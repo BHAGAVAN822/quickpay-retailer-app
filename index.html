@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>QuickPay Retailer Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+/* =========================================================================
+   DESIGN SYSTEM — frozen tokens (see design spec, Phase 1)
+   ========================================================================= */
+:root{
+  --primary:#0066FF;
+  --primary-dark:#0052CC;
+  --success:#00A651;
+  --danger:#E53935;
+  --warning:#F59E0B;
+  --refunded:#7C3AED;
+  --bg:#F4F6F9;
+  --card:#FFFFFF;
+  --border:#E2E8F0;
+  --text-primary:#1A202C;
+  --text-secondary:#64748B;
+  --text-muted:#94A3B8;
+  --sidebar-bg:#1A202C;
+  --sidebar-active:#0066FF;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+  background:var(--bg);
+  color:var(--text-primary);
+  font-size:14px;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;}
+a{color:inherit;text-decoration:none;}
+button{cursor:pointer;}
+.hidden{display:none !important;}
+
+/* Amounts — tabular numerals everywhere money appears */
+.amt{font-weight:600;font-variant-numeric:tabular-nums;}
+.amt-credit{color:var(--success);}
+.amt-debit{color:var(--danger);}
+.amt-neutral{color:var(--text-primary);}
+
+/* Section / field labels */
+.label-caps{font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-secondary);font-weight:600;}
+
+/* Card */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:8px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.05);
+  padding:20px;
+}
+
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:1px solid var(--border);background:#fff;color:var(--text-primary);
+  border-radius:8px;padding:10px 16px;font-weight:600;font-size:14px;
+  transition:background .12s,border-color .12s;
+}
+.btn:hover{background:#F8FAFC;}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff;}
+.btn.primary:hover{background:var(--primary-dark);border-color:var(--primary-dark);}
+.btn.primary:disabled{background:#9DBFFA;border-color:#9DBFFA;cursor:not-allowed;}
+.btn.block{width:100%;}
+.btn.lg{padding:14px 20px;font-size:16px;border-radius:10px;}
+.btn.sm{padding:6px 10px;font-size:12px;}
+.btn.danger-outline{color:var(--danger);border-color:#F5C6C5;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* Badges — text + color, never color alone */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;}
+.badge-success{background:#E8F5E9;color:#2E7D32;}
+.badge-pending{background:#FFF8E1;color:#E65100;}
+.badge-failed{background:#FFEBEE;color:#C62828;}
+.badge-refunded{background:#EDE7F6;color:#4527A0;}
+
+/* Skeleton loading */
+@keyframes shimmer{0%{background-position:-200px 0;}100%{background-position:200px 0;}}
+.skel{background:linear-gradient(90deg,#EEF2F6 25%,#E2E8F0 37%,#EEF2F6 63%);background-size:400px 100%;animation:shimmer 1.4s infinite linear;border-radius:6px;}
+.skel-line{height:14px;margin:6px 0;}
+.skel-card{height:96px;border-radius:8px;}
+
+/* Toast */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--text-primary);color:#fff;padding:12px 20px;border-radius:8px;
+  font-size:13px;font-weight:500;opacity:0;pointer-events:none;transition:all .2s;
+  z-index:9999;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.2);
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* Empty / error state */
+.state-block{text-align:center;padding:48px 20px;color:var(--text-secondary);}
+.state-block i{font-size:40px;color:var(--text-muted);display:block;margin-bottom:12px;}
+.state-block .state-title{font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:4px;}
+.state-block.error i{color:var(--danger);}
+
+/* =========================================================================
+   LOGIN SCREEN
+   ========================================================================= */
+#screen-login-wrap{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(160deg,#0052CC 0%,#0066FF 45%,#3385FF 100%);
+  padding:20px;
+}
+.login-card{
+  background:#fff;border-radius:16px;padding:36px 32px;width:100%;max-width:400px;
+  box-shadow:0 20px 60px rgba(0,20,80,.25);
+}
+.login-logo{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:28px;}
+.login-logo .qp-mark{
+  width:52px;height:52px;border-radius:14px;background:var(--primary);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;
+}
+.login-logo .qp-word{font-size:19px;font-weight:800;color:var(--text-primary);letter-spacing:-.01em;}
+.login-logo .qp-sub{font-size:12.5px;color:var(--text-secondary);}
+.field-group{margin-bottom:16px;}
+.field-group label{display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;}
+.field-group input{
+  width:100%;padding:13px 14px;border:1px solid var(--border);border-radius:8px;
+  font-size:15px;color:var(--text-primary);background:#fff;
+}
+.field-group input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,102,255,.12);}
+.login-error{
+  background:#FFEBEE;color:#C62828;border:1px solid #FFCDD2;border-radius:8px;
+  padding:10px 12px;font-size:13px;margin-bottom:14px;display:none;
+}
+.login-error.show{display:block;}
+
+/* =========================================================================
+   APP SHELL
+   ========================================================================= */
+#app-shell{display:none;min-height:100vh;}
+#app-shell.active{display:flex;}
+
+/* --- Sidebar (desktop) --- */
+#sidebar{
+  width:220px;flex-shrink:0;background:var(--sidebar-bg);color:#fff;
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:20px 18px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-logo .qp-mark{width:34px;height:34px;border-radius:9px;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;}
+.sb-logo .qp-word{font-weight:800;font-size:15.5px;letter-spacing:-.01em;white-space:nowrap;}
+.sb-nav{flex:1;padding:12px 10px;}
+.sb-item{
+  display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:8px;
+  color:rgba(255,255,255,.68);font-size:13.5px;font-weight:500;margin-bottom:2px;
+  border-left:3px solid transparent;cursor:pointer;position:relative;white-space:nowrap;
+}
+.sb-item i{font-size:18px;width:20px;text-align:center;flex-shrink:0;}
+.sb-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+.sb-item.active{background:rgba(0,102,255,.16);color:#fff;border-left-color:var(--sidebar-active);}
+.sb-item.disabled{opacity:.35;cursor:not-allowed;}
+.sb-item.disabled:hover{background:none;color:rgba(255,255,255,.68);}
+.sb-item .soon{font-size:9px;background:rgba(255,255,255,.12);padding:1px 6px;border-radius:8px;margin-left:auto;}
+.sb-item .chev{margin-left:auto;font-size:14px;transition:transform .15s;}
+.sb-item.open .chev{transform:rotate(180deg);}
+.sb-sub{padding-left:32px;max-height:0;overflow:hidden;transition:max-height .18s ease;}
+.sb-sub.open{max-height:200px;}
+.sb-sub-item{display:flex;align-items:center;gap:8px;padding:9px 10px;font-size:13px;color:rgba(255,255,255,.6);border-radius:6px;cursor:pointer;}
+.sb-sub-item:hover{color:#fff;background:rgba(255,255,255,.06);}
+.sb-sub-item.disabled{opacity:.4;cursor:not-allowed;}
+.sb-sub-item.disabled:hover{background:none;color:rgba(255,255,255,.6);}
+.sb-sub-item .soon{font-size:8.5px;background:rgba(255,255,255,.1);padding:1px 5px;border-radius:6px;margin-left:auto;}
+.sb-foot{padding:16px 18px;border-top:1px solid rgba(255,255,255,.08);}
+.sb-foot .name{font-size:13.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-foot .id{font-size:11.5px;color:rgba(255,255,255,.5);margin-bottom:10px;}
+.sb-logout{
+  display:flex;align-items:center;gap:8px;width:100%;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.8);padding:9px 12px;
+  border-radius:7px;font-size:13px;font-weight:600;
+}
+.sb-logout:hover{background:rgba(229,57,53,.18);color:#fff;border-color:rgba(229,57,53,.3);}
+
+/* --- Content area --- */
+#content-area{flex:1;min-width:0;display:flex;flex-direction:column;}
+#content-inner{max-width:1360px;margin:0 auto;width:100%;padding:0 24px 32px;}
+
+/* --- Top bar --- */
+#topbar{
+  height:56px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;position:sticky;top:0;background:var(--bg);z-index:40;
+  max-width:1360px;margin:0 auto;width:100%;
+}
+#topbar .page-title{font-size:20px;font-weight:600;color:var(--text-primary);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.wallet-pill{
+  display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--border);
+  border-radius:20px;padding:7px 14px;font-size:13px;font-weight:700;color:var(--text-primary);
+  font-variant-numeric:tabular-nums;
+}
+.wallet-pill i{color:var(--primary);font-size:15px;}
+.icon-btn{
+  width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--text-secondary);
+  position:relative;
+}
+.profile-dd{position:relative;}
+.profile-trigger{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--border);border-radius:20px;padding:6px 12px 6px 6px;font-size:13px;font-weight:600;}
+.profile-avatar{width:26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+.profile-menu{
+  position:absolute;top:calc(100% + 8px);right:0;background:#fff;border:1px solid var(--border);
+  border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.12);min-width:180px;padding:6px;display:none;z-index:50;
+}
+.profile-menu.open{display:block;}
+.profile-menu a,.profile-menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 10px;border-radius:7px;font-size:13.5px;color:var(--text-primary);background:none;border:none;}
+.profile-menu a:hover,.profile-menu button:hover{background:var(--bg);}
+.profile-menu .div{height:1px;background:var(--border);margin:5px 0;}
+
+/* Mobile hamburger + tablet toggle (hidden on desktop) */
+#hamburger-btn{display:none;}
+
+/* =========================================================================
+   DASHBOARD
+   ========================================================================= */
+.greeting-row{margin:20px 0 20px;}
+.greeting-row h2{margin:0 0 3px;font-size:19px;font-weight:700;}
+.greeting-row .sub{color:var(--text-secondary);font-size:13px;}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
+.kpi-card .label-caps{margin-bottom:8px;}
+.kpi-card .val{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:4px;}
+.kpi-card .sub{font-size:12.5px;color:var(--text-secondary);}
+.kpi-card .kpi-link{display:inline-block;margin-top:10px;font-size:12.5px;font-weight:600;color:var(--primary);}
+
+.perf-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.perf-stat{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px 16px;text-align:center;}
+.perf-stat .n{font-size:22px;font-weight:700;}
+.perf-stat .t{font-size:11.5px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
+.perf-stat.success .n{color:var(--success);}
+.perf-stat.pending .n{color:var(--warning);}
+.perf-stat.failed .n{color:var(--danger);}
+
+.qa-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.qa-tile{
+  background:#fff;border:1px solid var(--border);border-radius:8px;min-height:80px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  font-size:12.5px;font-weight:600;color:var(--text-primary);text-align:center;padding:10px 6px;
+}
+.qa-tile i{font-size:22px;color:var(--primary);}
+.qa-tile:hover{border-color:var(--primary);}
+.qa-tile.disabled{opacity:.4;cursor:not-allowed;}
+.qa-tile.disabled i{color:var(--text-muted);}
+.qa-tile.disabled:hover{border-color:var(--border);}
+
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.section-head h3{font-size:15px;font-weight:700;margin:0;}
+.section-head a{font-size:13px;font-weight:600;color:var(--primary);}
+
+.mini-table{width:100%;border-collapse:collapse;}
+.mini-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-secondary);padding:8px 10px;border-bottom:1px solid var(--border);}
+.mini-table td{padding:10px 10px;border-bottom:1px solid var(--border);font-size:13px;}
+.mini-table td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;}
+.mini-table tr:last-child td{border-bottom:none;}
+.mini-table tr:hover{background:#FAFBFC;}
+
+/* =========================================================================
+   MOBILE RECHARGE
+   ========================================================================= */
+.rc-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+.rc-field{margin-bottom:18px;}
+.rc-field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-secondary);margin-bottom:8px;}
+.rc-field input[type="tel"]{
+  width:100%;padding:13px 14px;border:1px solid var(--border);border-radius:8px;font-size:18px;
+  font-weight:600;letter-spacing:.02em;height:48px;
+}
+.rc-field input[type="tel"]:focus{outline:none;border-color:var(--primary);}
+.op-detect{font-size:12px;color:var(--text-secondary);margin-top:6px;}
+.op-pills{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.op-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 16px;border-radius:20px;border:1.5px solid var(--border);font-size:13px;font-weight:700;
+  background:#fff;color:var(--text-secondary);
+}
+.op-pill.active{color:#fff;border-color:transparent;}
+.op-pill-logo{height:22px;width:22px;object-fit:contain;border-radius:4px;background:#fff;flex-shrink:0;}
+.field-error{color:var(--danger);font-size:12px;margin-top:6px;display:none;}
+.field-error.show{display:block;}
+.amt-input-wrap{position:relative;}
+.amt-input-wrap .rupee{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:19px;font-weight:700;color:var(--text-primary);}
+.amt-input-wrap input{padding-left:32px !important;font-size:19px !important;font-weight:700 !important;height:52px;}
+.qa-pills{display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding-bottom:2px;}
+.qa-pill{flex-shrink:0;padding:8px 16px;border-radius:20px;border:1.5px solid var(--border);background:#fff;font-size:13px;font-weight:700;color:var(--text-primary);}
+.qa-pill.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+.plans-placeholder{text-align:center;padding:40px 20px;color:var(--text-secondary);font-size:13.5px;line-height:1.6;}
+.plans-placeholder i{font-size:34px;color:var(--text-muted);margin-bottom:10px;display:block;}
+
+/* Modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;z-index:200;padding:16px;}
+.modal-backdrop.show{display:flex;}
+.modal-box{background:#fff;border-radius:14px;max-width:420px;width:100%;padding:26px;box-shadow:0 24px 60px rgba(0,0,0,.25);}
+.modal-box h3{margin:0 0 16px;font-size:17px;font-weight:700;}
+.modal-row{display:flex;justify-content:space-between;padding:9px 0;font-size:13.5px;border-bottom:1px solid #F1F5F9;}
+.modal-row .k{color:var(--text-secondary);}
+.modal-row .v{font-weight:600;}
+.modal-actions{display:flex;gap:10px;margin-top:18px;}
+.modal-actions .btn{flex:1;}
+
+/* Result screens (inside modal) */
+.result-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:32px;}
+.result-icon.ok{background:#E8F5E9;color:var(--success);}
+.result-icon.fail{background:#FFEBEE;color:var(--danger);}
+.result-icon.pending{background:#FFF8E1;color:var(--warning);}
+.result-title{text-align:center;font-size:17px;font-weight:700;margin-bottom:4px;}
+.result-sub{text-align:center;font-size:13px;color:var(--text-secondary);margin-bottom:16px;}
+.result-note{background:#F8FAFC;border-radius:8px;padding:11px 13px;font-size:12.5px;color:var(--text-secondary);margin:12px 0;text-align:center;}
+.result-note.refund{background:#F3E8FF;color:#5B21B6;}
+.spinner{width:36px;height:36px;border:3px solid #E2E8F0;border-top-color:var(--primary);border-radius:50%;margin:0 auto 16px;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* =========================================================================
+   TRANSACTIONS
+   ========================================================================= */
+.filter-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px;}
+.status-tabs{display:flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:3px;}
+.status-tab{padding:7px 14px;border-radius:6px;font-size:12.5px;font-weight:600;color:var(--text-secondary);}
+.status-tab.active{background:var(--primary);color:#fff;}
+.date-pills{display:flex;gap:6px;flex-wrap:wrap;}
+.date-pill{padding:7px 13px;border-radius:16px;border:1px solid var(--border);background:#fff;font-size:12.5px;font-weight:600;color:var(--text-secondary);}
+.date-pill.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+.search-input{flex:1;min-width:200px;padding:9px 13px;border:1px solid var(--border);border-radius:8px;font-size:13px;}
+.custom-dates{display:none;gap:8px;align-items:center;}
+.custom-dates.show{display:flex;}
+.custom-dates input{padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-size:12.5px;}
+
+.tx-table{width:100%;border-collapse:collapse;}
+.tx-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-secondary);padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap;}
+.tx-table td{padding:12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
+.tx-table td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;}
+.tx-table tr:hover{background:#FAFBFC;}
+.tx-view-link{color:var(--primary);font-weight:600;font-size:12.5px;}
+.op-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:7px;flex-shrink:0;}
+
+.tx-cards{display:none;}
+.tx-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:13px 14px;margin-bottom:10px;}
+.tx-card-row1{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.tx-card-mobile{display:flex;align-items:center;font-weight:600;font-size:13.5px;}
+.tx-card-row2{display:flex;justify-content:space-between;align-items:center;}
+.tx-card-time{font-size:12px;color:var(--text-muted);}
+
+/* Drawer */
+.drawer-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.4);display:none;z-index:300;}
+.drawer-backdrop.show{display:block;}
+.drawer{
+  position:fixed;top:0;right:0;height:100vh;width:400px;max-width:92vw;background:#fff;
+  box-shadow:-8px 0 32px rgba(0,0,0,.15);transform:translateX(100%);transition:transform .22s ease;
+  z-index:301;overflow-y:auto;
+}
+.drawer.show{transform:translateX(0);}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;}
+.drawer-head h3{margin:0;font-size:16px;font-weight:700;}
+.drawer-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:16px;}
+.drawer-body{padding:20px;}
+.drawer-row{display:flex;justify-content:space-between;padding:10px 0;font-size:13.5px;border-bottom:1px solid #F1F5F9;}
+.drawer-row .k{color:var(--text-secondary);}
+.drawer-row .v{font-weight:600;text-align:right;}
+.timeline{margin-top:18px;}
+.timeline-item{display:flex;gap:10px;padding-bottom:16px;position:relative;}
+.timeline-item:not(:last-child)::before{content:"";position:absolute;left:5px;top:16px;bottom:-4px;width:1.5px;background:var(--border);}
+.timeline-dot{width:11px;height:11px;border-radius:50%;background:var(--primary);margin-top:3px;flex-shrink:0;}
+.timeline-txt .t{font-size:13px;font-weight:600;}
+.timeline-txt .s{font-size:11.5px;color:var(--text-muted);}
+
+/* =========================================================================
+   LEDGER
+   ========================================================================= */
+.ledger-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.ledger-tab{padding:9px 18px;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:13px;font-weight:700;color:var(--text-secondary);}
+.ledger-tab.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+.ledger-type-select{width:auto;min-width:170px;padding:9px 12px;font-size:13px;border:1px solid var(--border);border-radius:8px;}
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.summary-card .label-caps{margin-bottom:6px;}
+.summary-card .val{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;}
+.summary-card.credit .val{color:var(--success);}
+.summary-card.debit .val{color:var(--danger);}
+.ledger-table{width:100%;border-collapse:collapse;}
+.ledger-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-secondary);padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap;}
+.ledger-table td{padding:12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:top;}
+.ledger-table td.num{text-align:right;font-variant-numeric:tabular-nums;}
+.ledger-table tr:hover{background:#FAFBFC;}
+.led-particulars .main{font-weight:600;color:var(--text-primary);}
+.led-particulars .sub{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
+.pagination-bar{display:flex;justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap;gap:10px;}
+.pagination-bar .info{font-size:12.5px;color:var(--text-secondary);}
+.page-size-select{padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12.5px;}
+
+/* =========================================================================
+   WALLET
+   ========================================================================= */
+.wallet-cards{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:20px;max-width:520px;}
+.wallet-card .wc-label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-secondary);font-weight:700;margin-bottom:6px;}
+.wallet-card .wc-val{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:3px;}
+.wallet-card .wc-sub{font-size:12.5px;color:var(--text-secondary);margin-bottom:12px;}
+.wallet-card .wc-note{font-size:11.5px;color:var(--text-muted);font-style:italic;}
+.fund-toggle{margin-bottom:16px;}
+.fund-form{max-width:420px;display:none;}
+.fund-form.show{display:block;}
+.radio-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;}
+.radio-opt{display:flex;align-items:center;gap:6px;font-size:13px;}
+.fund-hist-empty{padding:30px;text-align:center;color:var(--text-secondary);font-size:13px;}
+
+/* =========================================================================
+   RESPONSIVE
+   ========================================================================= */
+/* Tablet: sidebar collapses to icon-only */
+@media (min-width:640px) and (max-width:1023px){
+  #sidebar{width:52px;}
+  #sidebar .sb-logo .qp-word,#sidebar .sb-item span:not(.soon),#sidebar .sb-item .chev,
+  #sidebar .sb-sub,#sidebar .sb-foot .name,#sidebar .sb-foot .id,#sidebar .sb-logout span{display:none;}
+  #sidebar.expanded{width:220px;}
+  #sidebar.expanded .sb-logo .qp-word,#sidebar.expanded .sb-item span:not(.soon),
+  #sidebar.expanded .sb-item .chev,#sidebar.expanded .sb-foot .name,
+  #sidebar.expanded .sb-foot .id,#sidebar.expanded .sb-logout span{display:inline;}
+  #hamburger-btn{display:flex;}
+  .kpi-grid{grid-template-columns:repeat(3,1fr);}
+  .rc-layout{grid-template-columns:1fr;}
+}
+@media (min-width:1024px){
+  .qa-grid{grid-template-columns:repeat(4,1fr);}
+}
+/* Mobile: no sidebar, bottom nav */
+@media (max-width:639px){
+  #sidebar{display:none;}
+  #bottom-nav{display:flex;}
+  #content-inner{padding:0 14px 80px;}
+  #topbar{padding:0 14px;height:52px;}
+  #topbar .page-title{font-size:16px;}
+  .wallet-pill{padding:6px 10px;font-size:12px;}
+  .kpi-grid{grid-template-columns:1fr;gap:12px;}
+  .perf-row{grid-template-columns:repeat(2,1fr);}
+  .qa-grid{grid-template-columns:repeat(4,1fr);gap:8px;}
+  .qa-tile{min-height:72px;font-size:11px;padding:8px 4px;}
+  .qa-tile i{font-size:19px;}
+  .rc-layout{grid-template-columns:1fr;}
+  .filter-bar{flex-direction:column;align-items:stretch;}
+  .status-tabs{overflow-x:auto;}
+  .tx-table{display:none;}
+  .tx-cards{display:block;}
+  .ledger-table-wrap{display:none;}
+  .ledger-cards{display:block !important;}
+  .summary-grid{grid-template-columns:repeat(2,1fr);}
+  .drawer{width:100%;max-width:100%;}
+  .greeting-row{margin-top:12px;}
+}
+@media (min-width:640px){
+  .ledger-cards{display:none;}
+}
+#bottom-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);
+  z-index:100;padding:4px 0 max(4px,env(safe-area-inset-bottom));
+}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 2px;min-height:44px;color:var(--text-secondary);font-size:10px;font-weight:600;}
+.bn-item i{font-size:20px;}
+.bn-item.active{color:var(--primary);}
+#bottom-nav{display:none;}
+@media (max-width:639px){#bottom-nav{display:flex;}}
+
+.ledger-cards{display:none;}
+.led-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:13px 14px;margin-bottom:10px;}
+.led-card-row1{display:flex;justify-content:space-between;align-items:flex-start;}
+.led-card .main{font-weight:600;font-size:13.5px;}
+.led-card .sub{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
+.led-card .amt-line{display:flex;align-items:center;gap:5px;font-weight:700;font-size:14px;}
+.led-card .balance-line{font-size:11.5px;color:var(--text-secondary);margin-top:6px;}
+</style>
+</head>
+<body>
+
+<!-- ==================== LOGIN SCREEN ==================== -->
+<div id="screen-login-wrap">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="qp-mark">QP</div>
+      <div class="qp-word">QuickPay</div>
+      <div class="qp-sub">Retailer Portal</div>
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <div class="field-group">
+      <label>Mobile Number</label>
+      <input type="tel" id="login-mobile" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric">
+    </div>
+    <div class="field-group" style="margin-bottom:22px;">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="Password">
+    </div>
+    <button class="btn primary block lg" id="login-btn" onclick="doLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- ==================== APP SHELL ==================== -->
+<div id="app-shell">
+  <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeDrawer()"></div>
+
+  <!-- Sidebar (desktop/tablet) -->
+  <aside id="sidebar">
+    <div class="sb-logo">
+      <button id="hamburger-btn" class="icon-btn" style="border:none;background:none;color:#fff;margin-right:2px;" onclick="toggleSidebar()"><i class="ti ti-menu-2"></i></button>
+      <div class="qp-mark">QP</div>
+      <div class="qp-word">QuickPay</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-item" data-nav="dashboard" onclick="goTo('dashboard')"><i class="ti ti-layout-grid"></i><span>Dashboard</span></div>
+
+      <div class="sb-item" id="sb-recharge-toggle" onclick="toggleRechargeMenu()"><i class="ti ti-bolt"></i><span>Recharge</span><i class="ti ti-chevron-down chev"></i></div>
+      <div class="sb-sub" id="sb-recharge-sub">
+        <div class="sb-sub-item" data-nav="recharge" onclick="goTo('recharge')"><i class="ti ti-device-mobile"></i><span>Mobile Recharge</span></div>
+        <div class="sb-sub-item disabled"><i class="ti ti-antenna"></i><span>DTH Recharge</span><span class="soon">Soon</span></div>
+        <div class="sb-sub-item disabled"><i class="ti ti-bulb"></i><span>Electricity / BBPS</span><span class="soon">Soon</span></div>
+        <div class="sb-sub-item disabled"><i class="ti ti-car"></i><span>FASTag</span><span class="soon">Soon</span></div>
+      </div>
+
+      <div class="sb-item" data-nav="transactions" onclick="goTo('transactions')"><i class="ti ti-list-details"></i><span>Transactions</span></div>
+      <div class="sb-item" data-nav="ledger" onclick="goTo('ledger')"><i class="ti ti-receipt"></i><span>Ledger</span></div>
+      <div class="sb-item disabled"><i class="ti ti-chart-bar"></i><span>Reports</span><span class="soon">Soon</span></div>
+      <div class="sb-item" data-nav="wallet" onclick="goTo('wallet')"><i class="ti ti-wallet"></i><span>Wallet</span></div>
+      <div class="sb-item disabled"><i class="ti ti-headset"></i><span>Support</span><span class="soon">Soon</span></div>
+    </nav>
+    <div class="sb-foot">
+      <div class="name" id="sb-retailer-name">—</div>
+      <div class="id" id="sb-retailer-id">—</div>
+      <button class="sb-logout" onclick="doLogout()"><i class="ti ti-logout"></i><span>Logout</span></button>
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <div id="content-area">
+    <div id="topbar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="hamburger-btn-mobile" class="icon-btn hidden" onclick="toggleSidebar()"><i class="ti ti-menu-2"></i></button>
+        <div class="page-title" id="page-title">Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <div class="wallet-pill"><i class="ti ti-wallet"></i><span id="topbar-balance">₹0.00</span></div>
+        <button class="icon-btn"><i class="ti ti-bell"></i></button>
+        <div class="profile-dd">
+          <button class="profile-trigger" onclick="toggleProfileMenu()">
+            <div class="profile-avatar" id="profile-avatar">R</div>
+            <span id="profile-name-short">Retailer</span>
+            <i class="ti ti-chevron-down" style="font-size:13px;"></i>
+          </button>
+          <div class="profile-menu" id="profile-menu">
+            <a href="#" onclick="return false;"><i class="ti ti-user"></i>Profile</a>
+            <a href="#" onclick="return false;"><i class="ti ti-key"></i>Change Password</a>
+            <div class="div"></div>
+            <button onclick="doLogout()"><i class="ti ti-logout"></i>Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="content-inner">
+
+      <!-- ============ DASHBOARD ============ -->
+      <div class="screen" id="screen-dashboard">
+        <div class="greeting-row">
+          <h2 id="dash-greeting">Good morning</h2>
+          <div class="sub" id="dash-date"></div>
+        </div>
+
+        <div class="kpi-grid" id="dash-kpi-grid">
+          <div class="card kpi-card">
+            <div class="label-caps">Main Wallet</div>
+            <div class="val" id="kpi-main">—</div>
+            <div class="sub">Available for recharge</div>
+            <a class="kpi-link" onclick="openFundRequest()">+ Request Fund</a>
+          </div>
+          <div class="card kpi-card">
+            <div class="label-caps">Commission</div>
+            <div class="val" id="kpi-commission">—</div>
+            <div class="sub">Earned commission</div>
+            <div class="sub" id="kpi-commission-today" style="color:var(--success);">Today earned: —</div>
+          </div>
+          <div class="card kpi-card">
+            <div class="label-caps">Today's Business</div>
+            <div class="val" id="kpi-today">—</div>
+            <div class="sub" id="kpi-today-count">— successful transactions</div>
+            <div class="sub" id="kpi-today-failed" style="color:var(--danger);display:none;"></div>
+          </div>
+        </div>
+
+        <!-- Adds Pending + Total (not shown on the KPI card above) -
+             kept rather than removed as duplicate. "Failed" is labeled
+             "Failed/Refunded" since /api/recharge/history has no
+             refund_status field to tell the two apart (see BACKLOG). -->
+        <div class="perf-row" id="dash-perf-row">
+          <div class="card perf-stat success"><div class="n" id="perf-success">0</div><div class="t">Success</div></div>
+          <div class="card perf-stat pending"><div class="n" id="perf-pending">0</div><div class="t">Pending</div></div>
+          <div class="card perf-stat failed"><div class="n" id="perf-failed">0</div><div class="t">Failed/Refunded</div></div>
+          <div class="card perf-stat"><div class="n" id="perf-total">0</div><div class="t">Total Today</div></div>
+        </div>
+
+        <div class="section-head"><h3>Quick Actions</h3></div>
+        <div class="qa-grid">
+          <div class="qa-tile" onclick="goTo('recharge')"><i class="ti ti-device-mobile"></i>Mobile Recharge</div>
+          <div class="qa-tile disabled"><i class="ti ti-antenna"></i>DTH</div>
+          <div class="qa-tile disabled"><i class="ti ti-bulb"></i>Electricity</div>
+          <div class="qa-tile disabled"><i class="ti ti-car"></i>FASTag</div>
+          <div class="qa-tile" onclick="openFundRequest()"><i class="ti ti-cash"></i>Fund Request</div>
+          <div class="qa-tile" onclick="goTo('ledger')"><i class="ti ti-receipt"></i>View Ledger</div>
+          <div class="qa-tile" onclick="goTo('transactions')"><i class="ti ti-list-details"></i>Transactions</div>
+          <div class="qa-tile disabled"><i class="ti ti-dots"></i>More</div>
+        </div>
+
+        <div class="section-head"><h3>Recent Transactions</h3><a onclick="goTo('transactions')">View all transactions →</a></div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div id="dash-recent-wrap">
+            <div class="state-block"><div class="skel skel-line" style="width:60%;margin:8px auto;"></div><div class="skel skel-line" style="width:80%;margin:8px auto;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ MOBILE RECHARGE ============ -->
+      <div class="screen hidden" id="screen-recharge">
+        <div class="rc-layout">
+          <div>
+            <div class="card">
+              <div class="rc-field">
+                <label>Mobile Number</label>
+                <input type="tel" id="rc-mobile" inputmode="numeric" placeholder="Enter 10-digit mobile number" oninput="onRcMobileInput()" onblur="onRcMobileBlur()">
+                <div class="field-error" id="rc-mobile-error"></div>
+                <div class="op-detect">Operator: <span id="rc-op-detect-label">Select below</span></div>
+                <div class="op-pills" id="rc-op-pills"></div>
+              </div>
+              <div class="rc-field">
+                <label>Amount</label>
+                <div class="amt-input-wrap">
+                  <span class="rupee">₹</span>
+                  <input type="number" id="rc-amount" placeholder="Enter amount" min="1" oninput="onRcAmountInput()" onblur="onRcAmountBlur()">
+                </div>
+                <div class="field-error" id="rc-amount-error"></div>
+                <div class="qa-pills" id="rc-quick-amounts"></div>
+              </div>
+              <button class="btn primary block lg" id="rc-submit-btn" onclick="openRechargeConfirm()" disabled>Recharge</button>
+            </div>
+
+            <div class="card" style="margin-top:16px;">
+              <div class="label-caps" style="margin-bottom:10px;">Recent</div>
+              <div id="rc-recent-list"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="label-caps" style="margin-bottom:10px;">Plans &amp; Offers</div>
+            <div class="plans-placeholder" id="rc-plans-panel">
+              <i class="ti ti-device-mobile"></i>
+              Enter a mobile number to find plans and personalised offers.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ TRANSACTIONS ============ -->
+      <div class="screen hidden" id="screen-transactions">
+        <div class="filter-bar">
+          <div class="status-tabs" id="tx-status-tabs"></div>
+          <div class="date-pills" id="tx-date-pills"></div>
+          <div class="custom-dates" id="tx-custom-dates">
+            <input type="date" id="tx-date-from" onchange="onTxCustomDate()">
+            <span style="color:var(--text-muted);">to</span>
+            <input type="date" id="tx-date-to" onchange="onTxCustomDate()">
+          </div>
+          <input type="text" class="search-input" id="tx-search" placeholder="Search mobile, Transaction ID..." oninput="onTxSearchInput()">
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table class="tx-table" id="tx-table">
+              <thead><tr><th>Date &amp; Time</th><th>Mobile</th><th>Operator</th><th class="num">Amount</th><th class="num">Commission</th><th>Status</th><th>Transaction ID</th><th>Action</th></tr></thead>
+              <tbody id="tx-tbody"></tbody>
+            </table>
+          </div>
+          <div class="tx-cards" id="tx-cards" style="padding:12px;"></div>
+          <div id="tx-state" style="padding:10px;"></div>
+        </div>
+      </div>
+
+      <!-- ============ LEDGER ============ -->
+      <div class="screen hidden" id="screen-ledger">
+        <div class="ledger-tabs" id="ledger-wallet-tabs"></div>
+        <div class="filter-bar">
+          <div class="date-pills" id="ledger-date-pills"></div>
+          <div class="custom-dates" id="ledger-custom-dates">
+            <input type="date" id="ledger-date-from" onchange="onLedgerCustomDateChange()">
+            <span style="color:var(--text-muted);">to</span>
+            <input type="date" id="ledger-date-to" onchange="onLedgerCustomDateChange()">
+          </div>
+          <select class="ledger-type-select" id="ledger-type-filter" onchange="onLedgerTypeChange()">
+            <option value="all">All Types</option>
+            <option value="credit">Credit</option>
+            <option value="debit">Debit</option>
+            <option value="recharge">Recharge</option>
+            <option value="fund_transfer">Fund Transfer</option>
+            <option value="commission">Commission</option>
+            <option value="reversal">Reversal</option>
+            <option value="adjustment">Adjustment</option>
+          </select>
+          <input type="text" class="search-input" id="ledger-search" placeholder="Search reference..." oninput="onLedgerSearchInput()">
+        </div>
+
+        <div class="summary-grid">
+          <div class="card summary-card"><div class="label-caps">Opening Balance</div><div class="val" id="ledger-sum-opening">₹0.00</div></div>
+          <div class="card summary-card credit"><div class="label-caps">Total Credit</div><div class="val" id="ledger-sum-credit">₹0.00</div></div>
+          <div class="card summary-card debit"><div class="label-caps">Total Debit</div><div class="val" id="ledger-sum-debit">₹0.00</div></div>
+          <div class="card summary-card"><div class="label-caps">Closing Balance</div><div class="val" id="ledger-sum-closing">₹0.00</div></div>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div class="ledger-table-wrap" style="overflow-x:auto;">
+            <table class="ledger-table" id="ledger-table">
+              <thead><tr><th>Date &amp; Time</th><th>Particulars</th><th>Reference</th><th class="num">Debit</th><th class="num">Credit</th><th class="num">Balance</th></tr></thead>
+              <tbody id="ledger-tbody"></tbody>
+            </table>
+          </div>
+          <div class="ledger-cards" id="ledger-cards" style="padding:12px;"></div>
+          <div id="ledger-empty" style="padding:10px;"></div>
+          <div class="pagination-bar" id="ledger-pagination" style="padding:14px 16px;display:none;">
+            <div class="info" id="ledger-pagination-summary">Showing 0-0 of 0 entries</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <select class="page-size-select" id="ledger-page-size" onchange="onLedgerPageSizeChange()">
+                <option value="25">25 / page</option>
+                <option value="50">50 / page</option>
+                <option value="100">100 / page</option>
+              </select>
+              <button class="btn sm" id="ledger-prev-btn" onclick="ledgerPrevPage()">Prev</button>
+              <button class="btn sm" id="ledger-next-btn" onclick="ledgerNextPage()">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ WALLET ============ -->
+      <div class="screen hidden" id="screen-wallet">
+        <div class="wallet-cards">
+          <div class="card wallet-card">
+            <div class="wc-label">Main Wallet</div>
+            <div class="wc-val" id="w-main">₹0.00</div>
+            <div class="wc-sub">Available for recharge</div>
+            <button class="btn primary" onclick="toggleFundForm()"><i class="ti ti-plus"></i> Request Fund</button>
+          </div>
+          <div class="card wallet-card">
+            <div class="wc-label">Commission Wallet</div>
+            <div class="wc-val" id="w-commission">₹0.00</div>
+            <div class="wc-sub">Commission earned</div>
+            <div class="wc-note">Transfer to Main Wallet coming soon</div>
+          </div>
+          <div class="card wallet-card">
+            <div class="wc-label">DMR Wallet</div>
+            <div class="wc-val" id="w-dmr">₹0.00</div>
+            <div class="wc-sub">DMR transactions</div>
+            <div class="wc-note">DMR coming soon</div>
+          </div>
+        </div>
+
+        <div class="card fund-form" id="fund-form-card">
+          <h3 style="margin:0 0 16px;font-size:15px;">Request Fund</h3>
+          <div class="rc-field">
+            <label>Amount</label>
+            <div class="amt-input-wrap"><span class="rupee">₹</span><input type="number" id="fund-amount" placeholder="0" min="1" style="height:44px;"></div>
+          </div>
+          <div class="rc-field">
+            <label>Payment Mode</label>
+            <div class="radio-row">
+              <label class="radio-opt"><input type="radio" name="pay-mode" value="IMPS" checked> IMPS</label>
+              <label class="radio-opt"><input type="radio" name="pay-mode" value="NEFT"> NEFT</label>
+              <label class="radio-opt"><input type="radio" name="pay-mode" value="UPI"> UPI</label>
+              <label class="radio-opt"><input type="radio" name="pay-mode" value="Cash Deposit"> Cash Deposit</label>
+            </div>
+          </div>
+          <div class="rc-field">
+            <label>UTR / Reference</label>
+            <input type="text" id="fund-utr" placeholder="Transaction UTR / reference number" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:8px;">
+          </div>
+          <div class="rc-field">
+            <label>Note (optional)</label>
+            <textarea id="fund-note" rows="2" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:8px;resize:vertical;"></textarea>
+          </div>
+          <button class="btn primary block" id="fund-submit-btn" onclick="submitFundRequest()">Submit Fund Request</button>
+        </div>
+
+        <div class="section-head" style="margin-top:24px;"><h3>Fund Request History</h3></div>
+        <div class="card" style="padding:0;">
+          <div class="fund-hist-empty">
+            No history available.<br><span style="font-size:11.5px;">Fund request history listing — planned for a future phase.</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Bottom nav (mobile) -->
+<nav id="bottom-nav">
+  <div class="bn-item" data-nav="dashboard" onclick="goTo('dashboard')"><i class="ti ti-layout-grid"></i>Home</div>
+  <div class="bn-item" data-nav="recharge" onclick="goTo('recharge')"><i class="ti ti-bolt"></i>Recharge</div>
+  <div class="bn-item" data-nav="transactions" onclick="goTo('transactions')"><i class="ti ti-list-details"></i>Txns</div>
+  <div class="bn-item" data-nav="ledger" onclick="goTo('ledger')"><i class="ti ti-receipt"></i>Ledger</div>
+  <div class="bn-item" data-nav="wallet" onclick="goTo('wallet')"><i class="ti ti-wallet"></i>Wallet</div>
+</nav>
+
+<!-- Recharge confirm / result modal -->
+<div class="modal-backdrop" id="rc-modal-backdrop">
+  <div class="modal-box" id="rc-modal-box"></div>
+</div>
+
+<!-- Transaction detail drawer -->
+<div class="drawer" id="tx-drawer">
+  <div class="drawer-head"><h3>Transaction Details</h3><button class="drawer-close" onclick="closeDrawer()">✕</button></div>
+  <div class="drawer-body" id="tx-drawer-body"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* =========================================================================
+   API BASE + STATE
+   ========================================================================= */
+const API_BASE = "https://odoo.qpaytest.fun";
+
+const OPERATOR_COLORS = { AIRTEL: "#E4002B", JIO: "#0F1E5C", VI: "#EE5A24", BSNL: "#15803D" };
+function operatorColor(code) { return OPERATOR_COLORS[(code || "").toUpperCase()] || "#64748B"; }
+
+let state = {
+  token: localStorage.getItem("qp_token") || null,
+  partnerId: localStorage.getItem("qp_partner_id") || null,
+  role: localStorage.getItem("qp_role") || null,
+  mobile: localStorage.getItem("qp_mobile") || null,
+  retailerName: null,
+  operators: [],
+  wallets: { main: 0, commission: 0, dmr: 0, total: 0 },
+  rc: { mobile: "", operator: null, amount: 0 },
+  tx: { status: "all", dateRange: "all", dateFrom: null, dateTo: null, search: "", all: [] },
+  // Shared raw /api/recharge/history cache, filled by whichever screen
+  // (Dashboard or Transactions) fetches it first - the Recharge screen's
+  // "Recent" list (Feature B5) reads from this instead of making its own
+  // API call, per spec.
+  historyCache: [],
+  ledger: {
+    walletType: "main", dateRange: "today", dateFrom: null, dateTo: null,
+    type: "all", search: "", page: 1, pageSize: 25, totalPages: 1, searchDebounce: null,
+  },
+};
+
+/* =========================================================================
+   LOW-LEVEL API HELPERS
+   ========================================================================= */
+function authHeaders() { return state.token ? { "Authorization": "Bearer " + state.token } : {}; }
+
+async function apiLogin(mobile, password) {
+  const res = await fetch(API_BASE + "/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", method: "call", params: { mobile: mobile, password: password, db: "qp_live" } }),
+  });
+  const data = await res.json();
+  return data.result || data;
+}
+async function apiGetWalletBalance() {
+  const res = await fetch(API_BASE + "/api/wallet/balance", { headers: authHeaders() });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+async function apiGetOperators() {
+  const res = await fetch(API_BASE + "/api/operators", { headers: authHeaders() });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+async function apiGetHistory(limit, offset, status) {
+  const url = new URL(API_BASE + "/api/recharge/history");
+  url.searchParams.set("limit", limit);
+  url.searchParams.set("offset", offset);
+  url.searchParams.set("status", status);
+  const res = await fetch(url.toString(), { headers: authHeaders() });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+async function apiGetLedger(params) {
+  const url = new URL(API_BASE + "/api/ledger");
+  Object.keys(params).forEach((k) => {
+    if (params[k] !== null && params[k] !== undefined && params[k] !== "") url.searchParams.set(k, params[k]);
+  });
+  const res = await fetch(url.toString(), { headers: authHeaders() });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+async function apiPostRecharge(payload) {
+  const res = await fetch(API_BASE + "/api/recharge", {
+    method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() }, body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+async function apiPostFundRequest(payload) {
+  const res = await fetch(API_BASE + "/api/fund-request", {
+    method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() }, body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+async function apiStatusCheck(rechargeId) {
+  const res = await fetch(API_BASE + "/api/status_check", {
+    method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ recharge_id: rechargeId }),
+  });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+
+function genIdempotencyKey() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+/* =========================================================================
+   FORMAT HELPERS
+   ========================================================================= */
+function formatMoney(n) {
+  const num = Number(n || 0);
+  return "₹" + num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function parseApiDate(iso) {
+  if (!iso) return null;
+  const d = new Date(iso.endsWith("Z") || iso.includes("+") ? iso : iso + "Z");
+  return isNaN(d.getTime()) ? null : d;
+}
+function formatDateTime(iso) {
+  const d = parseApiDate(iso);
+  if (!d) return iso || "-";
+  return d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+function formatTime(iso) {
+  const d = parseApiDate(iso);
+  if (!d) return iso || "-";
+  return d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+}
+function isToday(iso) {
+  const d = parseApiDate(iso);
+  if (!d) return false;
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+}
+function isWithinDays(iso, days) {
+  const d = parseApiDate(iso);
+  if (!d) return false;
+  return (Date.now() - d.getTime()) <= days * 24 * 60 * 60 * 1000;
+}
+function errMsg(e) { return (e && e.message) ? e.message : "Network error - please check your connection"; }
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str == null ? "" : String(str);
+  return div.innerHTML;
+}
+/* "9876543210" -> "98XXXX3210" - only masks real numbers already
+   returned by the API, never fabricates one. */
+function maskMobile(m) {
+  if (!m || String(m).length < 10) return m || "-";
+  const s = String(m);
+  return s.slice(0, 2) + "XXXX" + s.slice(6);
+}
+/* /api/recharge/history's real `state` values (confirmed against the
+   quickpay.recharge.request model): draft, queued, processing, hold,
+   success, failed. There is no "refunded" state on the recharge
+   itself - Phase 2's /api/recharge/history now adds a separate
+   refund_status field (null | "refunded"), computed backend-side from
+   quickpay.refund, which this function combines with state to render
+   an accurate Refunded badge instead of a plain Failed one. */
+function statusBadge(state_, refundStatus) {
+  const s = (state_ || "").toLowerCase();
+  if (s === "failed" && refundStatus === "refunded") return '<span class="badge badge-refunded"><i class="ti ti-rotate"></i>Refunded</span>';
+  if (s === "success") return '<span class="badge badge-success"><i class="ti ti-check"></i>Success</span>';
+  if (s === "pending") return '<span class="badge badge-pending"><i class="ti ti-clock"></i>Pending</span>';
+  if (s === "failed") return '<span class="badge badge-failed"><i class="ti ti-x"></i>Failed</span>';
+  if (s === "hold") return '<span class="badge badge-pending"><i class="ti ti-clock"></i>Pending</span>';
+  if (s === "processing") return '<span class="badge badge-pending"><i class="ti ti-loader"></i>Processing</span>';
+  if (s === "queued") return '<span class="badge badge-pending"><i class="ti ti-clock"></i>Queued</span>';
+  if (s === "draft") return '<span class="badge badge-pending"><i class="ti ti-clock"></i>Draft</span>';
+  return '<span class="badge badge-pending">' + escapeHtml(state_ || "Unknown") + '</span>';
+}
+
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 3200);
+}
+function retryBtn(fnCall) {
+  return '<br><button class="btn sm" style="margin-top:12px;" onclick="' + fnCall + '">Retry</button>';
+}
+function handleAuthFailure() {
+  localStorage.removeItem("qp_token"); localStorage.removeItem("qp_partner_id");
+  localStorage.removeItem("qp_role"); localStorage.removeItem("qp_mobile");
+  state.token = null;
+  showToast("Session expired. Please login again.");
+  goTo("login");
+}
+
+/* =========================================================================
+   LEDGER PARTICULARS HUMANIZER
+   Pattern-matches the real strings /api/ledger already returns (built in
+   api_ledger.py's _build_particulars()) into friendlier labels. Never
+   invents data not present in the response - unrecognized text falls
+   back to the raw particulars/reference exactly as returned.
+   ========================================================================= */
+function humanizeLedgerEntry(e) {
+  const p = e.particulars || "";
+  let m;
+  if ((m = p.match(/^Recharge #(\d+) - ([^-]+) - ₹/))) {
+    return { main: (m[2] || "").trim() + " Mobile Recharge", sub: "Transaction ID: QP-" + m[1] };
+  }
+  if ((m = p.match(/^Refund for Recharge #(\d+)/))) {
+    return { main: "Recharge Refund", sub: "For Recharge QP-" + m[1] };
+  }
+  if (p === "Refund") return { main: "Recharge Refund", sub: e.reference || "" };
+  if (p === "Admin Balance Add") return { main: "Fund Added by Admin", sub: e.reference || "" };
+  if ((m = p.match(/^Fund Request #(\d+) approved/))) {
+    return { main: "Fund Request Approved", sub: "Request #" + m[1] };
+  }
+  if ((m = p.match(/^Commission - Recharge #(\d+)/))) {
+    return { main: "Commission Credited", sub: "For Recharge QP-" + m[1] };
+  }
+  if (p === "Commission earned") return { main: "Commission Credited", sub: e.reference || "" };
+  if (/^wallet-unification/i.test(e.reference || "") || /^wallet-unification/i.test(p)) {
+    return { main: "Wallet Balance Transfer", sub: "" };
+  }
+  return { main: p || (e.reference || "Wallet Transaction"), sub: p ? (e.reference || "") : "" };
+}
+
+/* =========================================================================
+   AUTH
+   ========================================================================= */
+async function doLogin() {
+  const mobile = document.getElementById("login-mobile").value.trim();
+  const password = document.getElementById("login-password").value;
+  const errEl = document.getElementById("login-error");
+  errEl.classList.remove("show");
+
+  if (!mobile || !password) {
+    errEl.textContent = "Please enter both mobile number and password.";
+    errEl.classList.add("show");
+    return;
+  }
+  const btn = document.getElementById("login-btn");
+  btn.disabled = true; btn.textContent = "Signing in...";
+  try {
+    const result = await apiLogin(mobile, password);
+    if (result && result.status === "success" && result.token) {
+      state.token = result.token; state.partnerId = result.partner_id; state.role = result.role; state.mobile = mobile;
+      localStorage.setItem("qp_token", result.token);
+      localStorage.setItem("qp_partner_id", result.partner_id);
+      localStorage.setItem("qp_role", result.role || "");
+      localStorage.setItem("qp_mobile", mobile);
+      goTo("dashboard");
+    } else {
+      errEl.textContent = (result && (result.message || result.error)) || "Login failed. Please check your credentials.";
+      errEl.classList.add("show");
+    }
+  } catch (e) {
+    errEl.textContent = "Unable to connect - " + errMsg(e);
+    errEl.classList.add("show");
+  } finally {
+    btn.disabled = false; btn.textContent = "Sign In";
+  }
+}
+function doLogout() {
+  localStorage.removeItem("qp_token"); localStorage.removeItem("qp_partner_id");
+  localStorage.removeItem("qp_role"); localStorage.removeItem("qp_mobile");
+  state.token = null;
+  goTo("login");
+}
+
+/* =========================================================================
+   NAVIGATION
+   ========================================================================= */
+function goTo(screen) {
+  document.getElementById("profile-menu").classList.remove("open");
+  if (screen === "login") {
+    document.getElementById("app-shell").classList.remove("active");
+    document.getElementById("screen-login-wrap").style.display = "flex";
+    return;
+  }
+  document.getElementById("screen-login-wrap").style.display = "none";
+  document.getElementById("app-shell").classList.add("active");
+
+  document.querySelectorAll(".screen").forEach((s) => s.classList.add("hidden"));
+  const target = document.getElementById("screen-" + screen);
+  if (target) target.classList.remove("hidden");
+
+  const titles = { dashboard: "Dashboard", recharge: "Mobile Recharge", transactions: "Transactions", ledger: "Ledger", wallet: "Wallet" };
+  document.getElementById("page-title").textContent = titles[screen] || "QuickPay";
+
+  document.querySelectorAll("[data-nav]").forEach((el) => el.classList.toggle("active", el.getAttribute("data-nav") === screen));
+
+  try {
+    if (screen === "dashboard") loadDashboard();
+    else if (screen === "recharge") loadRechargeScreen();
+    else if (screen === "transactions") loadTransactionsScreen();
+    else if (screen === "ledger") loadLedgerScreen();
+    else if (screen === "wallet") loadWalletScreen();
+  } catch (e) {
+    showToast("Something went wrong loading this screen - " + errMsg(e));
+  }
+}
+function toggleRechargeMenu() {
+  document.getElementById("sb-recharge-toggle").classList.toggle("open");
+  document.getElementById("sb-recharge-sub").classList.toggle("open");
+}
+function toggleSidebar() { document.getElementById("sidebar").classList.toggle("expanded"); }
+function toggleProfileMenu() { document.getElementById("profile-menu").classList.toggle("open"); }
+document.addEventListener("click", (e) => {
+  const dd = document.querySelector(".profile-dd");
+  if (dd && !dd.contains(e.target)) document.getElementById("profile-menu").classList.remove("open");
+});
+
+/* Refresh header/sidebar wallet display + retailer identity everywhere at once. */
+function renderIdentityAndBalance() {
+  document.getElementById("topbar-balance").textContent = "Main " + formatMoney(state.wallets.main);
+  const name = state.retailerName || "Retailer";
+  document.getElementById("sb-retailer-name").textContent = name;
+  document.getElementById("sb-retailer-id").textContent = "Partner #" + (state.partnerId || "-");
+  document.getElementById("profile-name-short").textContent = name.split(" ")[0];
+  document.getElementById("profile-avatar").textContent = name.charAt(0).toUpperCase();
+}
+
+async function refreshWalletBalance() {
+  const { httpStatus, body } = await apiGetWalletBalance();
+  if (httpStatus === 401) { handleAuthFailure(); throw new Error("auth"); }
+  if (body && body.status === "success") {
+    state.wallets = { main: body.main_balance, commission: body.commission_balance, dmr: body.dmr_balance, total: body.total_balance };
+    renderIdentityAndBalance();
+  }
+  return body;
+}
+
+/* =========================================================================
+   DASHBOARD
+   ========================================================================= */
+async function loadDashboard() {
+  const now = new Date();
+  const hr = now.getHours();
+  const greetWord = hr < 12 ? "Good morning" : hr < 17 ? "Good afternoon" : "Good evening";
+  document.getElementById("dash-date").textContent = now.toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
+
+  document.getElementById("kpi-main").textContent = "…";
+  document.getElementById("kpi-commission").textContent = "…";
+  document.getElementById("kpi-today").textContent = "…";
+  document.getElementById("dash-recent-wrap").innerHTML =
+    '<div style="padding:16px;">' + Array(3).fill('<div class="skel skel-line" style="width:90%;"></div>').join("") + '</div>';
+
+  try {
+    const balP = apiGetWalletBalance();
+    const ledgerP = apiGetLedger({ wallet_type: "main", page_size: 1 }); // real, existing endpoint - also gives us partner_name
+    const histP = apiGetHistory(100, 0, "all");
+
+    const [balRes, ledgerRes, histRes] = await Promise.all([balP, ledgerP, histP]);
+
+    if (balRes.httpStatus === 401 || ledgerRes.httpStatus === 401 || histRes.httpStatus === 401) return handleAuthFailure();
+
+    if (balRes.body && balRes.body.status === "success") {
+      state.wallets = { main: balRes.body.main_balance, commission: balRes.body.commission_balance, dmr: balRes.body.dmr_balance, total: balRes.body.total_balance };
+    }
+    if (ledgerRes.body && ledgerRes.body.status === "success" && ledgerRes.body.wallet) {
+      state.retailerName = ledgerRes.body.wallet.partner_name || state.retailerName;
+    }
+    renderIdentityAndBalance();
+    document.getElementById("dash-greeting").textContent = greetWord + (state.retailerName ? ", " + state.retailerName : "");
+    document.getElementById("kpi-main").textContent = formatMoney(state.wallets.main);
+    document.getElementById("kpi-commission").textContent = formatMoney(state.wallets.commission);
+
+    if (histRes.body && histRes.body.status === "success") {
+      state.historyCache = histRes.body.recharges || [];
+      const todays = state.historyCache.filter((r) => isToday(r.date));
+      const successToday = todays.filter((r) => r.state === "success");
+      const pendingToday = todays.filter((r) => r.state === "hold" || r.state === "processing" || r.state === "queued" || r.state === "draft");
+      const failedToday = todays.filter((r) => r.state === "failed");
+      const sumToday = successToday.reduce((acc, r) => acc + (Number(r.amount) || 0), 0);
+      const commissionToday = successToday.reduce((acc, r) => acc + (Number(r.commission_amount) || 0), 0);
+
+      document.getElementById("kpi-today").textContent = formatMoney(sumToday);
+      document.getElementById("kpi-today-count").textContent = successToday.length + " successful transaction" + (successToday.length === 1 ? "" : "s");
+      const failedEl = document.getElementById("kpi-today-failed");
+      if (failedToday.length) { failedEl.textContent = failedToday.length + " failed"; failedEl.style.display = "block"; }
+      else { failedEl.style.display = "none"; }
+      document.getElementById("perf-success").textContent = successToday.length;
+      document.getElementById("perf-pending").textContent = pendingToday.length;
+      document.getElementById("perf-failed").textContent = failedToday.length;
+      document.getElementById("perf-total").textContent = todays.length;
+      document.getElementById("kpi-commission-today").textContent = "Today earned: " + formatMoney(commissionToday);
+
+      renderRecentTransactions(state.historyCache.slice(0, 5));
+    } else {
+      document.getElementById("dash-recent-wrap").innerHTML = '<div class="state-block"><div class="state-title">Could not load transactions</div></div>';
+    }
+  } catch (e) {
+    if (errMsg(e) !== "auth") showToast("Could not load dashboard - " + errMsg(e));
+  }
+}
+
+function renderRecentTransactions(list) {
+  const wrap = document.getElementById("dash-recent-wrap");
+  if (!list.length) {
+    wrap.innerHTML = '<div class="state-block"><i class="ti ti-receipt-off"></i><div class="state-title">No transactions yet</div>Your recent recharges will appear here.</div>';
+    return;
+  }
+  let html = '<table class="mini-table"><thead><tr><th>Time</th><th>Mobile</th><th>Operator</th><th class="num">Amount</th><th>Status</th></tr></thead><tbody>';
+  list.forEach((r) => {
+    html += '<tr><td>' + formatTime(r.date) + '</td><td>' + escapeHtml(maskMobile(r.mobile_number)) + '</td>'
+      + '<td><span class="op-dot" style="background:' + operatorColor(r.operator_code) + ';"></span>' + escapeHtml(r.operator_name || r.operator_code || "-") + '</td>'
+      + '<td class="num">' + formatMoney(r.amount) + '</td><td>' + statusBadge(r.state, r.refund_status) + '</td></tr>';
+  });
+  html += "</tbody></table>";
+  wrap.innerHTML = html;
+}
+
+/* =========================================================================
+   MOBILE RECHARGE
+   ========================================================================= */
+async function loadRechargeScreen() {
+  // idempotency_key generated ONCE per recharge-screen visit (screen
+  // open), not per submit-click - so even if a double-click somehow
+  // fired two submits, both would carry the same key and the API's own
+  // idempotency-cache would return the same stored result rather than
+  // creating two recharges.
+  state.rc = { mobile: "", operator: null, operatorObj: null, amount: 0, idempotencyKey: genIdempotencyKey() };
+  document.getElementById("rc-mobile").value = "";
+  document.getElementById("rc-amount").value = "";
+  document.getElementById("rc-mobile").removeAttribute("maxlength");
+  hideFieldError("rc-mobile-error");
+  hideFieldError("rc-amount-error");
+  document.getElementById("rc-op-detect-label").textContent = "Select below";
+  updateRcSubmitState();
+  renderPlansPanel();
+
+  if (!state.operators.length) {
+    // Backend-driven as of Phase 2: /api/operators now returns
+    // service_type (quickpay.operator.operator_type) per operator, so
+    // the Mobile Recharge screen filters on that instead of a
+    // hard-coded operator code list.
+    try {
+      const { httpStatus, body } = await apiGetOperators();
+      if (httpStatus === 401) return handleAuthFailure();
+      const all = (body && (body.operators || body)) || [];
+      state.operators = all.filter((o) => o.service_type === "mobile");
+      if (!state.operators.length) throw new Error("no mobile-service operators in API response");
+    } catch (e) {
+      // Fall back to the 4 core operators only if /api/operators itself
+      // is unreachable - still real codes, just not confirmed live.
+      state.operators = [{ code: "AIRTEL", name: "Airtel" }, { code: "JIO", name: "Jio" }, { code: "VI", name: "VI" }, { code: "BSNL", name: "BSNL" }];
+    }
+  }
+  renderOperatorPills();
+  renderQuickAmountPills();
+  renderRecentCustomers();
+  try { await refreshWalletBalance(); } catch (e) {}
+}
+/* FEATURE B5: last 5 unique mobile numbers, from whichever history
+   fetch (Dashboard or Transactions) already populated the shared
+   cache - no extra API call made here. */
+function renderRecentCustomers() {
+  const wrap = document.getElementById("rc-recent-list");
+  if (!state.historyCache.length) {
+    wrap.innerHTML = '<div style="font-size:12.5px;color:var(--text-muted);">No recent recharges yet.</div>';
+    return;
+  }
+  const seen = new Set();
+  const recent = [];
+  for (const r of state.historyCache) {
+    if (!r.mobile_number || seen.has(r.mobile_number)) continue;
+    seen.add(r.mobile_number);
+    recent.push(r);
+    if (recent.length === 5) break;
+  }
+  if (!recent.length) {
+    wrap.innerHTML = '<div style="font-size:12.5px;color:var(--text-muted);">No recent recharges yet.</div>';
+    return;
+  }
+  wrap.innerHTML = recent.map((r) =>
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F1F5F9;gap:8px;">'
+    + '<div style="display:flex;align-items:center;gap:8px;min-width:0;">'
+    + '<span class="op-dot" style="background:' + operatorColor(r.operator_code) + ';flex-shrink:0;"></span>'
+    + '<div style="min-width:0;"><div style="font-weight:600;font-size:13px;">' + escapeHtml(maskMobile(r.mobile_number)) + '</div>'
+    + '<div style="font-size:11.5px;color:var(--text-muted);">' + formatMoney(r.amount) + ' · ' + formatDateTime(r.date) + '</div></div></div>'
+    + '<button class="btn sm" onclick="repeatRecharge(\'' + escapeHtml(r.mobile_number) + '\',\'' + escapeHtml(r.operator_code || "") + '\')">Recharge <i class="ti ti-chevron-right"></i></button>'
+    + '</div>'
+  ).join("");
+}
+function repeatRecharge(mobile, operatorCode) {
+  document.getElementById("rc-mobile").value = mobile;
+  onRcMobileInput();
+  if (operatorCode && state.operators.some((o) => o.code === operatorCode)) {
+    selectOperator(operatorCode);
+  }
+  // Amount is intentionally NOT pre-filled - the plan/price may have
+  // changed since the last recharge to this number.
+  const amountInput = document.getElementById("rc-amount");
+  amountInput.value = "";
+  amountInput.focus();
+}
+function renderOperatorPills() {
+  const wrap = document.getElementById("rc-op-pills");
+  const ops = state.operators.length ? state.operators : [{ code: "AIRTEL", name: "Airtel" }, { code: "JIO", name: "Jio" }, { code: "VI", name: "VI" }, { code: "BSNL", name: "BSNL" }];
+  wrap.innerHTML = ops.map((op) => {
+    const code = op.code || op.operator_code || op.name;
+    const color = operatorColor(code);
+    const active = state.rc.operator === code;
+    // CHANGE 3: real logo when the operator has one (op.logo_url from
+    // /api/operators - null for every operator until an Admin uploads
+    // one via the Odoo backend, no frontend change needed when they do).
+    // Colored-dot fallback stays in place for operators without a logo.
+    const icon = op.logo_url
+      ? '<img class="op-pill-logo" src="' + escapeHtml(API_BASE + op.logo_url) + '" alt="">'
+      : '<span class="op-dot" style="background:' + (active ? "#fff" : color) + ';"></span>';
+    return '<button class="op-pill' + (active ? " active" : "") + '" style="' + (active ? "background:" + color + ";" : "") + '" onclick="selectOperator(\'' + escapeHtml(code) + '\')">' + icon + escapeHtml(op.name || code) + "</button>";
+  }).join("");
+}
+function selectOperator(code) {
+  state.rc.operator = code;
+  state.rc.operatorObj = state.operators.find((o) => (o.code || o.operator_code) === code) || null;
+  document.getElementById("rc-op-detect-label").textContent = (state.rc.operatorObj && state.rc.operatorObj.name) || code;
+
+  // CHANGE 1: dynamic customer-number rules from the operator's own
+  // customer_no_min_length/max_length/starts_with fields.
+  const mobileInput = document.getElementById("rc-mobile");
+  const op = state.rc.operatorObj;
+  const minLen = (op && op.customer_no_min_length) || 0;
+  const maxLen = (op && op.customer_no_max_length) || 0;
+  if (maxLen > 0) mobileInput.maxLength = maxLen;
+  else mobileInput.removeAttribute("maxlength");
+  mobileInput.placeholder = customerNumberPlaceholder(minLen, maxLen);
+  hideFieldError("rc-mobile-error");
+  hideFieldError("rc-amount-error");
+
+  renderOperatorPills();
+  renderQuickAmountPills();
+  updateRcSubmitState();
+  renderPlansPanel();
+}
+function customerNumberPlaceholder(minLen, maxLen) {
+  if (minLen === 10 && maxLen === 10) return "Enter 10-digit mobile number";
+  if (minLen > 0) return "Enter " + minLen + "-" + maxLen + " digit number";
+  return "Enter customer number";
+}
+function hideFieldError(id) {
+  const el = document.getElementById(id);
+  el.textContent = "";
+  el.classList.remove("show");
+}
+function showFieldError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add("show");
+}
+/* CHANGE 1: validated on blur/submit only - never blocks typing. */
+function validateCustomerNumber() {
+  const op = state.rc.operatorObj;
+  const value = state.rc.mobile;
+  if (!op || !value) return true;
+  if (op.customer_no_min_length && value.length < op.customer_no_min_length) {
+    showFieldError("rc-mobile-error", "Must be at least " + op.customer_no_min_length + " digits");
+    return false;
+  }
+  if (op.customer_no_max_length && value.length > op.customer_no_max_length) {
+    showFieldError("rc-mobile-error", "Cannot exceed " + op.customer_no_max_length + " digits");
+    return false;
+  }
+  if (op.customer_no_starts_with) {
+    const allowed = op.customer_no_starts_with.split(",").map((s) => s.trim()).filter(Boolean);
+    if (allowed.length && !allowed.some((p) => value.startsWith(p))) {
+      showFieldError("rc-mobile-error", "Must start with " + allowed.join(" or "));
+      return false;
+    }
+  }
+  hideFieldError("rc-mobile-error");
+  return true;
+}
+function onRcMobileBlur() { validateCustomerNumber(); }
+function onRcMobileInput() {
+  const v = document.getElementById("rc-mobile").value.replace(/\D/g, "");
+  document.getElementById("rc-mobile").value = v;
+  state.rc.mobile = v;
+  hideFieldError("rc-mobile-error");
+  updateRcSubmitState();
+  renderPlansPanel();
+}
+/* FIX 6: context-sensitive Plans & Offers placeholder - two honest
+   "coming soon" states, no fake plan data either way. */
+function renderPlansPanel() {
+  const panel = document.getElementById("rc-plans-panel");
+  if (state.rc.mobile.length === 10) {
+    const opName = (state.rc.operatorObj && state.rc.operatorObj.name) || state.rc.operator || "this operator";
+    panel.innerHTML = '<i class="ti ti-clipboard-list"></i>'
+      + 'Plans for ' + escapeHtml(opName) + '<br>'
+      + 'Plan browser coming soon.<br>Enter amount manually or choose a quick amount.';
+  } else {
+    panel.innerHTML = '<i class="ti ti-device-mobile"></i>Enter a mobile number to find plans and personalised offers.';
+  }
+}
+/* CHANGE 2: only show quick-amount pills within the selected operator's
+   min/max range - if every standard amount qualifies, all show. */
+function renderQuickAmountPills() {
+  const amounts = [10, 49, 99, 199, 299, 399];
+  const op = state.rc.operatorObj;
+  const visible = amounts.filter((a) => {
+    if (op && op.min_amount && a < op.min_amount) return false;
+    if (op && op.max_amount && a > op.max_amount) return false;
+    return true;
+  });
+  document.getElementById("rc-quick-amounts").innerHTML = visible.map((a) =>
+    '<button class="qa-pill" onclick="setQuickAmount(' + a + ')">₹' + a + "</button>").join("");
+}
+function setQuickAmount(a) {
+  document.getElementById("rc-amount").value = a;
+  state.rc.amount = a;
+  hideFieldError("rc-amount-error");
+  document.querySelectorAll("#rc-quick-amounts .qa-pill").forEach((el) => el.classList.toggle("active", el.textContent === "₹" + a));
+  updateRcSubmitState();
+}
+function onRcAmountInput() {
+  state.rc.amount = Number(document.getElementById("rc-amount").value) || 0;
+  hideFieldError("rc-amount-error");
+  document.querySelectorAll("#rc-quick-amounts .qa-pill").forEach((el) => el.classList.remove("active"));
+  updateRcSubmitState();
+}
+/* CHANGE 2: validated on blur/submit only - never blocks typing. */
+function validateAmount() {
+  const op = state.rc.operatorObj;
+  const amount = state.rc.amount;
+  if (!op || !amount) return true;
+  if (op.min_amount && amount < op.min_amount) {
+    showFieldError("rc-amount-error", "Minimum amount is ₹" + op.min_amount + " for " + op.name);
+    return false;
+  }
+  if (op.max_amount && amount > op.max_amount) {
+    showFieldError("rc-amount-error", "Maximum amount is ₹" + op.max_amount + " for " + op.name);
+    return false;
+  }
+  hideFieldError("rc-amount-error");
+  return true;
+}
+function onRcAmountBlur() { validateAmount(); }
+function updateRcSubmitState() {
+  const ok = state.rc.mobile.length === 10 && state.rc.operator && state.rc.amount > 0;
+  const btn = document.getElementById("rc-submit-btn");
+  btn.disabled = !ok;
+  btn.textContent = state.rc.amount > 0 ? "Recharge ₹" + state.rc.amount : "Recharge";
+}
+
+/* FIX 3: "Available" must reflect the most recently fetched balance,
+   not whatever was cached when the recharge screen first opened - so
+   this re-fetches /api/wallet/balance right before showing the modal. */
+async function openRechargeConfirm() {
+  // CHANGE 1/2: final validation on submit, not just blur.
+  const mobileOk = validateCustomerNumber();
+  const amountOk = validateAmount();
+  if (!mobileOk || !amountOk) return;
+
+  const box = document.getElementById("rc-modal-box");
+  box.innerHTML = '<div class="spinner"></div><div class="result-title">Loading current balance...</div>';
+  document.getElementById("rc-modal-backdrop").classList.add("show");
+  try {
+    await refreshWalletBalance();
+  } catch (e) {
+    // refreshWalletBalance() already handles 401 itself; any other
+    // failure here just falls back to the last-known balance rather
+    // than blocking the confirmation entirely.
+  }
+  renderRechargeConfirmModal();
+}
+function operatorDisplayName() {
+  // CHANGE 4: always the real op.name from /api/operators, never the
+  // raw code - state.rc.operator is the code (needed for the API
+  // payload), state.rc.operatorObj.name is what every screen shows.
+  return (state.rc.operatorObj && state.rc.operatorObj.name) || state.rc.operator;
+}
+function renderRechargeConfirmModal() {
+  const available = state.wallets.main;
+  const after = available - state.rc.amount;
+  const box = document.getElementById("rc-modal-box");
+  box.innerHTML =
+    '<h3>Confirm Recharge</h3>'
+    + modalRow("Mobile", maskMobile(state.rc.mobile))
+    + modalRow("Operator", operatorDisplayName())
+    + modalRow("Amount", formatMoney(state.rc.amount))
+    + modalRow("Available", formatMoney(available))
+    + modalRow("After recharge", formatMoney(after))
+    + '<div class="modal-actions">'
+    + '<button class="btn" id="rc-cancel-btn" onclick="closeRcModal()">Cancel</button>'
+    + '<button class="btn primary" id="rc-confirm-btn" onclick="submitRecharge()">Confirm ₹' + state.rc.amount + '</button></div>';
+  document.getElementById("rc-modal-backdrop").classList.add("show");
+}
+function modalRow(k, v) { return '<div class="modal-row"><span class="k">' + escapeHtml(k) + '</span><span class="v">' + escapeHtml(v) + '</span></div>'; }
+function closeRcModal() { document.getElementById("rc-modal-backdrop").classList.remove("show"); }
+
+async function submitRecharge() {
+  // FIX 4: disable both buttons immediately, spinner in the Confirm
+  // button, Cancel disabled too so the modal can't be dismissed mid-flight.
+  const confirmBtn = document.getElementById("rc-confirm-btn");
+  const cancelBtn = document.getElementById("rc-cancel-btn");
+  if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;margin:0;display:inline-block;"></span> Processing...'; }
+  if (cancelBtn) cancelBtn.disabled = true;
+
+  const payload = {
+    partner_id: Number(state.partnerId),
+    mobile_number: state.rc.mobile,
+    operator_code: state.rc.operator,
+    amount: state.rc.amount,
+    // Same key for the lifetime of this recharge-screen visit (see
+    // loadRechargeScreen) - not regenerated here, so a double-fire of
+    // this handler is naturally idempotent server-side.
+    idempotency_key: state.rc.idempotencyKey,
+  };
+
+  try {
+    const { httpStatus, body } = await apiPostRecharge(payload);
+    if (httpStatus === 401) { closeRcModal(); return handleAuthFailure(); }
+
+    if (!body || body.status === "error") {
+      renderRechargeResult("network_error", body);
+      return;
+    }
+    // Wallet is authoritative from the server after every recharge - never
+    // computed client-side.
+    await refreshWalletBalance().catch(() => {});
+    renderRechargeResult(body.state || body.status, body);
+  } catch (e) {
+    renderRechargeResult("network_error", null);
+  }
+}
+
+function renderRechargeResult(kind, body) {
+  const box = document.getElementById("rc-modal-box");
+  const mobile = maskMobile(state.rc.mobile);
+  const amount = formatMoney(state.rc.amount);
+  const balance = formatMoney(state.wallets.main);
+
+  if (kind === "network_error") {
+    box.innerHTML =
+      '<div class="result-icon fail"><i class="ti ti-wifi-off"></i></div>'
+      + '<div class="result-title">Unable to connect</div>'
+      + '<div class="result-sub">Please check your connection.</div>'
+      + '<div class="result-note">Your wallet has NOT been debited.</div>'
+      + '<div class="modal-actions"><button class="btn block primary" onclick="submitRecharge()">Try Again</button></div>';
+    return;
+  }
+  if (kind === "success") {
+    box.innerHTML =
+      '<div class="result-icon ok"><i class="ti ti-check"></i></div>'
+      + '<div class="result-title">Recharge Successful</div>'
+      + '<div class="result-sub">' + amount + ' · ' + escapeHtml(operatorDisplayName()) + ' · ' + mobile + '</div>'
+      + modalRow("Transaction ID", "QP-" + body.recharge_id)
+      + (body.transaction_id ? modalRow("Operator Reference", body.transaction_id) : "")
+      + modalRow("Wallet Balance", balance)
+      + '<div class="modal-actions"><button class="btn" onclick="closeRcModal();resetRechargeForm();">New Recharge</button>'
+      + '<button class="btn primary" onclick="closeRcModal();goTo(\'transactions\');">View in Transactions</button></div>';
+    return;
+  }
+  if (kind === "failed") {
+    box.innerHTML =
+      '<div class="result-icon fail"><i class="ti ti-x"></i></div>'
+      + '<div class="result-title">Recharge Failed</div>'
+      + '<div class="result-sub">' + amount + ' · ' + escapeHtml(operatorDisplayName()) + ' · ' + mobile + '</div>'
+      + '<div class="result-note refund">₹' + state.rc.amount.toFixed(2) + ' will be refunded to your Main Wallet automatically (or already has been).</div>'
+      + modalRow("Current Balance", balance)
+      + modalRow("Transaction ID", "QP-" + body.recharge_id)
+      + '<div class="modal-actions"><button class="btn" onclick="closeRcModal();resetRechargeForm();">Recharge Again</button>'
+      + '<button class="btn primary" onclick="closeRcModal();goTo(\'transactions\');">View Details</button></div>';
+    return;
+  }
+  // hold / processing / queued / draft
+  box.innerHTML =
+    '<div class="result-icon pending"><i class="ti ti-clock"></i></div>'
+    + '<div class="result-title">Recharge Processing</div>'
+    + '<div class="result-sub">Do not recharge again. We\'re waiting for operator confirmation.</div>'
+    + modalRow("Transaction ID", "QP-" + body.recharge_id)
+    + '<div class="modal-actions"><button class="btn primary block" onclick="checkRechargeStatus(' + body.recharge_id + ')">Check Status</button></div>';
+}
+
+async function checkRechargeStatus(rechargeId) {
+  const box = document.getElementById("rc-modal-box");
+  const prevHtml = box.innerHTML;
+  try {
+    const { httpStatus, body } = await apiStatusCheck(rechargeId);
+    if (httpStatus === 401) { closeRcModal(); return handleAuthFailure(); }
+    if (!body || body.status === "error") { showToast("Could not check status - " + errMsg({ message: body && body.message })); box.innerHTML = prevHtml; return; }
+    await refreshWalletBalance().catch(() => {});
+    renderRechargeResult(body.state, body);
+  } catch (e) {
+    showToast("Unable to connect - " + errMsg(e));
+    box.innerHTML = prevHtml;
+  }
+}
+function resetRechargeForm() { loadRechargeScreen(); }
+
+/* =========================================================================
+   TRANSACTIONS
+   ========================================================================= */
+function loadTransactionsScreen() {
+  document.getElementById("tx-status-tabs").innerHTML =
+    ["all", "success", "hold", "failed"].map((s) => {
+      const label = s === "all" ? "All" : s === "hold" ? "Pending" : s.charAt(0).toUpperCase() + s.slice(1);
+      return '<div class="status-tab' + (state.tx.status === s ? " active" : "") + '" onclick="setTxStatus(\'' + s + '\')">' + label + "</div>";
+    }).join("");
+  document.getElementById("tx-date-pills").innerHTML =
+    [["today", "Today"], ["yesterday", "Yesterday"], ["7d", "Last 7 Days"], ["30d", "Last 30 Days"], ["all", "All Time"], ["custom", "Custom"]]
+      .map(([k, l]) => '<div class="date-pill' + (state.tx.dateRange === k ? " active" : "") + '" onclick="setTxDateRange(\'' + k + '\')">' + l + "</div>").join("");
+  document.getElementById("tx-search").value = state.tx.search;
+  fetchAndRenderTransactions();
+}
+function setTxStatus(s) { state.tx.status = s; loadTransactionsScreen(); }
+function setTxDateRange(r) {
+  state.tx.dateRange = r;
+  document.getElementById("tx-custom-dates").classList.toggle("show", r === "custom");
+  loadTransactionsScreen();
+}
+function onTxCustomDate() {
+  state.tx.dateFrom = document.getElementById("tx-date-from").value || null;
+  state.tx.dateTo = document.getElementById("tx-date-to").value || null;
+  fetchAndRenderTransactions();
+}
+function onTxSearchInput() {
+  state.tx.search = document.getElementById("tx-search").value.trim().toLowerCase();
+  fetchAndRenderTransactions();
+}
+
+async function fetchAndRenderTransactions() {
+  const tbody = document.getElementById("tx-tbody");
+  const cards = document.getElementById("tx-cards");
+  const stateEl = document.getElementById("tx-state");
+  stateEl.innerHTML = "";
+  tbody.innerHTML = '<tr><td colspan="7"><div class="skel skel-line"></div></td></tr>';
+  cards.innerHTML = '<div class="skel skel-card"></div>';
+
+  try {
+    // /api/recharge/history has no server-side date filter; fetch a
+    // generous page and filter by date/search client-side (consistent
+    // with the "check actual API fields, don't invent params" instruction).
+    const apiStatus = ["success", "hold", "failed"].includes(state.tx.status) ? state.tx.status : "all";
+    const { httpStatus, body } = await apiGetHistory(100, 0, apiStatus);
+    if (httpStatus === 401) return handleAuthFailure();
+    if (!body || body.status !== "success") {
+      tbody.innerHTML = ""; cards.innerHTML = "";
+      stateEl.innerHTML = '<div class="state-block error"><i class="ti ti-alert-circle"></i><div class="state-title">Could not load transactions</div>' + escapeHtml((body && body.message) || "") + retryBtn("fetchAndRenderTransactions()") + "</div>";
+      return;
+    }
+    // apiStatus="all" is the only fetch that gives a complete, unfiltered
+    // cache worth sharing with the Recharge screen's Recent list - a
+    // status-filtered fetch here would silently drop recent numbers that
+    // don't match the currently-selected Transactions status tab.
+    if (apiStatus === "all") state.historyCache = body.recharges || [];
+    let list = body.recharges || [];
+    if (state.tx.dateRange === "today") list = list.filter((r) => isToday(r.date));
+    else if (state.tx.dateRange === "yesterday") list = list.filter((r) => { const d = parseApiDate(r.date); if (!d) return false; const y = new Date(); y.setDate(y.getDate() - 1); return d.toDateString() === y.toDateString(); });
+    else if (state.tx.dateRange === "7d") list = list.filter((r) => isWithinDays(r.date, 7));
+    else if (state.tx.dateRange === "30d") list = list.filter((r) => isWithinDays(r.date, 30));
+    else if (state.tx.dateRange === "custom" && (state.tx.dateFrom || state.tx.dateTo)) {
+      list = list.filter((r) => {
+        const d = parseApiDate(r.date); if (!d) return false;
+        if (state.tx.dateFrom && d < new Date(state.tx.dateFrom)) return false;
+        if (state.tx.dateTo && d > new Date(state.tx.dateTo + "T23:59:59")) return false;
+        return true;
+      });
+    }
+    if (state.tx.search) {
+      list = list.filter((r) =>
+        (r.mobile_number || "").includes(state.tx.search) ||
+        String(r.id).includes(state.tx.search) ||
+        ("qp-" + r.id).includes(state.tx.search) ||
+        (r.transaction_id || "").toLowerCase().includes(state.tx.search));
+    }
+    state.tx.all = list;
+    renderTransactionsTable(list);
+  } catch (e) {
+    tbody.innerHTML = ""; cards.innerHTML = "";
+    stateEl.innerHTML = '<div class="state-block error"><i class="ti ti-wifi-off"></i><div class="state-title">Unable to connect</div>' + errMsg(e) + retryBtn("fetchAndRenderTransactions()") + "</div>";
+  }
+}
+function renderTransactionsTable(list) {
+  const tbody = document.getElementById("tx-tbody");
+  const cards = document.getElementById("tx-cards");
+  const stateEl = document.getElementById("tx-state");
+  if (!list.length) {
+    tbody.innerHTML = ""; cards.innerHTML = "";
+    stateEl.innerHTML = '<div class="state-block"><i class="ti ti-receipt-off"></i><div class="state-title">No transactions found</div>Try a different filter or date range.</div>';
+    return;
+  }
+  stateEl.innerHTML = "";
+  tbody.innerHTML = list.map((r) =>
+    '<tr><td>' + formatDateTime(r.date) + '</td><td>' + escapeHtml(maskMobile(r.mobile_number)) + '</td>'
+    + '<td><span class="op-dot" style="background:' + operatorColor(r.operator_code) + ';"></span>' + escapeHtml(r.operator_name || r.operator_code || "-") + '</td>'
+    + '<td class="num">' + formatMoney(r.amount) + '</td>'
+    + '<td class="num">' + commissionCell(r.commission_amount) + '</td>'
+    + '<td>' + statusBadge(r.state, r.refund_status) + '</td>'
+    + '<td>QP-' + r.id + '</td><td><a class="tx-view-link" onclick="openTxDrawer(' + r.id + ')">View</a></td></tr>'
+  ).join("");
+  cards.innerHTML = list.map((r) =>
+    '<div class="tx-card" onclick="openTxDrawer(' + r.id + ')"><div class="tx-card-row1">'
+    + '<div class="tx-card-mobile"><span class="op-dot" style="background:' + operatorColor(r.operator_code) + ';"></span>' + escapeHtml(maskMobile(r.mobile_number)) + '</div>'
+    + '<div class="amt">' + formatMoney(r.amount) + '</div></div>'
+    + (r.commission_amount > 0 ? '<div style="text-align:right;font-size:11.5px;color:var(--success);font-weight:600;margin-top:2px;">+' + formatMoney(r.commission_amount) + ' commission</div>' : '')
+    + '<div class="tx-card-row2"><div class="tx-card-time">' + formatDateTime(r.date) + '</div>' + statusBadge(r.state, r.refund_status) + '</div></div>'
+  ).join("");
+}
+function commissionCell(amount) {
+  if (amount && amount > 0) return '<span style="color:var(--success);font-weight:600;font-size:12.5px;">+' + formatMoney(amount) + '</span>';
+  return '<span style="color:var(--text-muted);">—</span>';
+}
+function openTxDrawer(id) {
+  const r = state.tx.all.find((x) => x.id === id);
+  if (!r) return;
+  const body = document.getElementById("tx-drawer-body");
+  let html = '<div style="text-align:center;margin-bottom:18px;">' + statusBadge(r.state, r.refund_status) + '</div>';
+  html += drawerRow("Service", "Mobile Recharge");
+  html += '<div class="drawer-row"><span class="k">Operator</span><span class="v"><span class="op-dot" style="background:' + operatorColor(r.operator_code) + ';"></span>' + escapeHtml(r.operator_name || r.operator_code || "-") + '</span></div>';
+  html += drawerRow("Mobile", maskMobile(r.mobile_number));
+  html += drawerRow("Amount", formatMoney(r.amount));
+  if (r.commission_amount > 0) {
+    html += '<div class="drawer-row"><span class="k">Commission</span><span class="v" style="color:var(--success);">+' + formatMoney(r.commission_amount) + '</span></div>';
+  }
+  // "Transaction ID" (this app's own QP-<id> reference) and "Operator Ref"
+  // (r.transaction_id, which IS provider_txn_id in the real API - the two
+  // fields the spec names are actually the same underlying value) are kept
+  // as distinct rows since they serve different lookup purposes, not
+  // because the API returns two different transaction identifiers.
+  html += drawerRow("Transaction ID", "QP-" + r.id);
+  if (r.transaction_id) html += drawerRow("Operator Ref", r.transaction_id);
+
+  html += '<div class="label-caps" style="margin:16px 0 4px;">Wallet</div>';
+  html += '<div class="drawer-row"><span class="k">Debit</span><span class="v" style="color:var(--danger);">−' + formatMoney(r.amount) + '</span></div>';
+  // wallet_before/after are NOT returned by /api/recharge/history -
+  // intentionally omitted rather than faked (see Ledger screen for the
+  // authoritative running balance instead).
+
+  html += '<div class="timeline">'
+    + timelineItem("Request submitted", formatDateTime(r.date))
+    + timelineItem("Operator response: " + (r.message || r.state), "")
+    + '</div>';
+
+  if (r.state === "failed" && r.refund_status === "refunded") {
+    html += '<div class="result-note refund" style="text-align:left;margin-top:14px;">' + formatMoney(r.amount) + ' refunded to Main Wallet.</div>';
+  }
+
+  html += '<button class="btn block" disabled style="margin-top:18px;">Raise Complaint (Coming in Phase 5)</button>';
+  body.innerHTML = html;
+  document.getElementById("tx-drawer").classList.add("show");
+  document.getElementById("drawer-backdrop").classList.add("show");
+}
+function drawerRow(k, v) { return '<div class="drawer-row"><span class="k">' + escapeHtml(k) + '</span><span class="v">' + escapeHtml(v) + '</span></div>'; }
+function timelineItem(t, s) { return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-txt"><div class="t">' + escapeHtml(t) + '</div><div class="s">' + escapeHtml(s) + '</div></div></div>'; }
+function closeDrawer() {
+  document.getElementById("tx-drawer").classList.remove("show");
+  document.getElementById("drawer-backdrop").classList.remove("show");
+}
+
+/* =========================================================================
+   LEDGER
+   ========================================================================= */
+function toISODate(d) { return d.toISOString().slice(0, 10); }
+
+function loadLedgerScreen() {
+  document.getElementById("ledger-wallet-tabs").innerHTML =
+    [["main", "Main"], ["commission", "Commission"], ["dmr", "DMR"]]
+      .map(([k, l]) => '<div class="ledger-tab' + (state.ledger.walletType === k ? " active" : "") + '" onclick="setLedgerWallet(\'' + k + '\')">' + l + " Wallet</div>").join("");
+  document.getElementById("ledger-date-pills").innerHTML =
+    [["today", "Today"], ["yesterday", "Yesterday"], ["7d", "Last 7 Days"], ["30d", "Last 30 Days"], ["custom", "Custom"]]
+      .map(([k, l]) => '<div class="date-pill' + (state.ledger.dateRange === k ? " active" : "") + '" onclick="setLedgerDateRange(\'' + k + '\')">' + l + "</div>").join("");
+  document.getElementById("ledger-type-filter").value = state.ledger.type;
+  document.getElementById("ledger-search").value = state.ledger.search;
+  document.getElementById("ledger-page-size").value = state.ledger.pageSize;
+
+  if (!state.ledger.dateFrom) setLedgerDateRange("today", true);
+  else fetchAndRenderLedger();
+}
+function setLedgerWallet(t) { state.ledger.walletType = t; state.ledger.page = 1; loadLedgerScreen(); }
+function setLedgerDateRange(range, skipRender) {
+  state.ledger.dateRange = range;
+  const today = new Date();
+  if (range === "today") { state.ledger.dateFrom = toISODate(today); state.ledger.dateTo = toISODate(today); }
+  else if (range === "yesterday") { const y = new Date(today); y.setDate(y.getDate() - 1); state.ledger.dateFrom = toISODate(y); state.ledger.dateTo = toISODate(y); }
+  else if (range === "7d") { const f = new Date(today); f.setDate(f.getDate() - 6); state.ledger.dateFrom = toISODate(f); state.ledger.dateTo = toISODate(today); }
+  else if (range === "30d") { const f = new Date(today); f.setDate(f.getDate() - 29); state.ledger.dateFrom = toISODate(f); state.ledger.dateTo = toISODate(today); }
+  document.getElementById("ledger-custom-dates").classList.toggle("show", range === "custom");
+  if (range === "custom") { document.getElementById("ledger-date-from").value = state.ledger.dateFrom || ""; document.getElementById("ledger-date-to").value = state.ledger.dateTo || ""; }
+  state.ledger.page = 1;
+  loadLedgerScreen();
+  if (!skipRender) fetchAndRenderLedger();
+}
+function onLedgerCustomDateChange() {
+  state.ledger.dateFrom = document.getElementById("ledger-date-from").value || null;
+  state.ledger.dateTo = document.getElementById("ledger-date-to").value || null;
+  state.ledger.page = 1;
+  fetchAndRenderLedger();
+}
+function onLedgerTypeChange() { state.ledger.type = document.getElementById("ledger-type-filter").value; state.ledger.page = 1; fetchAndRenderLedger(); }
+function onLedgerSearchInput() {
+  clearTimeout(state.ledger.searchDebounce);
+  state.ledger.searchDebounce = setTimeout(() => {
+    state.ledger.search = document.getElementById("ledger-search").value.trim();
+    state.ledger.page = 1;
+    fetchAndRenderLedger();
+  }, 400);
+}
+function onLedgerPageSizeChange() { state.ledger.pageSize = Number(document.getElementById("ledger-page-size").value); state.ledger.page = 1; fetchAndRenderLedger(); }
+function ledgerPrevPage() { if (state.ledger.page > 1) { state.ledger.page--; fetchAndRenderLedger(); } }
+function ledgerNextPage() { if (state.ledger.page < state.ledger.totalPages) { state.ledger.page++; fetchAndRenderLedger(); } }
+
+function ledgerShowSkeleton() {
+  document.getElementById("ledger-tbody").innerHTML = Array(4).fill('<tr><td colspan="6"><div class="skel skel-line"></div></td></tr>').join("");
+  document.getElementById("ledger-cards").innerHTML = '<div class="skel skel-card"></div>';
+  document.getElementById("ledger-empty").innerHTML = "";
+  document.getElementById("ledger-pagination").style.display = "none";
+}
+
+async function fetchAndRenderLedger() {
+  ledgerShowSkeleton();
+  try {
+    const { httpStatus, body } = await apiGetLedger({
+      wallet_type: state.ledger.walletType, date_from: state.ledger.dateFrom, date_to: state.ledger.dateTo,
+      type: state.ledger.type, search: state.ledger.search, page: state.ledger.page, page_size: state.ledger.pageSize,
+    });
+    if (httpStatus === 401) return handleAuthFailure();
+    if (httpStatus === 404) {
+      document.getElementById("ledger-tbody").innerHTML = ""; document.getElementById("ledger-cards").innerHTML = "";
+      document.getElementById("ledger-empty").innerHTML = '<div class="state-block"><i class="ti ti-wallet-off"></i><div class="state-title">No ' + state.ledger.walletType + ' wallet found</div></div>';
+      ["opening", "credit", "debit", "closing"].forEach((k) => document.getElementById("ledger-sum-" + k).textContent = formatMoney(0));
+      return;
+    }
+    if (!body || body.status !== "success") {
+      document.getElementById("ledger-tbody").innerHTML = ""; document.getElementById("ledger-cards").innerHTML = "";
+      document.getElementById("ledger-empty").innerHTML = '<div class="state-block error"><i class="ti ti-alert-circle"></i><div class="state-title">Could not load ledger</div>' + escapeHtml((body && body.message) || "") + retryBtn("fetchAndRenderLedger()") + "</div>";
+      return;
+    }
+    document.getElementById("ledger-sum-opening").textContent = formatMoney(body.summary.opening_balance);
+    document.getElementById("ledger-sum-credit").textContent = formatMoney(body.summary.total_credit);
+    document.getElementById("ledger-sum-debit").textContent = formatMoney(body.summary.total_debit);
+    document.getElementById("ledger-sum-closing").textContent = formatMoney(body.summary.closing_balance);
+
+    if (!body.entries.length) {
+      document.getElementById("ledger-tbody").innerHTML = ""; document.getElementById("ledger-cards").innerHTML = "";
+      document.getElementById("ledger-empty").innerHTML = '<div class="state-block"><i class="ti ti-receipt-off"></i><div class="state-title">No transactions found for this period</div></div>';
+    } else {
+      document.getElementById("ledger-empty").innerHTML = "";
+      renderLedgerTable(body.entries);
+      renderLedgerCards(body.entries);
+    }
+    state.ledger.totalPages = body.pagination.total_pages;
+    renderLedgerPagination(body.pagination);
+  } catch (e) {
+    document.getElementById("ledger-tbody").innerHTML = ""; document.getElementById("ledger-cards").innerHTML = "";
+    document.getElementById("ledger-empty").innerHTML = '<div class="state-block error"><i class="ti ti-wifi-off"></i><div class="state-title">Unable to connect</div>' + errMsg(e) + retryBtn("fetchAndRenderLedger()") + "</div>";
+  }
+}
+function renderLedgerTable(entries) {
+  document.getElementById("ledger-tbody").innerHTML = entries.map((e) => {
+    const h = humanizeLedgerEntry(e);
+    return '<tr><td>' + formatDateTime(e.datetime) + '</td>'
+      + '<td class="led-particulars"><div class="main">' + escapeHtml(h.main) + '</div>' + (h.sub ? '<div class="sub">' + escapeHtml(h.sub) + '</div>' : '') + '</td>'
+      + '<td class="sub" style="color:var(--text-muted);font-size:12px;">' + escapeHtml(e.reference || "-") + '</td>'
+      + '<td class="num">' + (e.debit != null ? '<span class="amt amt-debit">−' + formatMoney(e.debit).replace("₹", "₹") + '</span>' : '-') + '</td>'
+      + '<td class="num">' + (e.credit != null ? '<span class="amt amt-credit">+' + formatMoney(e.credit).replace("₹", "₹") + '</span>' : '-') + '</td>'
+      + '<td class="num"><span class="amt amt-neutral">' + formatMoney(e.running_balance) + '</span></td></tr>';
+  }).join("");
+}
+function renderLedgerCards(entries) {
+  document.getElementById("ledger-cards").innerHTML = entries.map((e) => {
+    const h = humanizeLedgerEntry(e);
+    const isCredit = e.credit != null;
+    return '<div class="led-card"><div class="led-card-row1"><div><div class="main">' + escapeHtml(h.main) + '</div>' + (h.sub ? '<div class="sub">' + escapeHtml(h.sub) + '</div>' : '') + '</div>'
+      + '<div class="amt-line ' + (isCredit ? "amt-credit" : "amt-debit") + '"><i class="ti ti-arrow-' + (isCredit ? "down" : "up") + '-right"></i>' + (isCredit ? "+" : "−") + formatMoney(isCredit ? e.credit : e.debit) + '</div></div>'
+      + '<div class="balance-line">' + formatDateTime(e.datetime) + ' · Balance: ' + formatMoney(e.running_balance) + '</div></div>';
+  }).join("");
+}
+function renderLedgerPagination(p) {
+  const bar = document.getElementById("ledger-pagination");
+  if (!p.total_records) { bar.style.display = "none"; return; }
+  bar.style.display = "flex";
+  const start = (p.page - 1) * p.page_size + 1;
+  const end = Math.min(p.page * p.page_size, p.total_records);
+  document.getElementById("ledger-pagination-summary").textContent = "Showing " + start + "-" + end + " of " + p.total_records + " entries";
+  document.getElementById("ledger-prev-btn").disabled = p.page <= 1;
+  document.getElementById("ledger-next-btn").disabled = p.page >= p.total_pages;
+}
+
+/* =========================================================================
+   WALLET
+   ========================================================================= */
+async function loadWalletScreen() {
+  document.getElementById("w-main").textContent = "…";
+  document.getElementById("w-commission").textContent = "…";
+  document.getElementById("w-dmr").textContent = "…";
+  try {
+    await refreshWalletBalance();
+    document.getElementById("w-main").textContent = formatMoney(state.wallets.main);
+    document.getElementById("w-commission").textContent = formatMoney(state.wallets.commission);
+    document.getElementById("w-dmr").textContent = formatMoney(state.wallets.dmr);
+  } catch (e) {
+    if (errMsg(e) !== "auth") showToast("Could not load wallet balance - " + errMsg(e));
+  }
+}
+function toggleFundForm() { document.getElementById("fund-form-card").classList.toggle("show"); }
+function openFundRequest() { goTo("wallet"); setTimeout(() => document.getElementById("fund-form-card").classList.add("show"), 50); }
+
+async function submitFundRequest() {
+  const amount = Number(document.getElementById("fund-amount").value);
+  const mode = document.querySelector('input[name="pay-mode"]:checked').value;
+  const utr = document.getElementById("fund-utr").value.trim();
+  const note = document.getElementById("fund-note").value.trim();
+
+  if (!amount || amount <= 0) return showToast("Please enter a valid amount.");
+  if (!utr) return showToast("Please enter the UTR / reference number.");
+
+  const btn = document.getElementById("fund-submit-btn");
+  btn.disabled = true; btn.textContent = "Submitting...";
+  try {
+    // quickpay.fund.request has no dedicated payment-mode/UTR fields -
+    // both are folded into the free-text "notes" channel the backend
+    // already persists (via audit log), rather than inventing new
+    // backend fields for this UI.
+    const notes = "Payment Mode: " + mode + " | UTR: " + utr + (note ? " | Note: " + note : "");
+    const { httpStatus, body } = await apiPostFundRequest({ amount: amount, wallet_type: "main", notes: notes });
+    if (httpStatus === 401) return handleAuthFailure();
+    if (body && body.status === "success") {
+      showToast("Fund request submitted successfully.");
+      document.getElementById("fund-amount").value = ""; document.getElementById("fund-utr").value = ""; document.getElementById("fund-note").value = "";
+      document.getElementById("fund-form-card").classList.remove("show");
+    } else {
+      showToast((body && (body.message || body.error)) || "Could not submit fund request.");
+    }
+  } catch (e) {
+    showToast("Unable to connect. " + errMsg(e));
+  } finally {
+    btn.disabled = false; btn.textContent = "Submit Fund Request";
+  }
+}
+
+/* =========================================================================
+   BOOT
+   ========================================================================= */
+(function boot() {
+  if (state.token) goTo("dashboard");
+  else goTo("login");
+})();
+</script>
+</body>
+</html>
