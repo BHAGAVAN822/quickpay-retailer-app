@@ -521,6 +521,7 @@ button{cursor:pointer;}
 
       <div class="sb-item" data-nav="transactions" onclick="goTo('transactions')"><i class="ti ti-list-details"></i><span>Transactions</span></div>
       <div class="sb-item" data-nav="ledger" onclick="goTo('ledger')"><i class="ti ti-receipt"></i><span>Ledger</span></div>
+      <div class="sb-item" data-nav="commission" onclick="goTo('commission')"><i class="ti ti-percentage"></i><span>Commission</span></div>
       <div class="sb-item disabled"><i class="ti ti-chart-bar"></i><span>Reports</span><span class="soon">Soon</span></div>
       <div class="sb-item" data-nav="wallet" onclick="goTo('wallet')"><i class="ti ti-wallet"></i><span>Wallet</span></div>
       <div class="sb-item disabled"><i class="ti ti-headset"></i><span>Support</span><span class="soon">Soon</span></div>
@@ -579,6 +580,7 @@ button{cursor:pointer;}
             <div class="val" id="kpi-commission">—</div>
             <div class="sub">Earned commission</div>
             <div class="sub" id="kpi-commission-today" style="color:var(--success);">Today earned: —</div>
+            <a class="kpi-link" onclick="goTo('commission')">View details →</a>
           </div>
           <div class="card kpi-card">
             <div class="label-caps">Today's Business</div>
@@ -737,6 +739,59 @@ button{cursor:pointer;}
         </div>
       </div>
 
+      <!-- ============ COMMISSION REPORT ============ -->
+      <div class="screen hidden" id="screen-commission">
+        <div class="greeting-row" style="margin-top:0;">
+          <div class="sub">Your earnings from recharges</div>
+        </div>
+        <div class="filter-bar">
+          <div class="date-pills" id="commission-date-pills"></div>
+          <div class="custom-dates" id="commission-custom-dates">
+            <input type="date" id="commission-date-from" onchange="onCommissionCustomDateChange()">
+            <span style="color:var(--text-muted);">to</span>
+            <input type="date" id="commission-date-to" onchange="onCommissionCustomDateChange()">
+          </div>
+          <select class="ledger-type-select" id="commission-operator-filter" onchange="onCommissionOperatorChange()">
+            <option value="">All Operators</option>
+          </select>
+        </div>
+
+        <div class="summary-grid">
+          <div class="card summary-card credit"><div class="label-caps">Today's Earnings</div><div class="val" id="commission-sum-today">₹0.00</div></div>
+          <div class="card summary-card credit"><div class="label-caps">This Month</div><div class="val" id="commission-sum-month">₹0.00</div></div>
+          <div class="card summary-card"><div class="label-caps">Selected Period</div><div class="val" id="commission-sum-period">₹0.00</div></div>
+          <div class="card summary-card"><div class="label-caps">Transactions</div><div class="val" id="commission-sum-count">0</div></div>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table class="tx-table" id="commission-table" style="display:none;">
+              <thead><tr><th>Date &amp; Time</th><th>Mobile</th><th>Operator</th><th class="num">Recharge Amount</th><th class="num">Commission</th><th class="num">Rate</th></tr></thead>
+              <tbody id="commission-tbody"></tbody>
+            </table>
+          </div>
+          <div class="tx-cards" id="commission-cards" style="padding:12px;"></div>
+          <div id="commission-empty" style="padding:10px;"></div>
+          <div class="pagination-bar" id="commission-pagination" style="padding:14px 16px;display:none;">
+            <div class="info" id="commission-pagination-summary">Showing 0-0 of 0</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <button class="btn sm" id="commission-prev-btn" onclick="commissionPrevPage()">Prev</button>
+              <button class="btn sm" id="commission-next-btn" onclick="commissionNextPage()">Next</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-head" style="margin-top:24px;"><h3>By Operator</h3></div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table class="tx-table" id="commission-operator-summary-table">
+              <thead><tr><th>Operator</th><th class="num">Transactions</th><th class="num">Total Business</th><th class="num">Commission</th><th class="num">Avg Rate</th></tr></thead>
+              <tbody id="commission-operator-summary-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- ============ WALLET ============ -->
       <div class="screen hidden" id="screen-wallet">
         <div class="wallet-cards">
@@ -786,10 +841,23 @@ button{cursor:pointer;}
           <button class="btn primary block" id="fund-submit-btn" onclick="submitFundRequest()">Submit Fund Request</button>
         </div>
 
-        <div class="section-head" style="margin-top:24px;"><h3>Fund Request History</h3></div>
-        <div class="card" style="padding:0;">
-          <div class="fund-hist-empty">
-            No history available.<br><span style="font-size:11.5px;">Fund request history listing — planned for a future phase.</span>
+        <div class="section-head" style="margin-top:24px;"><h3>My Fund Requests</h3></div>
+        <div class="status-tabs" id="fund-status-tabs" style="margin-bottom:12px;"></div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table class="tx-table" id="fund-hist-table" style="display:none;">
+              <thead><tr><th>Date</th><th class="num">Amount</th><th>Wallet</th><th>Reference</th><th>Status</th><th>Approved Date</th></tr></thead>
+              <tbody id="fund-hist-tbody"></tbody>
+            </table>
+          </div>
+          <div class="tx-cards" id="fund-hist-cards" style="padding:12px;"></div>
+          <div id="fund-hist-state" style="padding:10px;"></div>
+          <div class="pagination-bar" id="fund-hist-pagination" style="padding:14px 16px;display:none;">
+            <div class="info" id="fund-hist-pagination-summary">Showing 0-0 of 0</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <button class="btn sm" id="fund-hist-prev-btn" onclick="fundHistPrevPage()">Prev</button>
+              <button class="btn sm" id="fund-hist-next-btn" onclick="fundHistNextPage()">Next</button>
+            </div>
           </div>
         </div>
       </div>
@@ -848,6 +916,11 @@ let state = {
     walletType: "main", dateRange: "today", dateFrom: null, dateTo: null,
     type: "all", search: "", page: 1, pageSize: 25, totalPages: 1, searchDebounce: null,
   },
+  fundHist: { status: "all", page: 1, pageSize: 20, totalPages: 1 },
+  commission: {
+    dateRange: "this_month", dateFrom: null, dateTo: null, operatorCode: "",
+    page: 1, pageSize: 25, totalPages: 1, entries: [],
+  },
 };
 
 /* =========================================================================
@@ -903,6 +976,24 @@ async function apiPostFundRequest(payload) {
   const res = await fetch(API_BASE + "/api/fund-request", {
     method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() }, body: JSON.stringify(payload),
   });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+async function apiGetFundRequests(params) {
+  const url = new URL(API_BASE + "/api/fund-requests");
+  Object.keys(params).forEach((k) => {
+    if (params[k] !== null && params[k] !== undefined && params[k] !== "") url.searchParams.set(k, params[k]);
+  });
+  const res = await fetch(url.toString(), { headers: authHeaders() });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+async function apiGetCommissionHistory(params) {
+  const url = new URL(API_BASE + "/api/commission/history");
+  Object.keys(params).forEach((k) => {
+    if (params[k] !== null && params[k] !== undefined && params[k] !== "") url.searchParams.set(k, params[k]);
+  });
+  const res = await fetch(url.toString(), { headers: authHeaders() });
   const data = await res.json();
   return { httpStatus: res.status, body: data };
 }
@@ -1099,7 +1190,7 @@ function goTo(screen) {
   const target = document.getElementById("screen-" + screen);
   if (target) target.classList.remove("hidden");
 
-  const titles = { dashboard: "Dashboard", recharge: "Mobile Recharge", transactions: "Transactions", ledger: "Ledger", wallet: "Wallet" };
+  const titles = { dashboard: "Dashboard", recharge: "Mobile Recharge", transactions: "Transactions", ledger: "Ledger", commission: "Commission Report", wallet: "Wallet" };
   document.getElementById("page-title").textContent = titles[screen] || "QuickPay";
 
   document.querySelectorAll("[data-nav]").forEach((el) => el.classList.toggle("active", el.getAttribute("data-nav") === screen));
@@ -1109,6 +1200,7 @@ function goTo(screen) {
     else if (screen === "recharge") loadRechargeScreen();
     else if (screen === "transactions") loadTransactionsScreen();
     else if (screen === "ledger") loadLedgerScreen();
+    else if (screen === "commission") loadCommissionScreen();
     else if (screen === "wallet") loadWalletScreen();
   } catch (e) {
     showToast("Something went wrong loading this screen - " + errMsg(e));
@@ -1894,6 +1986,163 @@ function renderLedgerPagination(p) {
 }
 
 /* =========================================================================
+   COMMISSION REPORT (Phase 3A Part D)
+   ========================================================================= */
+function loadCommissionScreen() {
+  document.getElementById("commission-date-pills").innerHTML =
+    [["today", "Today"], ["this_week", "This Week"], ["this_month", "This Month"], ["last_month", "Last Month"], ["custom", "Custom"]]
+      .map(([k, l]) => '<div class="date-pill' + (state.commission.dateRange === k ? " active" : "") + '" onclick="setCommissionDateRange(\'' + k + '\')">' + l + "</div>").join("");
+  if (!state.commission.dateFrom) setCommissionDateRange("this_month", true);
+  else fetchAndRenderCommission();
+}
+function setCommissionDateRange(range, skipFetch) {
+  state.commission.dateRange = range;
+  const today = new Date();
+  if (range === "today") { state.commission.dateFrom = toISODate(today); state.commission.dateTo = toISODate(today); }
+  else if (range === "this_week") { const f = new Date(today); f.setDate(f.getDate() - today.getDay()); state.commission.dateFrom = toISODate(f); state.commission.dateTo = toISODate(today); }
+  else if (range === "this_month") { const f = new Date(today.getFullYear(), today.getMonth(), 1); state.commission.dateFrom = toISODate(f); state.commission.dateTo = toISODate(today); }
+  else if (range === "last_month") {
+    const f = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const l = new Date(today.getFullYear(), today.getMonth(), 0);
+    state.commission.dateFrom = toISODate(f); state.commission.dateTo = toISODate(l);
+  }
+  document.getElementById("commission-custom-dates").classList.toggle("show", range === "custom");
+  if (range === "custom") {
+    document.getElementById("commission-date-from").value = state.commission.dateFrom || "";
+    document.getElementById("commission-date-to").value = state.commission.dateTo || "";
+  }
+  state.commission.page = 1;
+  loadCommissionScreen();
+  if (!skipFetch) fetchAndRenderCommission();
+}
+function onCommissionCustomDateChange() {
+  state.commission.dateFrom = document.getElementById("commission-date-from").value || null;
+  state.commission.dateTo = document.getElementById("commission-date-to").value || null;
+  state.commission.page = 1;
+  fetchAndRenderCommission();
+}
+function onCommissionOperatorChange() {
+  state.commission.operatorCode = document.getElementById("commission-operator-filter").value;
+  state.commission.page = 1;
+  fetchAndRenderCommission();
+}
+function commissionPrevPage() { if (state.commission.page > 1) { state.commission.page--; fetchAndRenderCommission(); } }
+function commissionNextPage() { if (state.commission.page < state.commission.totalPages) { state.commission.page++; fetchAndRenderCommission(); } }
+
+/* Operator filter dropdown is populated from whatever operators
+   actually appear in the loaded entries - no hard-coded operator
+   list, works automatically as new operators earn commission. */
+function renderCommissionOperatorFilterOptions(entries) {
+  const select = document.getElementById("commission-operator-filter");
+  const currentValue = select.value;
+  const seen = new Map();
+  entries.forEach((e) => { if (e.operator_code && !seen.has(e.operator_code)) seen.set(e.operator_code, e.operator_name || e.operator_code); });
+  let html = '<option value="">All Operators</option>';
+  seen.forEach((name, code) => { html += '<option value="' + escapeHtml(code) + '">' + escapeHtml(name) + '</option>'; });
+  select.innerHTML = html;
+  select.value = currentValue;
+}
+
+async function fetchAndRenderCommission() {
+  const table = document.getElementById("commission-table");
+  const tbody = document.getElementById("commission-tbody");
+  const cards = document.getElementById("commission-cards");
+  const stateEl = document.getElementById("commission-empty");
+  const paginationEl = document.getElementById("commission-pagination");
+  table.style.display = "none";
+  tbody.innerHTML = "";
+  cards.innerHTML = '<div class="skel skel-card"></div>';
+  stateEl.innerHTML = "";
+  paginationEl.style.display = "none";
+
+  try {
+    const { httpStatus, body } = await apiGetCommissionHistory({
+      date_from: state.commission.dateFrom, date_to: state.commission.dateTo,
+      operator_code: state.commission.operatorCode, page: state.commission.page, page_size: state.commission.pageSize,
+    });
+    if (httpStatus === 401) return handleAuthFailure();
+    if (!body || body.status !== "success") {
+      cards.innerHTML = "";
+      stateEl.innerHTML = '<div class="state-block error"><i class="ti ti-alert-circle"></i><div class="state-title">Could not load commission report</div>' + retryBtn("fetchAndRenderCommission()") + "</div>";
+      return;
+    }
+
+    document.getElementById("commission-sum-period").textContent = formatMoney(body.summary.total_commission);
+    document.getElementById("commission-sum-count").textContent = body.summary.transaction_count;
+    document.getElementById("commission-sum-today").textContent = formatMoney(body.summary.today_commission);
+    document.getElementById("commission-sum-month").textContent = formatMoney(body.summary.this_month_commission);
+
+    state.commission.entries = body.entries;
+    renderCommissionOperatorFilterOptions(body.entries);
+
+    if (!body.entries.length) {
+      cards.innerHTML = "";
+      stateEl.innerHTML = '<div class="state-block"><i class="ti ti-percentage"></i><div class="state-title">No commission earned in this period</div></div>';
+      renderCommissionOperatorSummary([]);
+      return;
+    }
+    table.style.display = "";
+    tbody.innerHTML = body.entries.map((e) =>
+      '<tr><td>' + formatDateTime(e.date) + '</td><td>' + escapeHtml(e.recharge_mobile || "-") + '</td>'
+      + '<td><span class="op-dot" style="background:' + operatorColor(e.operator_code) + ';"></span>' + escapeHtml(e.operator_name || e.operator_code || "-") + '</td>'
+      + '<td class="num">' + formatMoney(e.recharge_amount) + '</td>'
+      + '<td class="num"><span class="amt amt-credit">+' + formatMoney(e.commission_amount) + '</span></td>'
+      + '<td class="num" style="color:var(--text-muted);">' + (e.commission_rate != null ? e.commission_rate.toFixed(1) + "%" : "-") + '</td></tr>'
+    ).join("");
+    cards.innerHTML = body.entries.map((e) =>
+      '<div class="tx-card"><div class="tx-card-row1">'
+      + '<div class="tx-card-mobile"><span class="op-dot" style="background:' + operatorColor(e.operator_code) + ';"></span>' + escapeHtml(e.operator_name || e.operator_code || "-") + '</div>'
+      + '<div class="amt amt-credit">+' + formatMoney(e.commission_amount) + '</div></div>'
+      + '<div class="tx-card-row2"><div class="tx-card-time">' + escapeHtml(e.recharge_mobile || "-") + ' · ' + formatMoney(e.recharge_amount) + '</div>'
+      + '<div style="color:var(--text-muted);font-size:12.5px;">' + (e.commission_rate != null ? e.commission_rate.toFixed(1) + "%" : "-") + '</div></div></div>'
+    ).join("");
+
+    renderCommissionOperatorSummary(body.entries);
+
+    state.commission.totalPages = body.pagination.total_pages;
+    if (body.pagination.total_records) {
+      paginationEl.style.display = "flex";
+      const start = (body.pagination.page - 1) * body.pagination.page_size + 1;
+      const end = Math.min(body.pagination.page * body.pagination.page_size, body.pagination.total_records);
+      document.getElementById("commission-pagination-summary").textContent = "Showing " + start + "-" + end + " of " + body.pagination.total_records;
+      document.getElementById("commission-prev-btn").disabled = body.pagination.page <= 1;
+      document.getElementById("commission-next-btn").disabled = body.pagination.page >= body.pagination.total_pages;
+    }
+  } catch (e) {
+    cards.innerHTML = "";
+    stateEl.innerHTML = '<div class="state-block error"><i class="ti ti-wifi-off"></i><div class="state-title">Could not load commission report</div>' + errMsg(e) + retryBtn("fetchAndRenderCommission()") + "</div>";
+  }
+}
+
+/* Client-side grouping over the currently-loaded page of entries - no
+   extra API call, per spec. Note this means the operator breakdown
+   reflects only the current page, not the full filtered date range,
+   when there are more entries than fit on one page. */
+function renderCommissionOperatorSummary(entries) {
+  const tbody = document.getElementById("commission-operator-summary-tbody");
+  if (!entries.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:20px;">No data</td></tr>';
+    return;
+  }
+  const groups = new Map();
+  entries.forEach((e) => {
+    const key = e.operator_code || "unknown";
+    if (!groups.has(key)) groups.set(key, { name: e.operator_name || key, count: 0, business: 0, commission: 0 });
+    const g = groups.get(key);
+    g.count += 1;
+    g.business += e.recharge_amount || 0;
+    g.commission += e.commission_amount || 0;
+  });
+  tbody.innerHTML = [...groups.values()].map((g) => {
+    const avgRate = g.business > 0 ? (g.commission / g.business) * 100 : 0;
+    return '<tr><td>' + escapeHtml(g.name) + '</td><td class="num">' + g.count + '</td>'
+      + '<td class="num">' + formatMoney(g.business) + '</td>'
+      + '<td class="num"><span class="amt amt-credit">+' + formatMoney(g.commission) + '</span></td>'
+      + '<td class="num" style="color:var(--text-muted);">' + avgRate.toFixed(1) + '%</td></tr>';
+  }).join("");
+}
+
+/* =========================================================================
    WALLET
    ========================================================================= */
 async function loadWalletScreen() {
@@ -1907,6 +2156,91 @@ async function loadWalletScreen() {
     document.getElementById("w-dmr").textContent = formatMoney(state.wallets.dmr);
   } catch (e) {
     if (errMsg(e) !== "auth") showToast("Could not load wallet balance - " + errMsg(e));
+  }
+  loadFundRequestHistory();
+}
+
+/* =========================================================================
+   FUND REQUEST HISTORY (Phase 3A Part C)
+   ========================================================================= */
+function loadFundRequestHistory() {
+  document.getElementById("fund-status-tabs").innerHTML =
+    [["all", "All"], ["pending", "Pending"], ["approved", "Approved"], ["rejected", "Rejected"]]
+      .map(([k, l]) => '<div class="status-tab' + (state.fundHist.status === k ? " active" : "") + '" onclick="setFundHistStatus(\'' + k + '\')">' + l + "</div>").join("");
+  fetchAndRenderFundHistory();
+}
+function setFundHistStatus(status) {
+  state.fundHist.status = status;
+  state.fundHist.page = 1;
+  loadFundRequestHistory();
+}
+function fundHistPrevPage() { if (state.fundHist.page > 1) { state.fundHist.page--; fetchAndRenderFundHistory(); } }
+function fundHistNextPage() { if (state.fundHist.page < state.fundHist.totalPages) { state.fundHist.page++; fetchAndRenderFundHistory(); } }
+
+function fundStatusBadge(stateLabel) {
+  const s = (stateLabel || "").toLowerCase();
+  if (s === "approved") return '<span class="badge badge-success">Approved</span>';
+  if (s === "rejected") return '<span class="badge badge-failed">Rejected</span>';
+  return '<span class="badge badge-pending">Pending</span>';
+}
+
+async function fetchAndRenderFundHistory() {
+  const table = document.getElementById("fund-hist-table");
+  const tbody = document.getElementById("fund-hist-tbody");
+  const cards = document.getElementById("fund-hist-cards");
+  const stateEl = document.getElementById("fund-hist-state");
+  const paginationEl = document.getElementById("fund-hist-pagination");
+  table.style.display = "none";
+  tbody.innerHTML = "";
+  cards.innerHTML = '<div class="skel skel-card"></div>';
+  stateEl.innerHTML = "";
+  paginationEl.style.display = "none";
+
+  try {
+    const { httpStatus, body } = await apiGetFundRequests({
+      status: state.fundHist.status, page: state.fundHist.page, page_size: state.fundHist.pageSize,
+    });
+    if (httpStatus === 401) return handleAuthFailure();
+    if (!body || body.status !== "success") {
+      cards.innerHTML = "";
+      stateEl.innerHTML = '<div class="state-block error"><i class="ti ti-alert-circle"></i><div class="state-title">Could not load fund requests</div>' + retryBtn("fetchAndRenderFundHistory()") + "</div>";
+      return;
+    }
+    if (!body.requests.length) {
+      cards.innerHTML = "";
+      stateEl.innerHTML = '<div class="state-block"><i class="ti ti-receipt-off"></i><div class="state-title">No fund requests yet</div>Submit your first request above.</div>';
+      return;
+    }
+    table.style.display = "";
+    tbody.innerHTML = body.requests.map((r) =>
+      '<tr><td>' + formatDateTime(r.date) + '</td>'
+      + '<td class="num">' + formatMoney(r.amount) + '</td>'
+      + '<td style="text-transform:capitalize;">' + escapeHtml(r.wallet_type || "-") + '</td>'
+      + '<td>' + escapeHtml(r.reference || (r.notes ? r.notes.slice(0, 24) + (r.notes.length > 24 ? "…" : "") : "-")) + '</td>'
+      + '<td>' + fundStatusBadge(r.state_label) + '</td>'
+      + '<td>' + (r.approved_date ? formatDateTime(r.approved_date) : "-") + '</td></tr>'
+    ).join("");
+    cards.innerHTML = body.requests.map((r) =>
+      '<div class="tx-card"><div class="tx-card-row1">'
+      + '<div class="tx-card-mobile">' + formatDateTime(r.date) + '</div>'
+      + '<div class="amt">' + formatMoney(r.amount) + '</div></div>'
+      + '<div class="tx-card-row2">'
+      + '<div class="tx-card-time">' + escapeHtml(r.reference || r.notes || "") + '</div>'
+      + fundStatusBadge(r.state_label) + '</div></div>'
+    ).join("");
+
+    state.fundHist.totalPages = body.pagination.total_pages;
+    if (body.pagination.total_records) {
+      paginationEl.style.display = "flex";
+      const start = (body.pagination.page - 1) * body.pagination.page_size + 1;
+      const end = Math.min(body.pagination.page * body.pagination.page_size, body.pagination.total_records);
+      document.getElementById("fund-hist-pagination-summary").textContent = "Showing " + start + "-" + end + " of " + body.pagination.total_records;
+      document.getElementById("fund-hist-prev-btn").disabled = body.pagination.page <= 1;
+      document.getElementById("fund-hist-next-btn").disabled = body.pagination.page >= body.pagination.total_pages;
+    }
+  } catch (e) {
+    cards.innerHTML = "";
+    stateEl.innerHTML = '<div class="state-block error"><i class="ti ti-wifi-off"></i><div class="state-title">Could not load fund requests</div>' + errMsg(e) + retryBtn("fetchAndRenderFundHistory()") + "</div>";
   }
 }
 function toggleFundForm() { document.getElementById("fund-form-card").classList.toggle("show"); }
@@ -1935,6 +2269,11 @@ async function submitFundRequest() {
       showToast("Fund request submitted successfully.");
       document.getElementById("fund-amount").value = ""; document.getElementById("fund-utr").value = ""; document.getElementById("fund-note").value = "";
       document.getElementById("fund-form-card").classList.remove("show");
+      // New request appears at the top since the API already orders
+      // create_date desc, id desc - just re-fetch page 1 of "all".
+      state.fundHist.status = "all";
+      state.fundHist.page = 1;
+      loadFundRequestHistory();
     } else {
       showToast((body && (body.message || body.error)) || "Could not submit fund request.");
     }
