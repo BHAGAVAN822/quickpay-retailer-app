@@ -522,7 +522,7 @@ button{cursor:pointer;}
       <div class="sb-item" data-nav="transactions" onclick="goTo('transactions')"><i class="ti ti-list-details"></i><span>Transactions</span></div>
       <div class="sb-item" data-nav="ledger" onclick="goTo('ledger')"><i class="ti ti-receipt"></i><span>Ledger</span></div>
       <div class="sb-item" data-nav="commission" onclick="goTo('commission')"><i class="ti ti-percentage"></i><span>Commission</span></div>
-      <div class="sb-item disabled"><i class="ti ti-chart-bar"></i><span>Reports</span><span class="soon">Soon</span></div>
+      <div class="sb-item" data-nav="reports" onclick="goTo('reports')"><i class="ti ti-chart-bar"></i><span>Reports</span></div>
       <div class="sb-item" data-nav="wallet" onclick="goTo('wallet')"><i class="ti ti-wallet"></i><span>Wallet</span></div>
       <div class="sb-item disabled"><i class="ti ti-headset"></i><span>Support</span><span class="soon">Soon</span></div>
     </nav>
@@ -706,6 +706,7 @@ button{cursor:pointer;}
             <option value="adjustment">Adjustment</option>
           </select>
           <input type="text" class="search-input" id="ledger-search" placeholder="Search reference..." oninput="onLedgerSearchInput()">
+          <button class="btn sm" id="ledger-export-btn" onclick="downloadLedgerExcel()" style="white-space:nowrap;"><i class="ti ti-download"></i> Download Excel ↓</button>
         </div>
 
         <div class="summary-grid">
@@ -754,6 +755,7 @@ button{cursor:pointer;}
           <select class="ledger-type-select" id="commission-operator-filter" onchange="onCommissionOperatorChange()">
             <option value="">All Operators</option>
           </select>
+          <button class="btn sm" id="commission-export-btn" onclick="downloadCommissionExcel()" style="white-space:nowrap;"><i class="ti ti-download"></i> Download Excel ↓</button>
         </div>
 
         <div class="summary-grid">
@@ -789,6 +791,50 @@ button{cursor:pointer;}
               <tbody id="commission-operator-summary-tbody"></tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <!-- ============ REPORTS — Business Summary (Phase 3B) ============ -->
+      <div class="screen hidden" id="screen-reports">
+        <div class="greeting-row" style="margin-top:0;">
+          <h2 style="margin:0;font-size:19px;font-weight:700;">Business Summary</h2>
+          <div class="sub">Computed from your recharge history</div>
+        </div>
+        <div class="filter-bar">
+          <div class="date-pills" id="reports-date-pills"></div>
+          <div class="custom-dates" id="reports-custom-dates">
+            <input type="date" id="reports-date-from" onchange="onReportsCustomDateChange()">
+            <span style="color:var(--text-muted);">to</span>
+            <input type="date" id="reports-date-to" onchange="onReportsCustomDateChange()">
+          </div>
+        </div>
+
+        <div class="summary-grid" id="reports-kpi-grid">
+          <div class="card summary-card"><div class="label-caps">Total Recharges</div><div class="val" id="reports-kpi-total">0</div></div>
+          <div class="card summary-card credit"><div class="label-caps">Success</div><div class="val" id="reports-kpi-success">0</div></div>
+          <div class="card summary-card debit"><div class="label-caps">Failed</div><div class="val" id="reports-kpi-failed">0</div></div>
+          <div class="card summary-card"><div class="label-caps">Total Amount</div><div class="val" id="reports-kpi-amount">₹0.00</div></div>
+        </div>
+
+        <div class="section-head"><h3>Operator Breakdown</h3></div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table class="tx-table" id="reports-operator-table">
+              <thead><tr><th>Operator</th><th class="num">Transactions</th><th class="num">Amount</th><th class="num">Success Rate</th></tr></thead>
+              <tbody id="reports-operator-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="section-head" style="margin-top:24px;"><h3>Daily Trend</h3></div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table class="tx-table" id="reports-daily-table">
+              <thead><tr><th>Date</th><th class="num">Transactions</th><th class="num">Amount</th><th class="num">Commission</th></tr></thead>
+              <tbody id="reports-daily-tbody"></tbody>
+            </table>
+          </div>
+          <div id="reports-empty" style="padding:10px;"></div>
         </div>
       </div>
 
@@ -921,6 +967,9 @@ let state = {
     dateRange: "this_month", dateFrom: null, dateTo: null, operatorCode: "",
     page: 1, pageSize: 25, totalPages: 1, entries: [],
   },
+  reports: {
+    dateRange: "this_month", dateFrom: null, dateTo: null, rows: [],
+  },
 };
 
 /* =========================================================================
@@ -997,6 +1046,50 @@ async function apiGetCommissionHistory(params) {
   const data = await res.json();
   return { httpStatus: res.status, body: data };
 }
+
+/** Download an Excel export endpoint as a file (blob → object URL → <a> click). */
+async function downloadExcelExport(url, buttonEl, fallbackName) {
+  if (buttonEl) {
+    buttonEl.disabled = true;
+    buttonEl.dataset._label = buttonEl.innerHTML;
+    buttonEl.innerHTML = '<i class="ti ti-loader-2"></i> Downloading…';
+  }
+  try {
+    const res = await fetch(url, { headers: authHeaders() });
+    if (res.status === 401) { handleAuthFailure(); return; }
+    if (!res.ok) {
+      let msg = "Download failed";
+      try {
+        const err = await res.json();
+        msg = (err && (err.message || err.error)) || msg;
+      } catch (_e) { /* binary error body */ }
+      showToast(msg);
+      return;
+    }
+    const blob = await res.blob();
+    let filename = fallbackName || "quickpay_export.xlsx";
+    const cd = res.headers.get("Content-Disposition") || "";
+    const m = /filename\*?=(?:UTF-8''|")?([^\";]+)/i.exec(cd);
+    if (m) filename = decodeURIComponent(m[1].replace(/"/g, "").trim());
+    const objUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = objUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(objUrl);
+    showToast("Excel downloaded");
+  } catch (e) {
+    showToast("Download failed — " + errMsg(e));
+  } finally {
+    if (buttonEl) {
+      buttonEl.disabled = false;
+      if (buttonEl.dataset._label) buttonEl.innerHTML = buttonEl.dataset._label;
+    }
+  }
+}
+
 async function apiStatusCheck(rechargeId) {
   const res = await fetch(API_BASE + "/api/status_check", {
     method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() },
@@ -1190,7 +1283,7 @@ function goTo(screen) {
   const target = document.getElementById("screen-" + screen);
   if (target) target.classList.remove("hidden");
 
-  const titles = { dashboard: "Dashboard", recharge: "Mobile Recharge", transactions: "Transactions", ledger: "Ledger", commission: "Commission Report", wallet: "Wallet" };
+  const titles = { dashboard: "Dashboard", recharge: "Mobile Recharge", transactions: "Transactions", ledger: "Ledger", commission: "Commission Report", reports: "Business Summary", wallet: "Wallet" };
   document.getElementById("page-title").textContent = titles[screen] || "QuickPay";
 
   document.querySelectorAll("[data-nav]").forEach((el) => el.classList.toggle("active", el.getAttribute("data-nav") === screen));
@@ -1201,6 +1294,7 @@ function goTo(screen) {
     else if (screen === "transactions") loadTransactionsScreen();
     else if (screen === "ledger") loadLedgerScreen();
     else if (screen === "commission") loadCommissionScreen();
+    else if (screen === "reports") loadReportsScreen();
     else if (screen === "wallet") loadWalletScreen();
   } catch (e) {
     showToast("Something went wrong loading this screen - " + errMsg(e));
@@ -1985,6 +2079,26 @@ function renderLedgerPagination(p) {
   document.getElementById("ledger-next-btn").disabled = p.page >= p.total_pages;
 }
 
+async function downloadLedgerExcel() {
+  if (!state.ledger.dateFrom) setLedgerDateRange(state.ledger.dateRange || "today", true);
+  const url = new URL(API_BASE + "/api/ledger/export");
+  const params = {
+    wallet_type: state.ledger.walletType,
+    date_from: state.ledger.dateFrom,
+    date_to: state.ledger.dateTo,
+    type: state.ledger.type,
+    search: state.ledger.search,
+  };
+  Object.keys(params).forEach((k) => {
+    if (params[k] !== null && params[k] !== undefined && params[k] !== "") url.searchParams.set(k, params[k]);
+  });
+  await downloadExcelExport(
+    url.toString(),
+    document.getElementById("ledger-export-btn"),
+    "quickpay_ledger.xlsx"
+  );
+}
+
 /* =========================================================================
    COMMISSION REPORT (Phase 3A Part D)
    ========================================================================= */
@@ -2140,6 +2254,175 @@ function renderCommissionOperatorSummary(entries) {
       + '<td class="num"><span class="amt amt-credit">+' + formatMoney(g.commission) + '</span></td>'
       + '<td class="num" style="color:var(--text-muted);">' + avgRate.toFixed(1) + '%</td></tr>';
   }).join("");
+}
+
+async function downloadCommissionExcel() {
+  if (!state.commission.dateFrom) setCommissionDateRange(state.commission.dateRange || "this_month", true);
+  const url = new URL(API_BASE + "/api/commission/export");
+  const params = {
+    date_from: state.commission.dateFrom,
+    date_to: state.commission.dateTo,
+    operator_code: state.commission.operatorCode,
+  };
+  Object.keys(params).forEach((k) => {
+    if (params[k] !== null && params[k] !== undefined && params[k] !== "") url.searchParams.set(k, params[k]);
+  });
+  await downloadExcelExport(
+    url.toString(),
+    document.getElementById("commission-export-btn"),
+    "quickpay_commission.xlsx"
+  );
+}
+
+/* =========================================================================
+   REPORTS — Business Summary (Phase 3B)
+   Client-side compute from /api/recharge/history (paginated fetch).
+   ========================================================================= */
+function loadReportsScreen() {
+  document.getElementById("reports-date-pills").innerHTML =
+    [["this_week", "This Week"], ["this_month", "This Month"], ["last_month", "Last Month"], ["custom", "Custom"]]
+      .map(([k, l]) => '<div class="date-pill' + (state.reports.dateRange === k ? " active" : "") + '" onclick="setReportsDateRange(\'' + k + '\')">' + l + "</div>").join("");
+  if (!state.reports.dateFrom) setReportsDateRange("this_month", true);
+  else fetchAndRenderReports();
+}
+function setReportsDateRange(range, skipFetch) {
+  state.reports.dateRange = range;
+  const today = new Date();
+  if (range === "this_week") {
+    const f = new Date(today);
+    f.setDate(f.getDate() - today.getDay());
+    state.reports.dateFrom = toISODate(f);
+    state.reports.dateTo = toISODate(today);
+  } else if (range === "this_month") {
+    state.reports.dateFrom = toISODate(new Date(today.getFullYear(), today.getMonth(), 1));
+    state.reports.dateTo = toISODate(today);
+  } else if (range === "last_month") {
+    const f = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const l = new Date(today.getFullYear(), today.getMonth(), 0);
+    state.reports.dateFrom = toISODate(f);
+    state.reports.dateTo = toISODate(l);
+  }
+  document.getElementById("reports-custom-dates").classList.toggle("show", range === "custom");
+  if (range === "custom") {
+    document.getElementById("reports-date-from").value = state.reports.dateFrom || "";
+    document.getElementById("reports-date-to").value = state.reports.dateTo || "";
+  }
+  loadReportsScreen();
+  if (!skipFetch) fetchAndRenderReports();
+}
+function onReportsCustomDateChange() {
+  state.reports.dateFrom = document.getElementById("reports-date-from").value || null;
+  state.reports.dateTo = document.getElementById("reports-date-to").value || null;
+  fetchAndRenderReports();
+}
+
+async function fetchAllRechargeHistoryForReports() {
+  const all = [];
+  let offset = 0;
+  const limit = 100;
+  const maxPages = 20; // hard cap 2000 rows client-side
+  for (let page = 0; page < maxPages; page++) {
+    const { httpStatus, body } = await apiGetHistory(limit, offset, "all");
+    if (httpStatus === 401) { handleAuthFailure(); return null; }
+    if (!body || body.status !== "success") throw new Error((body && body.message) || "history failed");
+    const batch = body.recharges || [];
+    all.push.apply(all, batch);
+    if (batch.length < limit) break;
+    offset += limit;
+  }
+  return all;
+}
+
+function filterReportsRows(rows) {
+  const from = state.reports.dateFrom ? new Date(state.reports.dateFrom + "T00:00:00") : null;
+  const to = state.reports.dateTo ? new Date(state.reports.dateTo + "T23:59:59") : null;
+  return rows.filter((r) => {
+    const d = parseApiDate(r.date);
+    if (!d) return false;
+    if (from && d < from) return false;
+    if (to && d > to) return false;
+    return true;
+  });
+}
+
+async function fetchAndRenderReports() {
+  const emptyEl = document.getElementById("reports-empty");
+  const opBody = document.getElementById("reports-operator-tbody");
+  const dayBody = document.getElementById("reports-daily-tbody");
+  emptyEl.innerHTML = "";
+  opBody.innerHTML = '<tr><td colspan="4"><div class="skel skel-line"></div></td></tr>';
+  dayBody.innerHTML = '<tr><td colspan="4"><div class="skel skel-line"></div></td></tr>';
+  ["total", "success", "failed"].forEach((k) => { document.getElementById("reports-kpi-" + k).textContent = "…"; });
+  document.getElementById("reports-kpi-amount").textContent = "…";
+
+  try {
+    const all = await fetchAllRechargeHistoryForReports();
+    if (all === null) return;
+    const rows = filterReportsRows(all);
+    state.reports.rows = rows;
+
+    const success = rows.filter((r) => r.state === "success");
+    const failed = rows.filter((r) => r.state === "failed");
+    const amount = success.reduce((acc, r) => acc + (Number(r.amount) || 0), 0);
+
+    document.getElementById("reports-kpi-total").textContent = String(rows.length);
+    document.getElementById("reports-kpi-success").textContent = String(success.length);
+    document.getElementById("reports-kpi-failed").textContent = String(failed.length);
+    document.getElementById("reports-kpi-amount").textContent = formatMoney(amount);
+
+    // Operator breakdown
+    const byOp = new Map();
+    rows.forEach((r) => {
+      const key = r.operator_code || "unknown";
+      if (!byOp.has(key)) byOp.set(key, { name: r.operator_name || key, total: 0, success: 0, amount: 0 });
+      const g = byOp.get(key);
+      g.total += 1;
+      if (r.state === "success") {
+        g.success += 1;
+        g.amount += Number(r.amount) || 0;
+      }
+    });
+    if (!byOp.size) {
+      opBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px;">No data</td></tr>';
+    } else {
+      opBody.innerHTML = [...byOp.values()].map((g) => {
+        const rate = g.total ? ((g.success / g.total) * 100).toFixed(1) + "%" : "0%";
+        return '<tr><td>' + escapeHtml(g.name) + '</td><td class="num">' + g.total + '</td>'
+          + '<td class="num">' + formatMoney(g.amount) + '</td><td class="num">' + rate + '</td></tr>';
+      }).join("");
+    }
+
+    // Daily trend
+    const byDay = new Map();
+    rows.forEach((r) => {
+      const d = parseApiDate(r.date);
+      if (!d) return;
+      const key = toISODate(d);
+      if (!byDay.has(key)) byDay.set(key, { txns: 0, amount: 0, commission: 0 });
+      const g = byDay.get(key);
+      g.txns += 1;
+      if (r.state === "success") g.amount += Number(r.amount) || 0;
+      g.commission += Number(r.commission_amount) || 0;
+    });
+    const days = [...byDay.keys()].sort().reverse();
+    if (!days.length) {
+      dayBody.innerHTML = "";
+      emptyEl.innerHTML = '<div class="state-block"><i class="ti ti-chart-bar"></i><div class="state-title">No recharges in this period</div></div>';
+    } else {
+      emptyEl.innerHTML = "";
+      dayBody.innerHTML = days.map((key) => {
+        const g = byDay.get(key);
+        const label = new Date(key + "T00:00:00").toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+        return '<tr><td>' + label + '</td><td class="num">' + g.txns + '</td>'
+          + '<td class="num">' + formatMoney(g.amount) + '</td>'
+          + '<td class="num"><span class="amt amt-credit">+' + formatMoney(g.commission) + '</span></td></tr>';
+      }).join("");
+    }
+  } catch (e) {
+    opBody.innerHTML = "";
+    dayBody.innerHTML = "";
+    emptyEl.innerHTML = '<div class="state-block error"><i class="ti ti-wifi-off"></i><div class="state-title">Could not load report</div>' + errMsg(e) + retryBtn("fetchAndRenderReports()") + "</div>";
+  }
 }
 
 /* =========================================================================
