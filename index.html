@@ -1366,10 +1366,23 @@ async function loadServices() {
   renderQuickActions();
 }
 
+function openService(code) {
+  const s = (state.services || []).find((x) => x.code === code);
+  if (!s || !s.available) return;
+  if (s.route_available === false) {
+    showToast(
+      (s.name || "Service")
+        + " temporarily unavailable. Our team is setting up providers. Please try again later."
+    );
+    return;
+  }
+  goTo("recharge", { serviceType: code });
+}
+
 function renderServiceNav() {
   const sub = document.getElementById("sb-recharge-sub");
   if (!sub) return;
-  const list = (state.services || []).filter((s) => s.available || s.operator_count > 0);
+  const list = (state.services || []).filter((s) => s.available);
   if (!list.length) {
     // Fallback until /api/services loads — keep Mobile usable
     sub.innerHTML = '<div class="sb-sub-item" data-nav="recharge" data-service="mobile" onclick="goTo(\'recharge\')"><i class="ti ti-device-mobile"></i><span>Mobile Recharge</span></div>';
@@ -1377,17 +1390,14 @@ function renderServiceNav() {
   }
   sub.innerHTML = list.map((s) => {
     const icon = "ti ti-" + (s.icon || "apps");
-    if (s.available) {
-      return '<div class="sb-sub-item" data-nav="recharge" data-service="' + escapeHtml(s.code) + '" onclick="goTo(\'recharge\', {serviceType: \'' + escapeHtml(s.code) + '\'})"><i class="' + icon + '"></i><span>' + escapeHtml(s.name) + "</span></div>";
-    }
-    return '<div class="sb-sub-item disabled"><i class="' + icon + '"></i><span>' + escapeHtml(s.name) + '</span><span class="soon">Soon</span></div>';
+    return '<div class="sb-sub-item" data-nav="recharge" data-service="' + escapeHtml(s.code) + '" onclick="openService(\'' + escapeHtml(s.code) + '\')"><i class="' + icon + '"></i><span>' + escapeHtml(s.name) + "</span></div>";
   }).join("");
 }
 
 function renderQuickActions() {
   const grid = document.getElementById("dash-qa-grid");
   if (!grid) return;
-  const list = (state.services || []).filter((s) => s.available || s.operator_count > 0);
+  const list = (state.services || []).filter((s) => s.available);
   let html = "";
   if (!list.length) {
     html += '<div class="qa-tile" onclick="goTo(\'recharge\')"><i class="ti ti-device-mobile"></i>Mobile Recharge</div>';
@@ -1395,10 +1405,7 @@ function renderQuickActions() {
     html += list.map((s) => {
       const icon = "ti ti-" + (s.icon || "apps");
       const label = escapeHtml(s.name);
-      if (s.available) {
-        return '<div class="qa-tile" onclick="goTo(\'recharge\', {serviceType: \'' + escapeHtml(s.code) + '\'})"><i class="' + icon + '"></i>' + label + "</div>";
-      }
-      return '<div class="qa-tile disabled"><i class="' + icon + '"></i>' + label + "</div>";
+      return '<div class="qa-tile" onclick="openService(\'' + escapeHtml(s.code) + '\')"><i class="' + icon + '"></i>' + label + "</div>";
     }).join("");
   }
   html += '<div class="qa-tile" onclick="openFundRequest()"><i class="ti ti-cash"></i>Fund Request</div>';
