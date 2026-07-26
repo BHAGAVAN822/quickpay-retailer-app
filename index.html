@@ -513,10 +513,7 @@ button{cursor:pointer;}
 
       <div class="sb-item" id="sb-recharge-toggle" onclick="toggleRechargeMenu()"><i class="ti ti-bolt"></i><span>Recharge</span><i class="ti ti-chevron-down chev"></i></div>
       <div class="sb-sub" id="sb-recharge-sub">
-        <div class="sb-sub-item" data-nav="recharge" onclick="goTo('recharge')"><i class="ti ti-device-mobile"></i><span>Mobile Recharge</span></div>
-        <div class="sb-sub-item disabled"><i class="ti ti-antenna"></i><span>DTH Recharge</span><span class="soon">Soon</span></div>
-        <div class="sb-sub-item disabled"><i class="ti ti-bulb"></i><span>Electricity / BBPS</span><span class="soon">Soon</span></div>
-        <div class="sb-sub-item disabled"><i class="ti ti-car"></i><span>FASTag</span><span class="soon">Soon</span></div>
+        <!-- filled by renderServiceNav() from /api/services -->
       </div>
 
       <div class="sb-item" data-nav="transactions" onclick="goTo('transactions')"><i class="ti ti-list-details"></i><span>Transactions</span></div>
@@ -602,15 +599,8 @@ button{cursor:pointer;}
         </div>
 
         <div class="section-head"><h3>Quick Actions</h3></div>
-        <div class="qa-grid">
-          <div class="qa-tile" onclick="goTo('recharge')"><i class="ti ti-device-mobile"></i>Mobile Recharge</div>
-          <div class="qa-tile disabled"><i class="ti ti-antenna"></i>DTH</div>
-          <div class="qa-tile disabled"><i class="ti ti-bulb"></i>Electricity</div>
-          <div class="qa-tile disabled"><i class="ti ti-car"></i>FASTag</div>
-          <div class="qa-tile" onclick="openFundRequest()"><i class="ti ti-cash"></i>Fund Request</div>
-          <div class="qa-tile" onclick="goTo('ledger')"><i class="ti ti-receipt"></i>View Ledger</div>
-          <div class="qa-tile" onclick="goTo('transactions')"><i class="ti ti-list-details"></i>Transactions</div>
-          <div class="qa-tile disabled"><i class="ti ti-dots"></i>More</div>
+        <div class="qa-grid" id="dash-qa-grid">
+          <!-- service tiles from /api/services + fixed actions; rendered by renderQuickActions() -->
         </div>
 
         <div class="section-head"><h3>Recent Transactions</h3><a onclick="goTo('transactions')">View all transactions →</a></div>
@@ -950,8 +940,9 @@ let state = {
   mobile: localStorage.getItem("qp_mobile") || null,
   retailerName: null,
   operators: [],
+  services: [],
   wallets: { main: 0, commission: 0, dmr: 0, total: 0 },
-  rc: { mobile: "", operator: null, amount: 0 },
+  rc: { mobile: "", operator: null, amount: 0, serviceType: "mobile" },
   tx: { status: "all", dateRange: "all", dateFrom: null, dateTo: null, search: "", all: [] },
   // Shared raw /api/recharge/history cache, filled by whichever screen
   // (Dashboard or Transactions) fetches it first - the Recharge screen's
@@ -993,6 +984,11 @@ async function apiGetWalletBalance() {
 }
 async function apiGetOperators() {
   const res = await fetch(API_BASE + "/api/operators", { headers: authHeaders() });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+async function apiGetServices() {
+  const res = await fetch(API_BASE + "/api/services", { headers: authHeaders() });
   const data = await res.json();
   return { httpStatus: res.status, body: data };
 }
@@ -1247,6 +1243,7 @@ async function doLogin() {
       localStorage.setItem("qp_partner_id", result.partner_id);
       localStorage.setItem("qp_role", result.role || "");
       localStorage.setItem("qp_mobile", mobile);
+      await loadServices();
       goTo("dashboard");
     } else {
       errEl.textContent = (result && (result.message || result.error)) || "Login failed. Please check your credentials.";
@@ -1269,7 +1266,8 @@ function doLogout() {
 /* =========================================================================
    NAVIGATION
    ========================================================================= */
-function goTo(screen) {
+function goTo(screen, opts) {
+  opts = opts || {};
   document.getElementById("profile-menu").classList.remove("open");
   if (screen === "login") {
     document.getElementById("app-shell").classList.remove("active");
@@ -1283,10 +1281,27 @@ function goTo(screen) {
   const target = document.getElementById("screen-" + screen);
   if (target) target.classList.remove("hidden");
 
-  const titles = { dashboard: "Dashboard", recharge: "Mobile Recharge", transactions: "Transactions", ledger: "Ledger", commission: "Commission Report", reports: "Business Summary", wallet: "Wallet" };
+  if (screen === "recharge") {
+    state.rc.serviceType = opts.serviceType || "mobile";
+  }
+
+  const titles = {
+    dashboard: "Dashboard",
+    recharge: state.rc.serviceType === "mobile" ? "Mobile Recharge" : ((state.services.find((s) => s.code === state.rc.serviceType) || {}).name || "Recharge"),
+    transactions: "Transactions", ledger: "Ledger", commission: "Commission Report",
+    reports: "Business Summary", wallet: "Wallet",
+  };
   document.getElementById("page-title").textContent = titles[screen] || "QuickPay";
 
-  document.querySelectorAll("[data-nav]").forEach((el) => el.classList.toggle("active", el.getAttribute("data-nav") === screen));
+  document.querySelectorAll("[data-nav]").forEach((el) => {
+    const nav = el.getAttribute("data-nav");
+    const svc = el.getAttribute("data-service");
+    let active = nav === screen;
+    if (screen === "recharge" && nav === "recharge") {
+      active = (svc || "mobile") === (state.rc.serviceType || "mobile");
+    }
+    el.classList.toggle("active", active);
+  });
 
   try {
     if (screen === "dashboard") loadDashboard();
@@ -1334,6 +1349,65 @@ async function refreshWalletBalance() {
 /* =========================================================================
    DASHBOARD
    ========================================================================= */
+async function loadServices() {
+  if (!state.token) return;
+  try {
+    const { httpStatus, body } = await apiGetServices();
+    if (httpStatus === 401) return handleAuthFailure();
+    if (Array.isArray(body)) {
+      state.services = body.slice().sort((a, b) => (a.display_order || 99) - (b.display_order || 99));
+    } else {
+      state.services = [];
+    }
+  } catch (e) {
+    state.services = state.services || [];
+  }
+  renderServiceNav();
+  renderQuickActions();
+}
+
+function renderServiceNav() {
+  const sub = document.getElementById("sb-recharge-sub");
+  if (!sub) return;
+  const list = (state.services || []).filter((s) => s.available || s.operator_count > 0);
+  if (!list.length) {
+    // Fallback until /api/services loads — keep Mobile usable
+    sub.innerHTML = '<div class="sb-sub-item" data-nav="recharge" data-service="mobile" onclick="goTo(\'recharge\')"><i class="ti ti-device-mobile"></i><span>Mobile Recharge</span></div>';
+    return;
+  }
+  sub.innerHTML = list.map((s) => {
+    const icon = "ti ti-" + (s.icon || "apps");
+    if (s.available) {
+      return '<div class="sb-sub-item" data-nav="recharge" data-service="' + escapeHtml(s.code) + '" onclick="goTo(\'recharge\', {serviceType: \'' + escapeHtml(s.code) + '\'})"><i class="' + icon + '"></i><span>' + escapeHtml(s.name) + "</span></div>";
+    }
+    return '<div class="sb-sub-item disabled"><i class="' + icon + '"></i><span>' + escapeHtml(s.name) + '</span><span class="soon">Soon</span></div>';
+  }).join("");
+}
+
+function renderQuickActions() {
+  const grid = document.getElementById("dash-qa-grid");
+  if (!grid) return;
+  const list = (state.services || []).filter((s) => s.available || s.operator_count > 0);
+  let html = "";
+  if (!list.length) {
+    html += '<div class="qa-tile" onclick="goTo(\'recharge\')"><i class="ti ti-device-mobile"></i>Mobile Recharge</div>';
+  } else {
+    html += list.map((s) => {
+      const icon = "ti ti-" + (s.icon || "apps");
+      const label = escapeHtml(s.name);
+      if (s.available) {
+        return '<div class="qa-tile" onclick="goTo(\'recharge\', {serviceType: \'' + escapeHtml(s.code) + '\'})"><i class="' + icon + '"></i>' + label + "</div>";
+      }
+      return '<div class="qa-tile disabled"><i class="' + icon + '"></i>' + label + "</div>";
+    }).join("");
+  }
+  html += '<div class="qa-tile" onclick="openFundRequest()"><i class="ti ti-cash"></i>Fund Request</div>';
+  html += '<div class="qa-tile" onclick="goTo(\'ledger\')"><i class="ti ti-receipt"></i>View Ledger</div>';
+  html += '<div class="qa-tile" onclick="goTo(\'transactions\')"><i class="ti ti-list-details"></i>Transactions</div>';
+  html += '<div class="qa-tile disabled"><i class="ti ti-dots"></i>More</div>';
+  grid.innerHTML = html;
+}
+
 async function loadDashboard() {
   const now = new Date();
   const hr = now.getHours();
@@ -1345,6 +1419,10 @@ async function loadDashboard() {
   document.getElementById("kpi-today").textContent = "…";
   document.getElementById("dash-recent-wrap").innerHTML =
     '<div style="padding:16px;">' + Array(3).fill('<div class="skel skel-line" style="width:90%;"></div>').join("") + '</div>';
+
+  // Ensure service nav/tiles are populated (and refresh after login)
+  if (!state.services.length) await loadServices();
+  else { renderServiceNav(); renderQuickActions(); }
 
   try {
     const balP = apiGetWalletBalance();
@@ -2571,8 +2649,11 @@ async function submitFundRequest() {
    BOOT
    ========================================================================= */
 (function boot() {
-  if (state.token) goTo("dashboard");
-  else goTo("login");
+  if (state.token) {
+    loadServices().finally(function () { goTo("dashboard"); });
+  } else {
+    goTo("login");
+  }
 })();
 </script>
 </body>
