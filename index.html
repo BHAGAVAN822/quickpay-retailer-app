@@ -888,7 +888,7 @@ button{cursor:pointer;}
             <div class="big" style="font-weight:700;margin-top:8px;">Waiting for payment…</div>
             <div class="upi-amt" id="upi-wait-amount">₹0</div>
             <div class="upi-ref" id="upi-wait-ref"></div>
-            <div class="upi-msg">Complete payment in your UPI app. We auto-check every 5 seconds (up to 5 minutes).</div>
+            <div class="upi-msg">Complete payment in your UPI app. We auto-check every 5 seconds (up to 3 minutes).</div>
             <div class="upi-msg" id="upi-poll-hint" style="font-size:12.5px;color:var(--text-muted);"></div>
             <button class="btn primary block" id="upi-check-btn" onclick="checkUpiStatus(true)">✓ I've Paid — Check Status</button>
             <button class="btn block" style="margin-top:8px;" onclick="cancelUpiPay()">✕ Cancel</button>
@@ -999,6 +999,8 @@ let state = {
   },
   fundHist: { status: "all", page: 1, pageSize: 20, totalPages: 1 },
   upi: { collectId: null, orderId: null, amount: 0, pollTimer: null, polls: 0 },
+  rateLimitUntil: 0,
+  rateLimitToastAt: 0,
   commission: {
     dateRange: "this_month", dateFrom: null, dateTo: null, operatorCode: "",
     page: 1, pageSize: 25, totalPages: 1, entries: [],
@@ -1026,6 +1028,20 @@ async function apiGetWalletBalance() {
   const res = await fetch(API_BASE + "/api/wallet/balance", { headers: authHeaders() });
   const data = await res.json();
   return { httpStatus: res.status, body: data };
+}
+function isRateLimited(httpStatus, body) {
+  return httpStatus === 429 || (body && body.error === "rate_limit_exceeded");
+}
+function handleRateLimit(body) {
+  const retryAfter = Math.max(30, Number((body && body.retry_after) || 30));
+  state.rateLimitUntil = Date.now() + retryAfter * 1000;
+  if (Date.now() - (state.rateLimitToastAt || 0) > 10000) {
+    state.rateLimitToastAt = Date.now();
+    showToast("Too many requests. Please wait a moment.");
+  }
+}
+function canCallApi() {
+  return Date.now() >= (state.rateLimitUntil || 0);
 }
 async function apiGetOperators() {
   const res = await fetch(API_BASE + "/api/operators", { headers: authHeaders() });
@@ -1394,8 +1410,15 @@ function renderIdentityAndBalance() {
 }
 
 async function refreshWalletBalance() {
+  if (!canCallApi()) return state.wallets;
   const { httpStatus, body } = await apiGetWalletBalance();
   if (httpStatus === 401) { handleAuthFailure(); throw new Error("auth"); }
+  if (isRateLimited(httpStatus, body)) {
+    handleRateLimit(body);
+    // Keep last known balance — never overwrite with ₹0 on 429.
+    renderIdentityAndBalance();
+    return body;
+  }
   if (body && body.status === "success") {
     state.wallets = { main: body.main_balance, commission: body.commission_balance, dmr: body.dmr_balance, total: body.total_balance };
     renderIdentityAndBalance();
@@ -1409,8 +1432,10 @@ async function refreshWalletBalance() {
 async function loadServices() {
   if (!state.token) return;
   try {
+    if (!canCallApi()) return;
     const { httpStatus, body } = await apiGetServices();
     if (httpStatus === 401) return handleAuthFailure();
+    if (isRateLimited(httpStatus, body)) { handleRateLimit(body); return; }
     if (Array.isArray(body)) {
       state.services = body.slice().sort((a, b) => (a.display_order || 99) - (b.display_order || 99));
     } else {
@@ -1478,8 +1503,10 @@ async function loadDashboard() {
   const greetWord = hr < 12 ? "Good morning" : hr < 17 ? "Good afternoon" : "Good evening";
   document.getElementById("dash-date").textContent = now.toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
 
-  document.getElementById("kpi-main").textContent = "…";
-  document.getElementById("kpi-commission").textContent = "…";
+  // Prefer last known balance while loading — never flash ₹0 on rate-limit.
+  const hasKnownBal = Number(state.wallets.main) > 0 || Number(state.wallets.commission) > 0;
+  document.getElementById("kpi-main").textContent = hasKnownBal ? formatMoney(state.wallets.main) : "…";
+  document.getElementById("kpi-commission").textContent = hasKnownBal ? formatMoney(state.wallets.commission) : "…";
   document.getElementById("kpi-today").textContent = "…";
   document.getElementById("dash-recent-wrap").innerHTML =
     '<div style="padding:16px;">' + Array(3).fill('<div class="skel skel-line" style="width:90%;"></div>').join("") + '</div>';
@@ -1489,6 +1516,14 @@ async function loadDashboard() {
   else { renderServiceNav(); renderQuickActions(); }
 
   try {
+    if (!canCallApi()) {
+      handleRateLimit({ retry_after: Math.ceil((state.rateLimitUntil - Date.now()) / 1000) });
+      document.getElementById("dash-greeting").textContent = greetWord + (state.retailerName ? ", " + state.retailerName : "");
+      document.getElementById("kpi-main").textContent = formatMoney(state.wallets.main);
+      document.getElementById("kpi-commission").textContent = formatMoney(state.wallets.commission);
+      document.getElementById("kpi-today").textContent = formatMoney(0);
+      return;
+    }
     const balP = apiGetWalletBalance();
     const ledgerP = apiGetLedger({ wallet_type: "main", page_size: 1 }); // real, existing endpoint - also gives us partner_name
     const histP = apiGetHistory(100, 0, "all");
@@ -1496,6 +1531,10 @@ async function loadDashboard() {
     const [balRes, ledgerRes, histRes] = await Promise.all([balP, ledgerP, histP]);
 
     if (balRes.httpStatus === 401 || ledgerRes.httpStatus === 401 || histRes.httpStatus === 401) return handleAuthFailure();
+
+    if (isRateLimited(balRes.httpStatus, balRes.body) || isRateLimited(ledgerRes.httpStatus, ledgerRes.body) || isRateLimited(histRes.httpStatus, histRes.body)) {
+      handleRateLimit(balRes.body || ledgerRes.body || histRes.body);
+    }
 
     if (balRes.body && balRes.body.status === "success") {
       state.wallets = { main: balRes.body.main_balance, commission: balRes.body.commission_balance, dmr: balRes.body.dmr_balance, total: balRes.body.total_balance };
@@ -2789,8 +2828,8 @@ function startUpiPolling() {
   if (state.upi.pollTimer) clearInterval(state.upi.pollTimer);
   state.upi.polls = 0;
   const hint = document.getElementById("upi-poll-hint");
-  if (hint) hint.textContent = "Auto-checking… 0/60";
-  // Immediate first check, then every 5s for up to 5 minutes (60 attempts).
+  if (hint) hint.textContent = "Auto-checking… 0/36";
+  // Immediate first check, then every 5s for up to 3 minutes (36 attempts).
   checkUpiStatus(false);
   state.upi.pollTimer = setInterval(function () {
     checkUpiStatus(false);
@@ -2801,7 +2840,7 @@ function showUpiTimeout() {
   showUpiResult(
     '<div style="font-size:28px;">⏳</div>'
     + '<div class="big">Payment not confirmed yet</div>'
-    + '<div class="sub">Auto-check timed out after 5 minutes. If you already paid, tap Check manually — credit can still arrive via webhook or backend sync.</div>'
+    + '<div class="sub">Auto-check timed out after 3 minutes. If you already paid, tap Check manually — credit can still arrive via webhook or backend sync.</div>'
     + '<button class="btn primary block" id="upi-check-btn" onclick="checkUpiStatus(true)">Check manually</button>'
     + '<button class="btn block" style="margin-top:8px;" onclick="cancelUpiPay()">Cancel</button>'
   );
@@ -2811,17 +2850,26 @@ async function checkUpiStatus(manual) {
   if (!manual) {
     state.upi.polls += 1;
     const hint = document.getElementById("upi-poll-hint");
-    if (hint) hint.textContent = "Auto-checking… " + state.upi.polls + "/60";
-    if (state.upi.polls > 60) {
+    if (hint) hint.textContent = "Auto-checking… " + state.upi.polls + "/36";
+    if (state.upi.polls > 36) {
       showUpiTimeout();
       return;
     }
+  }
+  if (!canCallApi()) {
+    if (manual) showToast("Too many requests. Please wait a moment.");
+    return;
   }
   const checkBtn = document.getElementById("upi-check-btn");
   if (manual && checkBtn) { checkBtn.disabled = true; checkBtn.textContent = "Checking…"; }
   try {
     const { httpStatus, body } = await apiGetUpiStatus(state.upi.collectId);
     if (httpStatus === 401) return handleAuthFailure();
+    if (isRateLimited(httpStatus, body)) {
+      handleRateLimit(body);
+      if (manual) showToast("Too many requests. Please wait a moment.");
+      return;
+    }
     if (httpStatus === 403) {
       showUpiResult('<div class="big">❌ Access denied</div><div class="sub">You cannot check this payment.</div><button class="btn primary block" onclick="cancelUpiPay()">Done</button>');
       return;
@@ -2876,6 +2924,15 @@ async function finishUpiSuccess() {
    BOOT
    ========================================================================= */
 (function boot() {
+  // Refresh balance on tab focus / visibility only — no background polling.
+  function onAppFocus() {
+    if (!state.token) return;
+    if (document.visibilityState && document.visibilityState !== "visible") return;
+    refreshWalletBalance().catch(function () {});
+  }
+  document.addEventListener("visibilitychange", onAppFocus);
+  window.addEventListener("focus", onAppFocus);
+
   if (state.token) {
     loadServices().finally(function () { goTo("dashboard"); });
   } else {
