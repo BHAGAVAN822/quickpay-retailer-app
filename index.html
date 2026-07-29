@@ -411,10 +411,12 @@ button{cursor:pointer;}
 .upi-form.show{display:block;}
 .upi-quick{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 14px;}
 .upi-quick .btn{flex:1;min-width:72px;}
-.upi-waiting{text-align:center;padding:8px 0;}
-.upi-waiting .upi-amt{font-size:28px;font-weight:700;margin:8px 0;}
-.upi-waiting .upi-ref{font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;word-break:break-all;}
-.upi-waiting .upi-msg{font-size:14px;color:var(--text-secondary);margin-bottom:16px;line-height:1.45;}
+.upi-waiting,.upi-redirect{text-align:center;padding:8px 0;}
+.upi-waiting .upi-amt,.upi-redirect .upi-amt{font-size:28px;font-weight:700;margin:8px 0;}
+.upi-waiting .upi-ref,.upi-redirect .upi-ref{font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;word-break:break-all;}
+.upi-waiting .upi-msg,.upi-redirect .upi-msg{font-size:14px;color:var(--text-secondary);margin-bottom:16px;line-height:1.45;}
+.upi-redirect .upi-steps{text-align:left;margin:0 auto 18px;max-width:280px;font-size:14px;color:var(--text-primary);line-height:1.7;}
+.upi-redirect .upi-steps li{margin:4px 0;}
 .upi-result{text-align:center;padding:12px 0;}
 .upi-result .big{font-size:18px;font-weight:700;margin:10px 0 6px;}
 .upi-result .sub{font-size:14px;color:var(--text-secondary);margin-bottom:14px;}
@@ -883,9 +885,22 @@ button{cursor:pointer;}
             </div>
             <button class="btn primary block" id="upi-proceed-btn" onclick="proceedUpiPay()">Proceed to Pay</button>
           </div>
+          <div id="upi-step-redirect" class="upi-redirect" style="display:none;">
+            <div style="font-size:28px;">💳</div>
+            <div class="big" style="font-weight:700;margin-top:8px;">Redirecting to payment page…</div>
+            <div class="upi-amt" id="upi-redir-amount">₹0</div>
+            <div class="upi-ref" id="upi-redir-ref"></div>
+            <ul class="upi-steps">
+              <li>✓ Complete UPI payment</li>
+              <li>✓ Return to this page</li>
+              <li>✓ Status updates automatically</li>
+            </ul>
+            <button class="btn primary block" id="upi-open-pay-btn" onclick="openUpiPaymentPage()">Open Payment Page →</button>
+            <button class="btn block" style="margin-top:8px;" onclick="cancelUpiPay()">Cancel</button>
+          </div>
           <div id="upi-step-waiting" class="upi-waiting" style="display:none;">
             <div style="font-size:28px;">⏳</div>
-            <div class="big" style="font-weight:700;margin-top:8px;">Waiting for payment…</div>
+            <div class="big" style="font-weight:700;margin-top:8px;" id="upi-wait-title">Waiting for payment…</div>
             <div class="upi-amt" id="upi-wait-amount">₹0</div>
             <div class="upi-ref" id="upi-wait-ref"></div>
             <div class="upi-msg">Complete payment in your UPI app. We auto-check every 5 seconds (up to 3 minutes).</div>
@@ -998,7 +1013,7 @@ let state = {
     type: "all", search: "", page: 1, pageSize: 25, totalPages: 1, searchDebounce: null,
   },
   fundHist: { status: "all", page: 1, pageSize: 20, totalPages: 1 },
-  upi: { collectId: null, orderId: null, amount: 0, pollTimer: null, polls: 0 },
+  upi: { collectId: null, orderId: null, amount: 0, paymentUrl: null, pollTimer: null, polls: 0 },
   rateLimitUntil: 0,
   rateLimitToastAt: 0,
   commission: {
@@ -1317,7 +1332,7 @@ async function doLogin() {
       localStorage.setItem("qp_role", result.role || "");
       localStorage.setItem("qp_mobile", mobile);
       await loadServices();
-      goTo("dashboard");
+      routeAfterAuth();
     } else {
       errEl.textContent = (result && (result.message || result.error)) || "Login failed. Please check your credentials.";
       errEl.classList.add("show");
@@ -2755,7 +2770,29 @@ async function submitFundRequest() {
 
 /* =========================================================================
    UPI INSTANT TOP-UP
+   // TODO: Contact API Station support for UPI intent deep link
+   // Question: Does API return upi:// intent URL for mobile app selection?
+   // Current workaround: redirect to hosted checkout page (redirect_url only)
    ========================================================================= */
+function isMobileUpiClient() {
+  return /Android|iPhone|iPad/i.test(navigator.userAgent || "");
+}
+function clearUpiSession() {
+  try {
+    sessionStorage.removeItem("upi_collect_id");
+    sessionStorage.removeItem("upi_amount");
+    sessionStorage.removeItem("upi_order_id");
+    sessionStorage.removeItem("upi_payment_url");
+  } catch (e) {}
+}
+function saveUpiSession() {
+  try {
+    if (state.upi.collectId) sessionStorage.setItem("upi_collect_id", String(state.upi.collectId));
+    if (state.upi.amount != null) sessionStorage.setItem("upi_amount", String(state.upi.amount));
+    if (state.upi.orderId) sessionStorage.setItem("upi_order_id", String(state.upi.orderId));
+    if (state.upi.paymentUrl) sessionStorage.setItem("upi_payment_url", String(state.upi.paymentUrl));
+  } catch (e) {}
+}
 function toggleUpiForm() {
   const card = document.getElementById("upi-form-card");
   const opening = !card.classList.contains("show");
@@ -2772,12 +2809,17 @@ function setUpiAmount(n) {
   const btn = document.getElementById("upi-proceed-btn");
   if (btn) btn.textContent = "Proceed to Pay ₹" + Number(n).toLocaleString("en-IN");
 }
-function resetUpiForm() {
-  if (state.upi.pollTimer) { clearInterval(state.upi.pollTimer); state.upi.pollTimer = null; }
-  state.upi = { collectId: null, orderId: null, amount: 0, pollTimer: null, polls: 0 };
-  document.getElementById("upi-step-amount").style.display = "";
+function hideUpiSteps() {
+  document.getElementById("upi-step-amount").style.display = "none";
+  document.getElementById("upi-step-redirect").style.display = "none";
   document.getElementById("upi-step-waiting").style.display = "none";
   document.getElementById("upi-step-result").style.display = "none";
+}
+function resetUpiForm() {
+  if (state.upi.pollTimer) { clearInterval(state.upi.pollTimer); state.upi.pollTimer = null; }
+  state.upi = { collectId: null, orderId: null, amount: 0, paymentUrl: null, pollTimer: null, polls: 0 };
+  hideUpiSteps();
+  document.getElementById("upi-step-amount").style.display = "";
   document.getElementById("upi-step-result").innerHTML = "";
   document.getElementById("upi-amount").value = "";
   document.getElementById("upi-proceed-btn").disabled = false;
@@ -2785,13 +2827,30 @@ function resetUpiForm() {
 }
 function showUpiResult(html) {
   if (state.upi.pollTimer) { clearInterval(state.upi.pollTimer); state.upi.pollTimer = null; }
-  document.getElementById("upi-step-amount").style.display = "none";
-  document.getElementById("upi-step-waiting").style.display = "none";
+  hideUpiSteps();
   const el = document.getElementById("upi-step-result");
   el.style.display = "";
   el.innerHTML = html;
 }
+function showUpiWaiting(title) {
+  hideUpiSteps();
+  document.getElementById("upi-step-waiting").style.display = "";
+  const t = document.getElementById("upi-wait-title");
+  if (t) t.textContent = title || "Waiting for payment…";
+  document.getElementById("upi-wait-amount").textContent = formatMoney(state.upi.amount);
+  document.getElementById("upi-wait-ref").textContent = state.upi.orderId ? ("Ref: " + state.upi.orderId) : "";
+}
+function showUpiRedirectStep() {
+  hideUpiSteps();
+  document.getElementById("upi-step-redirect").style.display = "";
+  document.getElementById("upi-redir-amount").textContent = formatMoney(state.upi.amount);
+  document.getElementById("upi-redir-ref").textContent = state.upi.orderId ? ("Ref: " + state.upi.orderId) : "";
+  const openBtn = document.getElementById("upi-open-pay-btn");
+  if (openBtn) openBtn.disabled = false;
+}
 function cancelUpiPay() {
+  if (state.upi.pollTimer) { clearInterval(state.upi.pollTimer); state.upi.pollTimer = null; }
+  clearUpiSession();
   resetUpiForm();
   document.getElementById("upi-form-card").classList.remove("show");
 }
@@ -2812,17 +2871,35 @@ async function proceedUpiPay() {
     state.upi.collectId = body.collect_id;
     state.upi.orderId = body.order_id;
     state.upi.amount = body.amount || amount;
+    state.upi.paymentUrl = body.payment_url;
     state.upi.polls = 0;
-    document.getElementById("upi-step-amount").style.display = "none";
-    document.getElementById("upi-step-waiting").style.display = "";
-    document.getElementById("upi-wait-amount").textContent = formatMoney(state.upi.amount);
-    document.getElementById("upi-wait-ref").textContent = "Ref: " + (body.order_id || "");
-    window.open(body.payment_url, "_blank");
-    startUpiPolling();
+    saveUpiSession();
+    showUpiRedirectStep();
+    // Mobile: auto-open same-tab after a short beat so instructions are readable.
+    if (isMobileUpiClient()) {
+      setTimeout(function () { openUpiPaymentPage(); }, 600);
+    }
   } catch (e) {
     showToast("Unable to connect. " + errMsg(e));
     btn.disabled = false; btn.textContent = "Proceed to Pay";
   }
+}
+function openUpiPaymentPage() {
+  if (!state.upi.paymentUrl) {
+    showToast("Payment link missing. Please try again.");
+    return;
+  }
+  saveUpiSession();
+  const url = state.upi.paymentUrl;
+  if (isMobileUpiClient()) {
+    // Mobile: same-tab redirect keeps context via sessionStorage on return.
+    window.location.href = url;
+    return;
+  }
+  // Desktop: open hosted checkout in a new tab; keep polling here.
+  window.open(url, "_blank");
+  showUpiWaiting("Waiting for payment…");
+  startUpiPolling();
 }
 function startUpiPolling() {
   if (state.upi.pollTimer) clearInterval(state.upi.pollTimer);
@@ -2844,6 +2921,53 @@ function showUpiTimeout() {
     + '<button class="btn primary block" id="upi-check-btn" onclick="checkUpiStatus(true)">Check manually</button>'
     + '<button class="btn block" style="margin-top:8px;" onclick="cancelUpiPay()">Cancel</button>'
   );
+}
+function resumePendingUpiPayment(opts) {
+  opts = opts || {};
+  let collectId = opts.collectId || null;
+  try {
+    if (!collectId) collectId = sessionStorage.getItem("upi_collect_id");
+  } catch (e) {}
+  if (!collectId) return false;
+  try { sessionStorage.removeItem("upi_collect_id"); } catch (e) {}
+
+  state.upi.collectId = Number(collectId) || collectId;
+  try {
+    const amt = sessionStorage.getItem("upi_amount");
+    const oid = sessionStorage.getItem("upi_order_id");
+    if (amt) state.upi.amount = Number(amt) || state.upi.amount;
+    if (oid) state.upi.orderId = oid;
+  } catch (e) {}
+
+  document.getElementById("upi-form-card").classList.add("show");
+  document.getElementById("fund-form-card").classList.remove("show");
+  const title = opts.fromReturn
+    ? "Checking payment status…"
+    : "Checking payment status…";
+  showUpiWaiting(title);
+  if (opts.hint) showToast(opts.hint);
+  startUpiPolling();
+  return true;
+}
+function checkUpiPaymentStatus(collectId) {
+  return resumePendingUpiPayment({ collectId: collectId, fromReturn: true });
+}
+function readUpiReturnParams() {
+  const params = new URLSearchParams(window.location.search || "");
+  let upiStatus = params.get("upi_status");
+  const path = (window.location.pathname || "").replace(/\/+$/, "") || "/";
+  // Fallback for older backend redirect_urls (/payment/success|failure).
+  if (!upiStatus && /\/payment\/success$/i.test(path)) upiStatus = "success";
+  if (!upiStatus && /\/payment\/failure$/i.test(path)) upiStatus = "failure";
+  return upiStatus;
+}
+function consumeUpiReturnUrl() {
+  const upiStatus = readUpiReturnParams();
+  if (!upiStatus && !(window.location.search || "").includes("upi_")) return null;
+  try {
+    window.history.replaceState({}, "", "/");
+  } catch (e) {}
+  return upiStatus;
 }
 async function checkUpiStatus(manual) {
   if (!state.upi.collectId) return;
@@ -2871,6 +2995,7 @@ async function checkUpiStatus(manual) {
       return;
     }
     if (httpStatus === 403) {
+      clearUpiSession();
       showUpiResult('<div class="big">❌ Access denied</div><div class="sub">You cannot check this payment.</div><button class="btn primary block" onclick="cancelUpiPay()">Done</button>');
       return;
     }
@@ -2880,6 +3005,7 @@ async function checkUpiStatus(manual) {
     }
     const st = (body.status || "").toLowerCase();
     if (st === "paid" || body.wallet_credited) {
+      clearUpiSession();
       const bal = (body.new_balance !== undefined && body.new_balance !== null)
         ? formatMoney(body.new_balance) : formatMoney(state.wallets.main);
       showUpiResult(
@@ -2892,6 +3018,7 @@ async function checkUpiStatus(manual) {
       return;
     }
     if (st === "failed" || st === "expired") {
+      clearUpiSession();
       showUpiResult(
         '<div style="font-size:28px;">❌</div>'
         + '<div class="big">Payment ' + st + ". No amount deducted.</div>"
@@ -2902,8 +3029,7 @@ async function checkUpiStatus(manual) {
     }
     if (manual) {
       showToast("Payment not confirmed yet.");
-      document.getElementById("upi-step-waiting").style.display = "";
-      document.getElementById("upi-step-result").style.display = "none";
+      showUpiWaiting("Waiting for payment…");
     }
   } catch (e) {
     if (manual) showToast("Unable to check status. " + errMsg(e));
@@ -2912,12 +3038,34 @@ async function checkUpiStatus(manual) {
   }
 }
 async function finishUpiSuccess() {
+  clearUpiSession();
   resetUpiForm();
   document.getElementById("upi-form-card").classList.remove("show");
   try {
     await refreshWalletBalance();
     document.getElementById("w-main").textContent = formatMoney(state.wallets.main);
   } catch (e) {}
+}
+
+function routeAfterAuth() {
+  let pendingCollect = null;
+  try { pendingCollect = sessionStorage.getItem("upi_collect_id"); } catch (e) {}
+  const upiReturnStatus = readUpiReturnParams();
+  if (upiReturnStatus || (window.location.search || "").includes("upi_")) {
+    try { window.history.replaceState({}, "", "/"); } catch (e) {}
+  }
+  if (pendingCollect) {
+    goTo("wallet");
+    resumePendingUpiPayment({
+      collectId: pendingCollect,
+      fromReturn: true,
+      hint: upiReturnStatus === "failure"
+        ? "Payment page reported failure — verifying with server…"
+        : null,
+    });
+    return;
+  }
+  goTo("dashboard");
 }
 
 /* =========================================================================
@@ -2929,12 +3077,14 @@ async function finishUpiSuccess() {
     if (!state.token) return;
     if (document.visibilityState && document.visibilityState !== "visible") return;
     refreshWalletBalance().catch(function () {});
+    // If user returned to the tab after paying (desktop new-tab flow), nudge status check.
+    if (state.upi.collectId && state.upi.pollTimer) checkUpiStatus(true).catch(function () {});
   }
   document.addEventListener("visibilitychange", onAppFocus);
   window.addEventListener("focus", onAppFocus);
 
   if (state.token) {
-    loadServices().finally(function () { goTo("dashboard"); });
+    loadServices().finally(routeAfterAuth);
   } else {
     goTo("login");
   }
