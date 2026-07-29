@@ -1,4 +1,13 @@
+[build]
+publish = "."
+
+[[headers]]
+for = "/*"
+[headers.values]
+Cache-Control = "no-cache"
+
+# SPA fallback so ?upi_status= and deep links load index.html
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+from = "/*"
+to = "/index.html"
+status = 200
