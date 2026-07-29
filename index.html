@@ -405,6 +405,19 @@ button{cursor:pointer;}
 .fund-toggle{margin-bottom:16px;}
 .fund-form{max-width:420px;display:none;}
 .fund-form.show{display:block;}
+.wallet-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+.wallet-actions .btn{flex:1;min-width:140px;}
+.upi-form{max-width:420px;display:none;margin-bottom:16px;}
+.upi-form.show{display:block;}
+.upi-quick{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 14px;}
+.upi-quick .btn{flex:1;min-width:72px;}
+.upi-waiting{text-align:center;padding:8px 0;}
+.upi-waiting .upi-amt{font-size:28px;font-weight:700;margin:8px 0;}
+.upi-waiting .upi-ref{font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;word-break:break-all;}
+.upi-waiting .upi-msg{font-size:14px;color:var(--text-secondary);margin-bottom:16px;line-height:1.45;}
+.upi-result{text-align:center;padding:12px 0;}
+.upi-result .big{font-size:18px;font-weight:700;margin:10px 0 6px;}
+.upi-result .sub{font-size:14px;color:var(--text-secondary);margin-bottom:14px;}
 .radio-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;}
 .radio-opt{display:flex;align-items:center;gap:6px;font-size:13px;}
 .fund-hist-empty{padding:30px;text-align:center;color:var(--text-secondary);font-size:13px;}
@@ -835,7 +848,10 @@ button{cursor:pointer;}
             <div class="wc-label">Main Wallet</div>
             <div class="wc-val" id="w-main">₹0.00</div>
             <div class="wc-sub">Available for recharge</div>
-            <button class="btn primary" onclick="toggleFundForm()"><i class="ti ti-plus"></i> Request Fund</button>
+            <div class="wallet-actions">
+              <button class="btn primary" onclick="toggleUpiForm()"><i class="ti ti-bolt"></i> Add Money via UPI</button>
+              <button class="btn" onclick="toggleFundForm()"><i class="ti ti-plus"></i> Request Fund</button>
+            </div>
           </div>
           <div class="card wallet-card">
             <div class="wc-label">Commission Wallet</div>
@@ -849,6 +865,34 @@ button{cursor:pointer;}
             <div class="wc-sub">DMR transactions</div>
             <div class="wc-note">DMR coming soon</div>
           </div>
+        </div>
+
+        <!-- UPI instant top-up (collapsible) -->
+        <div class="card upi-form" id="upi-form-card">
+          <div id="upi-step-amount">
+            <h3 style="margin:0 0 16px;font-size:15px;">Add Money via UPI</h3>
+            <div class="rc-field">
+              <label>Amount</label>
+              <div class="amt-input-wrap"><span class="rupee">₹</span><input type="number" id="upi-amount" placeholder="0" min="100" max="50000" style="height:44px;"></div>
+            </div>
+            <div class="upi-quick">
+              <button type="button" class="btn sm" onclick="setUpiAmount(500)">₹500</button>
+              <button type="button" class="btn sm" onclick="setUpiAmount(1000)">₹1,000</button>
+              <button type="button" class="btn sm" onclick="setUpiAmount(2000)">₹2,000</button>
+              <button type="button" class="btn sm" onclick="setUpiAmount(5000)">₹5,000</button>
+            </div>
+            <button class="btn primary block" id="upi-proceed-btn" onclick="proceedUpiPay()">Proceed to Pay</button>
+          </div>
+          <div id="upi-step-waiting" class="upi-waiting" style="display:none;">
+            <div style="font-size:28px;">⏳</div>
+            <div class="big" style="font-weight:700;margin-top:8px;">Waiting for payment…</div>
+            <div class="upi-amt" id="upi-wait-amount">₹0</div>
+            <div class="upi-ref" id="upi-wait-ref"></div>
+            <div class="upi-msg">Complete payment in your UPI app, then click below.</div>
+            <button class="btn primary block" id="upi-check-btn" onclick="checkUpiStatus(true)">✓ I've Paid — Check Status</button>
+            <button class="btn block" style="margin-top:8px;" onclick="cancelUpiPay()">✕ Cancel</button>
+          </div>
+          <div id="upi-step-result" class="upi-result" style="display:none;"></div>
         </div>
 
         <div class="card fund-form" id="fund-form-card">
@@ -897,7 +941,6 @@ button{cursor:pointer;}
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </div>
@@ -954,6 +997,7 @@ let state = {
     type: "all", search: "", page: 1, pageSize: 25, totalPages: 1, searchDebounce: null,
   },
   fundHist: { status: "all", page: 1, pageSize: 20, totalPages: 1 },
+  upi: { collectId: null, orderId: null, amount: 0, pollTimer: null, polls: 0 },
   commission: {
     dateRange: "this_month", dateFrom: null, dateTo: null, operatorCode: "",
     page: 1, pageSize: 25, totalPages: 1, entries: [],
@@ -1021,6 +1065,18 @@ async function apiPostFundRequest(payload) {
   const res = await fetch(API_BASE + "/api/fund-request", {
     method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() }, body: JSON.stringify(payload),
   });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+async function apiPostUpiInitiate(payload) {
+  const res = await fetch(API_BASE + "/api/upi/initiate", {
+    method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() }, body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+async function apiGetUpiStatus(collectId) {
+  const res = await fetch(API_BASE + "/api/upi/status/" + collectId, { headers: authHeaders() });
   const data = await res.json();
   return { httpStatus: res.status, body: data };
 }
@@ -2611,8 +2667,13 @@ async function fetchAndRenderFundHistory() {
     stateEl.innerHTML = '<div class="state-block error"><i class="ti ti-wifi-off"></i><div class="state-title">Could not load fund requests</div>' + errMsg(e) + retryBtn("fetchAndRenderFundHistory()") + "</div>";
   }
 }
-function toggleFundForm() { document.getElementById("fund-form-card").classList.toggle("show"); }
-function openFundRequest() { goTo("wallet"); setTimeout(() => document.getElementById("fund-form-card").classList.add("show"), 50); }
+function openFundRequest() {
+  goTo("wallet");
+  setTimeout(function () {
+    document.getElementById("upi-form-card").classList.remove("show");
+    document.getElementById("fund-form-card").classList.add("show");
+  }, 50);
+}
 
 async function submitFundRequest() {
   const amount = Number(document.getElementById("fund-amount").value);
@@ -2650,6 +2711,151 @@ async function submitFundRequest() {
   } finally {
     btn.disabled = false; btn.textContent = "Submit Fund Request";
   }
+}
+
+/* =========================================================================
+   UPI INSTANT TOP-UP
+   ========================================================================= */
+function toggleUpiForm() {
+  const card = document.getElementById("upi-form-card");
+  const opening = !card.classList.contains("show");
+  card.classList.toggle("show");
+  document.getElementById("fund-form-card").classList.remove("show");
+  if (opening) resetUpiForm();
+}
+function toggleFundForm() {
+  document.getElementById("fund-form-card").classList.toggle("show");
+  document.getElementById("upi-form-card").classList.remove("show");
+}
+function setUpiAmount(n) {
+  document.getElementById("upi-amount").value = n;
+  const btn = document.getElementById("upi-proceed-btn");
+  if (btn) btn.textContent = "Proceed to Pay ₹" + Number(n).toLocaleString("en-IN");
+}
+function resetUpiForm() {
+  if (state.upi.pollTimer) { clearInterval(state.upi.pollTimer); state.upi.pollTimer = null; }
+  state.upi = { collectId: null, orderId: null, amount: 0, pollTimer: null, polls: 0 };
+  document.getElementById("upi-step-amount").style.display = "";
+  document.getElementById("upi-step-waiting").style.display = "none";
+  document.getElementById("upi-step-result").style.display = "none";
+  document.getElementById("upi-step-result").innerHTML = "";
+  document.getElementById("upi-amount").value = "";
+  document.getElementById("upi-proceed-btn").disabled = false;
+  document.getElementById("upi-proceed-btn").textContent = "Proceed to Pay";
+}
+function showUpiResult(html) {
+  if (state.upi.pollTimer) { clearInterval(state.upi.pollTimer); state.upi.pollTimer = null; }
+  document.getElementById("upi-step-amount").style.display = "none";
+  document.getElementById("upi-step-waiting").style.display = "none";
+  const el = document.getElementById("upi-step-result");
+  el.style.display = "";
+  el.innerHTML = html;
+}
+function cancelUpiPay() {
+  resetUpiForm();
+  document.getElementById("upi-form-card").classList.remove("show");
+}
+async function proceedUpiPay() {
+  const amount = parseFloat(document.getElementById("upi-amount").value);
+  if (!amount || amount < 100) { showToast("Minimum UPI top-up is ₹100"); return; }
+  if (amount > 50000) { showToast("Maximum UPI top-up is ₹50,000"); return; }
+  const btn = document.getElementById("upi-proceed-btn");
+  btn.disabled = true; btn.textContent = "Creating payment…";
+  try {
+    const { httpStatus, body } = await apiPostUpiInitiate({ amount: amount });
+    if (httpStatus === 401) return handleAuthFailure();
+    if (!body || body.status !== "success" || !body.payment_url) {
+      showToast((body && (body.message || body.error)) || "Could not start UPI payment.");
+      btn.disabled = false; btn.textContent = "Proceed to Pay ₹" + amount.toLocaleString("en-IN");
+      return;
+    }
+    state.upi.collectId = body.collect_id;
+    state.upi.orderId = body.order_id;
+    state.upi.amount = body.amount || amount;
+    state.upi.polls = 0;
+    document.getElementById("upi-step-amount").style.display = "none";
+    document.getElementById("upi-step-waiting").style.display = "";
+    document.getElementById("upi-wait-amount").textContent = formatMoney(state.upi.amount);
+    document.getElementById("upi-wait-ref").textContent = "Ref: " + (body.order_id || "");
+    window.open(body.payment_url, "_blank");
+    startUpiPolling();
+  } catch (e) {
+    showToast("Unable to connect. " + errMsg(e));
+    btn.disabled = false; btn.textContent = "Proceed to Pay";
+  }
+}
+function startUpiPolling() {
+  if (state.upi.pollTimer) clearInterval(state.upi.pollTimer);
+  state.upi.polls = 0;
+  state.upi.pollTimer = setInterval(function () {
+    checkUpiStatus(false);
+  }, 3000);
+}
+async function checkUpiStatus(manual) {
+  if (!state.upi.collectId) return;
+  if (!manual) {
+    state.upi.polls += 1;
+    if (state.upi.polls > 10) {
+      clearInterval(state.upi.pollTimer);
+      state.upi.pollTimer = null;
+      document.getElementById("upi-step-waiting").style.display = "";
+      showToast("Payment not confirmed yet. Tap Check Status to retry.");
+      return;
+    }
+  }
+  const checkBtn = document.getElementById("upi-check-btn");
+  if (manual && checkBtn) { checkBtn.disabled = true; checkBtn.textContent = "Checking…"; }
+  try {
+    const { httpStatus, body } = await apiGetUpiStatus(state.upi.collectId);
+    if (httpStatus === 401) return handleAuthFailure();
+    if (httpStatus === 403) {
+      showUpiResult('<div class="big">❌ Access denied</div><div class="sub">You cannot check this payment.</div><button class="btn primary block" onclick="cancelUpiPay()">Done</button>');
+      return;
+    }
+    if (!body) {
+      if (manual) showToast("Could not check status.");
+      return;
+    }
+    const st = (body.status || "").toLowerCase();
+    if (st === "paid" || body.wallet_credited) {
+      const bal = (body.new_balance !== undefined && body.new_balance !== null)
+        ? formatMoney(body.new_balance) : formatMoney(state.wallets.main);
+      showUpiResult(
+        '<div style="font-size:28px;">✅</div>'
+        + '<div class="big">₹' + Number(body.amount || state.upi.amount).toLocaleString("en-IN") + " added to your Main Wallet!</div>"
+        + '<div class="sub">New Balance: ' + bal + "</div>"
+        + '<button class="btn primary block" onclick="finishUpiSuccess()">Done</button>'
+      );
+      try { await refreshWalletBalance(); document.getElementById("w-main").textContent = formatMoney(state.wallets.main); } catch (e) {}
+      return;
+    }
+    if (st === "failed" || st === "expired") {
+      showUpiResult(
+        '<div style="font-size:28px;">❌</div>'
+        + '<div class="big">Payment ' + st + ". No amount deducted.</div>"
+        + '<div class="sub">You can try again with a new payment.</div>'
+        + '<button class="btn primary block" onclick="resetUpiForm()">Try Again</button>'
+      );
+      return;
+    }
+    if (manual) {
+      showToast("Payment not confirmed yet.");
+      document.getElementById("upi-step-waiting").style.display = "";
+      document.getElementById("upi-step-result").style.display = "none";
+    }
+  } catch (e) {
+    if (manual) showToast("Unable to check status. " + errMsg(e));
+  } finally {
+    if (manual && checkBtn) { checkBtn.disabled = false; checkBtn.textContent = "✓ I've Paid — Check Status"; }
+  }
+}
+async function finishUpiSuccess() {
+  resetUpiForm();
+  document.getElementById("upi-form-card").classList.remove("show");
+  try {
+    await refreshWalletBalance();
+    document.getElementById("w-main").textContent = formatMoney(state.wallets.main);
+  } catch (e) {}
 }
 
 /* =========================================================================
