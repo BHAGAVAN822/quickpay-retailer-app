@@ -888,7 +888,8 @@ button{cursor:pointer;}
             <div class="big" style="font-weight:700;margin-top:8px;">Waiting for payment…</div>
             <div class="upi-amt" id="upi-wait-amount">₹0</div>
             <div class="upi-ref" id="upi-wait-ref"></div>
-            <div class="upi-msg">Complete payment in your UPI app, then click below.</div>
+            <div class="upi-msg">Complete payment in your UPI app. We auto-check every 5 seconds (up to 5 minutes).</div>
+            <div class="upi-msg" id="upi-poll-hint" style="font-size:12.5px;color:var(--text-muted);"></div>
             <button class="btn primary block" id="upi-check-btn" onclick="checkUpiStatus(true)">✓ I've Paid — Check Status</button>
             <button class="btn block" style="margin-top:8px;" onclick="cancelUpiPay()">✕ Cancel</button>
           </div>
@@ -2787,19 +2788,32 @@ async function proceedUpiPay() {
 function startUpiPolling() {
   if (state.upi.pollTimer) clearInterval(state.upi.pollTimer);
   state.upi.polls = 0;
+  const hint = document.getElementById("upi-poll-hint");
+  if (hint) hint.textContent = "Auto-checking… 0/60";
+  // Immediate first check, then every 5s for up to 5 minutes (60 attempts).
+  checkUpiStatus(false);
   state.upi.pollTimer = setInterval(function () {
     checkUpiStatus(false);
-  }, 3000);
+  }, 5000);
+}
+function showUpiTimeout() {
+  if (state.upi.pollTimer) { clearInterval(state.upi.pollTimer); state.upi.pollTimer = null; }
+  showUpiResult(
+    '<div style="font-size:28px;">⏳</div>'
+    + '<div class="big">Payment not confirmed yet</div>'
+    + '<div class="sub">Auto-check timed out after 5 minutes. If you already paid, tap Check manually — credit can still arrive via webhook or backend sync.</div>'
+    + '<button class="btn primary block" id="upi-check-btn" onclick="checkUpiStatus(true)">Check manually</button>'
+    + '<button class="btn block" style="margin-top:8px;" onclick="cancelUpiPay()">Cancel</button>'
+  );
 }
 async function checkUpiStatus(manual) {
   if (!state.upi.collectId) return;
   if (!manual) {
     state.upi.polls += 1;
-    if (state.upi.polls > 10) {
-      clearInterval(state.upi.pollTimer);
-      state.upi.pollTimer = null;
-      document.getElementById("upi-step-waiting").style.display = "";
-      showToast("Payment not confirmed yet. Tap Check Status to retry.");
+    const hint = document.getElementById("upi-poll-hint");
+    if (hint) hint.textContent = "Auto-checking… " + state.upi.polls + "/60";
+    if (state.upi.polls > 60) {
+      showUpiTimeout();
       return;
     }
   }
