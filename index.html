@@ -241,35 +241,43 @@ a:focus:not(:focus-visible),
 #app-shell{display:none;min-height:100vh;}
 #app-shell.active{display:flex;}
 
-/* --- Sidebar (desktop) — Figma Sidebar Mode=Expanded, 256px navy --- */
+/* --- Sidebar — Figma 16:302 exact: 256px, px-16 py-24, nav h-40 --- */
 #sidebar{
   width:var(--sidebar-width);flex-shrink:0;background:var(--color-bg-sidebar);color:var(--color-text-sidebar-active);
-  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;
-  border-right:1px solid var(--color-border-sidebar);
+  display:flex;flex-direction:column;justify-content:space-between;gap:var(--space-6);
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  padding:var(--space-5) var(--space-4);
+  border-right:none;
 }
+.sb-top{display:flex;flex-direction:column;gap:var(--space-5);width:100%;min-height:0;}
 .sb-logo{
-  display:flex;align-items:center;gap:var(--space-3);padding:var(--space-5) var(--space-4);
-  border-bottom:1px solid var(--color-border-sidebar);
+  display:flex;align-items:center;gap:var(--space-3);padding:0;border-bottom:none;height:40px;
 }
 .sb-logo .qp-mark{
   width:36px;height:36px;border-radius:var(--radius-md);background:var(--color-bg-brand);color:var(--color-text-on-brand);
-  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-weight:600;font-size:11px;letter-spacing:.6px;flex-shrink:0;
 }
-.sb-logo .qp-word{font-weight:700;font-size:15px;letter-spacing:-.01em;white-space:nowrap;color:var(--color-text-sidebar-active);}
-.sb-nav{flex:1;padding:var(--space-3) var(--space-2);}
+.sb-brand-text{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.sb-logo .qp-word{font-weight:600;font-size:16px;line-height:24px;letter-spacing:-.1px;white-space:nowrap;color:var(--color-text-sidebar-active);}
+.sb-logo .qp-tag{font-weight:500;font-size:11px;line-height:14px;letter-spacing:.2px;color:var(--color-text-sidebar);white-space:nowrap;}
+.sb-nav{flex:1;display:flex;flex-direction:column;gap:var(--space-4);padding:0;min-height:0;}
+.sb-section{display:flex;flex-direction:column;gap:var(--space-1);width:100%;}
+.sb-section-label{
+  font-size:11px;font-weight:500;line-height:14px;letter-spacing:.6px;color:var(--color-text-sidebar);
+  opacity:.85;padding:0;margin:0 0 0;
+}
 .sb-item{
-  display:flex;align-items:center;gap:var(--space-3);padding:10px var(--space-3);border-radius:var(--radius-md);
-  color:var(--color-text-sidebar);font-size:14px;font-weight:500;margin-bottom:2px;
-  border-left:3px solid transparent;cursor:pointer;position:relative;white-space:nowrap;
+  display:flex;align-items:center;gap:var(--space-3);height:40px;padding:8px 12px;border-radius:var(--radius-md);
+  color:var(--color-text-sidebar);font-size:14px;font-weight:500;line-height:20px;margin-bottom:0;
+  border-left:none;cursor:pointer;position:relative;white-space:nowrap;width:100%;box-sizing:border-box;
 }
-.sb-item i{font-size:18px;width:20px;text-align:center;flex-shrink:0;color:var(--color-icon-sidebar);}
+.sb-item i{font-size:18px;width:20px;height:20px;text-align:center;flex-shrink:0;color:var(--color-icon-sidebar);display:inline-flex;align-items:center;justify-content:center;}
 .sb-item:hover{background:var(--color-bg-sidebar-hover);color:var(--color-text-sidebar-active);}
 .sb-item:hover i{color:var(--color-text-sidebar-active);}
 .sb-item.active{
-  background:var(--color-bg-sidebar-active);color:var(--color-text-sidebar-active);
-  border-left-color:transparent;font-weight:500;
+  background:var(--color-bg-sidebar-active);color:var(--color-text-sidebar-active);font-weight:500;
 }
-.sb-item.active i{color:var(--color-bg-brand);}
+.sb-item.active i{color:var(--color-text-sidebar-active);}
 .sb-item.disabled{opacity:.35;cursor:not-allowed;}
 .sb-item.disabled:hover{background:none;color:var(--color-text-sidebar);}
 .sb-item.disabled:hover i{color:var(--color-icon-sidebar);}
@@ -290,51 +298,85 @@ a:focus:not(:focus-visible),
 .sb-sub-item.disabled{opacity:.4;cursor:not-allowed;}
 .sb-sub-item.disabled:hover{background:none;color:var(--color-text-sidebar);}
 .sb-sub-item .soon{font-size:9.5px;background:rgba(255,255,255,.1);padding:1px 5px;border-radius:6px;margin-left:auto;}
-.sb-foot{padding:var(--space-4);border-top:1px solid var(--color-border-sidebar);}
-.sb-foot .name{font-size:14px;font-weight:600;color:var(--color-text-sidebar-active);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.sb-foot .id{font-size:12px;color:var(--color-text-sidebar);margin-bottom:10px;}
-.sb-logout{
-  display:flex;align-items:center;gap:8px;width:100%;background:transparent;
-  border:1px solid var(--color-border-sidebar);color:var(--color-text-sidebar);padding:9px 12px;
-  border-radius:var(--radius-md);font-size:13px;font-weight:600;
+.sb-foot{display:flex;flex-direction:column;gap:var(--space-2);padding:0;border-top:none;width:100%;}
+.sb-profile{
+  background:var(--color-bg-sidebar-hover);border-radius:var(--radius-lg);padding:var(--space-3);
+  display:flex;flex-direction:column;gap:var(--space-1);width:100%;
 }
-.sb-logout:hover{background:rgba(185,28,28,.16);color:var(--color-text-sidebar-active);border-color:rgba(220,38,38,.35);}
+.sb-foot .name,.sb-profile .name{font-size:14px;font-weight:500;line-height:20px;color:var(--color-text-sidebar-active);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0;}
+.sb-foot .id,.sb-profile .id{font-size:12px;font-weight:400;line-height:16px;color:var(--color-text-sidebar);margin:0;}
+.sb-logout{
+  display:flex;align-items:center;gap:var(--space-3);width:100%;height:40px;background:transparent;
+  border:none;color:var(--color-text-sidebar);padding:8px 12px;
+  border-radius:var(--radius-md);font-size:14px;font-weight:500;line-height:20px;
+}
+.sb-logout i{width:20px;font-size:18px;color:var(--color-icon-sidebar);}
+.sb-logout:hover{background:var(--color-bg-sidebar-hover);color:var(--color-text-sidebar-active);}
+.sb-logout:hover i{color:var(--color-text-sidebar-active);}
 
 /* --- Content area --- */
 #content-area{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--color-bg-canvas);}
-#content-inner{max-width:1360px;margin:0 auto;width:100%;padding:0 var(--space-5) var(--space-6);}
+#content-inner{max-width:1136px;margin:0 auto;width:100%;padding:0 24px 40px;}
 
-/* --- Top bar — Figma Top Bar (64px, surface) --- */
+/* --- Top bar — Figma 55:2100 exact: h-64, search 360x40, avatar 36 --- */
 #topbar{
-  height:var(--topbar-height);display:flex;align-items:center;justify-content:space-between;
-  padding:0 var(--space-5);position:sticky;top:0;z-index:40;
-  max-width:1360px;margin:0 auto;width:100%;
+  height:var(--topbar-height);display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);
+  padding:0 24px;position:sticky;top:0;z-index:40;
+  max-width:none;margin:0;width:100%;
   background:var(--color-bg-surface);border-bottom:1px solid var(--color-border-default);
+  box-sizing:border-box;
 }
+.topbar-left{display:flex;align-items:center;gap:16px;min-width:0;flex:1;}
 #topbar .page-title{font-size:20px;font-weight:600;color:var(--color-text-primary);letter-spacing:-.01em;}
-.topbar-right{display:flex;align-items:center;gap:var(--space-3);}
+.topbar-search{
+  display:flex;align-items:center;gap:8px;width:360px;max-width:100%;height:40px;
+  padding:0 14px;background:#fff;border:1px solid var(--color-border-default);border-radius:var(--radius-md);
+  color:var(--color-text-secondary);font-size:13px;font-weight:400;
+}
+.topbar-search i{font-size:16px;color:var(--color-icon-muted);flex-shrink:0;}
+.topbar-search input{
+  border:none;outline:none;background:transparent;width:100%;min-width:0;
+  font-size:13px;color:var(--color-text-primary);padding:0;
+}
+.topbar-search input::placeholder{color:var(--color-text-secondary);}
+.topbar-date{
+  display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px;
+  background:#fff;border:1px solid var(--color-border-default);border-radius:var(--radius-md);
+  color:var(--color-text-secondary);font-size:12px;font-weight:500;white-space:nowrap;flex-shrink:0;
+}
+.topbar-date i{font-size:15px;color:var(--color-icon-muted);}
+.topbar-right{display:flex;align-items:center;gap:12px;flex-shrink:0;}
 .wallet-pill{
   display:flex;align-items:center;gap:6px;background:var(--color-bg-brand-subtle);border:1px solid var(--color-border-brand);
   border-radius:var(--radius-full);padding:7px 14px;font-size:13px;font-weight:700;color:var(--color-text-brand);
-  font-variant-numeric:tabular-nums;
+  font-variant-numeric:tabular-nums;height:36px;box-sizing:border-box;
 }
 .wallet-pill i{color:var(--color-icon-brand);font-size:15px;}
 .icon-btn{
-  width:40px;height:40px;border-radius:var(--radius-md);border:1px solid var(--color-border-default);background:var(--color-bg-surface);
-  display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--color-icon-default);
+  width:40px;height:40px;border-radius:var(--radius-md);border:1px solid transparent;background:transparent;
+  display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--color-icon-default);
   position:relative;
 }
 .icon-btn:hover{background:var(--color-bg-muted);color:var(--color-text-primary);}
+.icon-btn .notif-badge{
+  position:absolute;top:4px;right:4px;min-width:18px;height:18px;padding:0 4px;
+  background:#C71414;color:#fff;border-radius:9px;font-size:9px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;line-height:1;
+}
 .profile-dd{position:relative;}
 .profile-trigger{
-  display:flex;align-items:center;gap:8px;background:var(--color-bg-surface);border:1px solid var(--color-border-default);
-  border-radius:var(--radius-full);padding:6px 12px 6px 6px;font-size:13px;font-weight:600;color:var(--color-text-primary);
+  display:flex;align-items:center;gap:12px;background:transparent;border:none;
+  border-radius:var(--radius-md);padding:0;font-size:13px;font-weight:600;color:var(--color-text-primary);
 }
-.profile-trigger:hover{background:var(--color-bg-muted);}
+.profile-trigger:hover{background:transparent;opacity:.92;}
 .profile-avatar{
-  width:28px;height:28px;border-radius:50%;background:var(--color-bg-brand);color:var(--color-text-on-brand);
-  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;
+  width:36px;height:36px;border-radius:18px;background:var(--color-bg-brand);color:var(--color-text-on-brand);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;
 }
+.profile-meta{display:flex;flex-direction:column;align-items:flex-start;gap:0;line-height:1.2;}
+.profile-meta .profile-name{font-size:13px;font-weight:600;color:var(--color-text-primary);}
+.profile-meta .profile-role{font-size:11px;font-weight:400;color:var(--color-text-secondary);}
+.profile-trigger .ti-chevron-down{font-size:14px;color:var(--color-text-secondary);}
 .profile-menu{
   position:absolute;top:calc(100% + 8px);right:0;background:var(--color-bg-surface);border:1px solid var(--color-border-default);
   border-radius:var(--radius-lg);box-shadow:0 12px 32px rgba(15,23,42,.12);min-width:180px;padding:6px;display:none;z-index:50;
@@ -343,20 +385,33 @@ a:focus:not(:focus-visible),
 .profile-menu a,.profile-menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 10px;border-radius:var(--radius-md);font-size:14px;color:var(--color-text-primary);background:none;border:none;}
 .profile-menu a:hover,.profile-menu button:hover{background:var(--color-bg-muted);}
 .profile-menu .div{height:1px;background:var(--color-border-default);margin:5px 0;}
+@media (min-width:1024px){
+  #topbar .page-title{display:none;}
+}
+@media (max-width:1023px){
+  .topbar-search,.topbar-date{display:none;}
+  .profile-meta{display:none;}
+}
 
 /* Mobile hamburger + tablet toggle (hidden on desktop) */
 #hamburger-btn{display:none;}
 
 /* =========================================================================
-   DASHBOARD V2.1 — Figma Desktop + Mobile
+   DASHBOARD V2.1 — Figma node 16:301 / Content 55:2113 pixel specs
+   Frame content: pad 24; wallet 360x160; QA 760x160 tiles 168x94;
+   KPI 268x132 x4; trend 760x250; status 360x250; recent 1136
    ========================================================================= */
 .dash-header{
   display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);
-  margin:var(--space-5) 0 var(--space-4);
+  margin:24px 0 16px;
 }
-.dash-header h2{margin:0 0 4px;font-size:24px;font-weight:700;letter-spacing:-.02em;color:var(--color-text-primary);}
-.dash-header .sub{color:var(--text-secondary);font-size:13px;line-height:1.4;}
-.dash-header .dash-cta{flex-shrink:0;}
+.dash-header h2{margin:0 0 4px;font-size:22px;font-weight:700;line-height:28px;letter-spacing:0;color:var(--color-text-primary);}
+.dash-header .sub{color:var(--color-text-secondary);font-size:13px;line-height:16px;font-weight:400;}
+.dash-header .dash-cta{flex-shrink:0;margin-top:-2px;}
+.dash-header .dash-cta .btn{
+  height:44px;min-height:44px;padding:0 18px;border-radius:var(--radius-md);
+  font-size:13px;font-weight:600;gap:8px;
+}
 
 .dash-alert{
   display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-3);
@@ -368,66 +423,102 @@ a:focus:not(:focus-visible),
 .dash-alert .dash-alert-title{font-weight:700;font-size:13px;margin-bottom:2px;}
 .dash-alert .dash-alert-msg{font-size:12.5px;opacity:.95;}
 
+/* Top row: Available Balance 360 + Quick Actions 760, gap 16 */
 .dash-top-row{
-  display:grid;grid-template-columns:minmax(240px,34%) minmax(0,1fr);gap:var(--space-4);
-  margin-bottom:24px;align-items:stretch;
+  display:grid;grid-template-columns:360px minmax(0,1fr);gap:16px;
+  margin-bottom:16px;align-items:stretch;
 }
 .dash-wallet{
-  padding:var(--space-4);display:flex;flex-direction:column;gap:10px;position:relative;
+  width:100%;min-height:160px;padding:18px 16px 16px;display:flex;flex-direction:column;
+  gap:0;position:relative;border-radius:12px;box-sizing:border-box;
 }
+.dash-wallet .kpi-icon{display:none;}
 .dash-wallet-label{
-  display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;
-  text-transform:uppercase;letter-spacing:.04em;color:var(--text-secondary);
+  display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;
+  text-transform:none;letter-spacing:0;color:var(--color-text-secondary);line-height:15px;
 }
 .dash-wallet-label .eye-btn{
   border:none;background:transparent;color:var(--color-icon-muted);padding:2px;display:inline-flex;
-  cursor:pointer;border-radius:var(--radius-sm);
+  cursor:pointer;border-radius:var(--radius-sm);margin-left:2px;
 }
 .dash-wallet-label .eye-btn:hover{color:var(--color-text-primary);background:var(--color-bg-muted);}
 .dash-wallet .wallet-val{
-  font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em;
-  color:var(--color-text-amount);line-height:1.15;
+  font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:0;
+  color:var(--color-text-amount);line-height:38px;margin-top:18px;
 }
 .dash-wallet .wallet-status{
-  display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--color-text-success);
+  display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;
+  color:var(--color-text-success);margin-top:6px;
 }
 .dash-wallet .wallet-status .dot{width:6px;height:6px;border-radius:50%;background:var(--color-bg-brand);}
-.dash-wallet-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto;}
-.dash-wallet-actions .btn{min-height:40px;}
+.dash-wallet-actions{display:flex;flex-wrap:wrap;align-items:center;gap:22px;margin-top:auto;padding-top:14px;}
+.dash-wallet-actions .btn.primary{
+  min-height:36px;height:36px;padding:0 14px;border-radius:6px;font-size:12px;font-weight:500;
+}
+.dash-wallet-actions .btn:not(.primary){
+  min-height:36px;height:36px;padding:0;border:none;background:transparent;box-shadow:none;
+  color:var(--color-text-primary);font-size:12px;font-weight:500;
+}
+.dash-wallet-actions .btn:not(.primary):hover{background:var(--color-bg-muted);}
 
+.dash-qa-panel{
+  min-height:160px;padding:16px;border-radius:12px;box-sizing:border-box;
+  display:flex;flex-direction:column;gap:15px;
+}
+.dash-qa-panel .qa-title{
+  margin:0;font-size:15px;font-weight:600;line-height:19px;color:var(--color-text-primary);
+}
 .qa-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-3);
-  align-content:stretch;min-height:0;
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;
+  align-content:stretch;flex:1;min-height:0;
 }
 .qa-tile{
   background:var(--color-bg-muted);border:1px solid transparent;border-radius:10px;
-  min-height:94px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
-  font-size:12.5px;font-weight:600;color:var(--color-text-primary);text-align:center;padding:14px 8px;
+  min-height:94px;height:94px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  font-size:12px;font-weight:500;color:var(--color-text-primary);text-align:center;padding:18px 8px 15px;
+  box-sizing:border-box;
 }
-.qa-tile i{font-size:22px;color:var(--color-icon-default);}
-.qa-tile:hover,.quick-action-card:hover{border-color:var(--color-border-brand);background:var(--color-bg-brand-subtle);}
+.qa-tile i{font-size:16px;color:var(--color-icon-default);line-height:20px;}
+.qa-tile:hover,.quick-action-card:hover{border-color:var(--color-border-brand);background:var(--color-bg-brand-subtle);color:var(--color-text-brand);}
 .qa-tile:hover i{color:var(--color-icon-brand);}
 .qa-tile.primary{
   border-color:var(--color-border-brand);background:var(--color-bg-brand-subtle);color:var(--color-text-brand);
 }
 .qa-tile.primary i{color:var(--color-icon-brand);}
 .qa-tile.disabled{opacity:.45;cursor:not-allowed;}
-.qa-tile.disabled:hover{border-color:var(--color-border-default);background:var(--color-bg-surface);}
+.qa-tile.disabled:hover{border-color:transparent;background:var(--color-bg-muted);color:var(--color-text-primary);}
 .qa-tile.disabled i{color:var(--color-icon-muted);}
 
+/* KPI row: 4 x 268x132, gap 16 */
 .kpi-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-3);margin-bottom:var(--space-4);
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:0 0 16px;
 }
-.kpi-card{padding:var(--space-4);position:relative;display:flex;flex-direction:column;gap:12px;}
-.kpi-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
-.kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px;}
-.kpi-value,.balance-amount,.wallet-pill-amount{
+.kpi-card{
+  min-height:132px;padding:16px;position:relative;display:flex;flex-direction:column;
+  gap:0;border-radius:12px;box-sizing:border-box;
+}
+.kpi-card-header{display:none;}
+.kpi-badge{
+  position:absolute;top:16px;right:16px;display:inline-flex;align-items:center;
+  padding:5px 10px;border-radius:999px;font-size:11px;font-weight:600;line-height:14px;white-space:nowrap;
+}
+.kpi-badge.up{background:var(--color-bg-brand-subtle);color:var(--color-text-brand);}
+.kpi-badge.warn{background:#FFF6C7;color:#A65C08;}
+.kpi-label{
+  font-size:12px;font-weight:500;text-transform:none;letter-spacing:0;
+  color:var(--color-text-secondary);margin:32px 0 0;line-height:15px;
+}
+.kpi-value{
+  font-size:18px;font-weight:700;color:var(--color-text-primary);letter-spacing:0;
+  font-variant-numeric:tabular-nums;line-height:23px;margin-top:12px;
+}
+.balance-amount,.wallet-pill-amount{
   font-size:28px;font-weight:800;color:var(--text-primary);letter-spacing:-.5px;
   font-variant-numeric:tabular-nums;line-height:1.1;
 }
-.kpi-sub{font-size:12px;color:var(--text-secondary);margin-top:4px;}
+.kpi-sub{font-size:11px;color:var(--color-text-secondary);margin-top:8px;line-height:14px;}
 .kpi-card .label-caps{margin-bottom:8px;font-size:11px;}
-.kpi-card .val{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:6px;color:var(--color-text-primary);}
+.kpi-card .val{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:6px;color:var(--color-text-primary);}
 .kpi-card .sub{font-size:12px;color:var(--text-secondary);}
 .kpi-card.tone-warning .val{color:var(--color-text-warning);}
 .kpi-card.tone-success .val{color:var(--color-text-success);}
@@ -436,38 +527,41 @@ a:focus:not(:focus-visible),
   font-size:22px;flex-shrink:0;
 }
 .kpi-icon-blue{background:rgba(0,102,255,.10);color:#0066FF;}
-.kpi-icon-green{background:rgba(0,166,81,.10);color:#00A651;}
+.kpi-icon-green{background:rgba(5,150,105,.10);color:#059669;}
 .kpi-icon-purple{background:rgba(124,58,237,.10);color:#7C3AED;}
 .kpi-icon-amber{background:rgba(245,158,11,.10);color:#F59E0B;}
 .kpi-icon-red{background:rgba(229,57,53,.10);color:#E53935;}
 
+/* Mid: Business Trend 760 + Status 360 */
 .dash-mid-row{
-  display:grid;grid-template-columns:1.65fr 1fr;gap:var(--space-4);margin-bottom:var(--space-4);
+  display:grid;grid-template-columns:minmax(0,760fr) minmax(0,360fr);gap:16px;margin-bottom:16px;
 }
-.dash-panel{padding:var(--space-4);}
+.dash-panel{padding:16px;border-radius:12px;min-height:250px;box-sizing:border-box;}
 .dash-panel-head{
-  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:var(--space-4);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;
 }
-.dash-panel-head h3{margin:0;font-size:15px;font-weight:700;}
-.dash-panel-head .panel-sub{font-size:12px;color:var(--text-secondary);margin-top:2px;}
-.trend-filters{display:flex;gap:4px;flex-wrap:wrap;}
+.dash-panel-head h3{margin:0;font-size:15px;font-weight:600;line-height:19px;color:var(--color-text-primary);}
+.dash-panel-head .panel-sub{font-size:11px;color:var(--color-text-secondary);margin-top:10px;line-height:14px;}
+.trend-filters{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .trend-filter{
-  border:1px solid var(--color-border-default);background:var(--color-bg-surface);color:var(--text-secondary);
-  border-radius:var(--radius-full);padding:5px 10px;font-size:11px;font-weight:700;
+  border:none;background:transparent;color:var(--color-text-secondary);
+  border-radius:var(--radius-full);padding:5px 10px;font-size:11px;font-weight:500;
 }
-.trend-filter.active{background:var(--color-bg-brand-subtle);border-color:var(--color-border-brand);color:var(--color-text-brand);}
+.trend-filter.active{
+  background:var(--color-bg-muted);border:none;color:var(--color-text-primary);font-weight:600;
+}
 .trend-chart{
   display:flex;align-items:flex-end;justify-content:space-between;gap:8px;min-height:160px;padding-top:8px;
 }
 .trend-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;}
-.trend-val{font-size:10px;font-weight:600;color:var(--text-secondary);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.trend-val{font-size:10px;font-weight:500;color:var(--color-text-secondary);font-variant-numeric:tabular-nums;white-space:nowrap;}
 .trend-bar-wrap{width:100%;height:120px;display:flex;align-items:flex-end;justify-content:center;}
 .trend-bar{
-  width:70%;max-width:36px;border-radius:6px 6px 2px 2px;background:var(--color-bg-brand-subtle);
-  border:1px solid #A7F3D0;min-height:4px;transition:height .2s;
+  width:42px;max-width:70%;border-radius:4px;background:var(--color-bg-brand-subtle);
+  border:none;min-height:4px;transition:height .2s;
 }
-.trend-bar.today{background:var(--color-bg-brand);border-color:var(--color-bg-brand);}
-.trend-day{font-size:11px;font-weight:600;color:var(--text-secondary);}
+.trend-bar.today{background:var(--color-bg-brand);}
+.trend-day{font-size:10px;font-weight:400;color:var(--color-text-secondary);}
 .trend-empty,.chart-empty,.chart-empty-state{
   min-height:160px;padding:36px 12px;text-align:center;color:var(--text-secondary);font-size:13px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
@@ -477,14 +571,14 @@ a:focus:not(:focus-visible),
 .chart-empty-title{font-size:14px;font-weight:600;color:var(--text-secondary);margin:0;}
 .chart-empty-sub{font-size:12px;color:var(--text-muted);margin:0;}
 
-.status-today{display:flex;align-items:center;gap:var(--space-5);min-height:0;}
+.status-today{display:flex;align-items:center;gap:24px;min-height:0;padding:8px 0 0;}
 .status-total{text-align:center;min-width:88px;flex-shrink:0;}
-.status-total .n{font-size:36px;font-weight:700;color:var(--color-text-primary);line-height:1;}
-.status-total .t{font-size:11px;color:var(--text-secondary);margin-top:6px;}
-.status-legend{flex:1;display:flex;flex-direction:column;gap:10px;}
+.status-total .n{font-size:35px;font-weight:700;color:var(--color-text-primary);line-height:35px;}
+.status-total .t{font-size:11px;color:var(--color-text-secondary);margin-top:0;line-height:13px;}
+.status-legend{flex:1;display:flex;flex-direction:column;gap:20px;}
 .status-legend-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;}
-.status-legend-row .left{display:flex;align-items:center;gap:8px;color:var(--text-secondary);}
-.status-legend-row .count{font-weight:700;color:var(--color-text-primary);font-variant-numeric:tabular-nums;}
+.status-legend-row .left{display:flex;align-items:center;gap:8px;color:var(--color-text-secondary);font-size:12px;font-weight:500;}
+.status-legend-row .count{font-weight:700;font-size:13px;color:var(--color-text-primary);font-variant-numeric:tabular-nums;}
 .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .status-dot.success{background:var(--color-bg-brand);}
 .status-dot.pending{background:#F59E0B;}
@@ -495,18 +589,26 @@ a:focus:not(:focus-visible),
 .section-head h3{font-size:16px;font-weight:700;margin:0;}
 .section-head a{font-size:13px;font-weight:600;color:var(--color-text-brand);cursor:pointer;}
 
-.dash-recent-card{padding:0;overflow:hidden;}
+.dash-recent-card{padding:0;overflow:hidden;border-radius:12px;}
+.dash-recent-head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  padding:16px 16px 12px;
+}
+.dash-recent-head h3{margin:0;font-size:15px;font-weight:600;line-height:19px;color:var(--color-text-primary);}
+.dash-recent-head .panel-sub{font-size:11px;color:var(--color-text-secondary);margin-top:7px;line-height:14px;}
+.dash-recent-head a{font-size:12px;font-weight:600;color:var(--color-text-brand);cursor:pointer;white-space:nowrap;padding-top:4px;}
 .mini-table{width:100%;border-collapse:collapse;}
 .mini-table th{
-  text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-secondary);
-  padding:12px 14px;border-bottom:1px solid var(--border);background:var(--color-bg-muted);font-weight:600;
+  text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--color-text-secondary);
+  padding:13px 16px;border-bottom:1px solid var(--border);background:var(--color-bg-muted);font-weight:600;line-height:13px;
 }
-.mini-table td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--color-text-primary);}
+.mini-table td{padding:16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:500;color:var(--color-text-primary);line-height:15px;height:auto;}
 .mini-table td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;}
 .mini-table td.amt-debit{color:var(--color-text-debit);}
-.mini-table td.muted{color:var(--text-secondary);}
+.mini-table td.muted{color:var(--color-text-primary);font-weight:600;}
 .mini-table tr:last-child td{border-bottom:none;}
-.mini-table tr:hover{background:#FAFBFC;}
+.mini-table tr:nth-child(even) td{background:#FAFBFC;}
+.mini-table tr:hover td{background:#F8FAFC;}
 .dash-tx-cards{display:none;padding:8px 12px 12px;}
 .dash-tx-card{
   display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
@@ -519,31 +621,35 @@ a:focus:not(:focus-visible),
 .dash-tx-card .amt{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;}
 .dash-tx-card .badge{margin-top:6px;}
 
-/* compatibility: old perf-row hidden if unused */
+/* Status badges — Figma 24px pills with dot */
+#screen-dashboard .badge{
+  display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;
+  border-radius:999px;font-size:11px;font-weight:600;line-height:14px;
+}
+#screen-dashboard .badge i{font-size:10px;}
+#screen-dashboard .badge-success{background:var(--color-bg-brand-subtle);color:var(--color-text-brand);}
+#screen-dashboard .badge-pending{background:#FFF6C7;color:#A65C08;}
+#screen-dashboard .badge-processing{background:#DBEAFE;color:#1D4ED8;}
+#screen-dashboard .badge-failed{background:var(--color-bg-danger);color:var(--color-text-danger);}
+
 .perf-row{display:none;}
 
 @media (min-width:1024px){
-  .dash-top-row{grid-template-columns:minmax(240px,34%) minmax(0,1fr);}
-  .dash-wallet{padding:16px 18px;gap:8px;}
-  .dash-wallet .wallet-val{font-size:28px;}
-  .dash-wallet-actions .btn{min-height:36px;padding:8px 14px;}
-  .qa-tile{min-height:100%;}
+  .dash-top-row{grid-template-columns:360px minmax(0,1fr);}
+  .dash-wallet{padding:18px 16px 16px;}
+  .dash-wallet .wallet-val{font-size:30px;line-height:38px;}
+  .qa-tile{min-height:94px;height:94px;}
 }
 @media (min-width:640px) and (max-width:1023px){
-  .dash-top-row{
-    grid-template-columns:1fr;
-    margin-bottom:28px;
-    gap:var(--space-4);
-  }
+  .dash-top-row{grid-template-columns:1fr;margin-bottom:16px;gap:16px;}
   .dash-top-row > div{min-width:0;}
   .qa-grid{grid-template-columns:repeat(4,1fr);height:auto;}
-  .qa-tile{min-height:88px;}
+  .qa-tile{min-height:88px;height:auto;}
   .kpi-grid{grid-template-columns:repeat(2,1fr);margin-top:0;}
-  #screen-dashboard > .section-head{margin-top:0;}
-  .dash-mid-row{grid-template-columns:1fr;align-items:start;gap:var(--space-4);}
-  .dash-mid-row .dash-panel{height:auto;}
+  .dash-mid-row{grid-template-columns:1fr;align-items:start;gap:16px;}
+  .dash-mid-row .dash-panel{height:auto;min-height:0;}
   .status-today{min-height:0;align-items:flex-start;gap:var(--space-4);padding-top:0;}
-  .status-legend{gap:8px;}
+  .status-legend{gap:12px;}
   .status-total .n{font-size:32px;}
 }
 @media (max-width:639px){
@@ -551,13 +657,14 @@ a:focus:not(:focus-visible),
   .dash-header h2{font-size:22px;}
   .dash-header .dash-cta{width:100%;}
   .dash-header .dash-cta .btn{width:100%;}
-  .dash-top-row{grid-template-columns:1fr;margin-bottom:24px;gap:var(--space-4);}
-  .dash-wallet .wallet-val{font-size:28px;}
-  .qa-grid{grid-template-columns:repeat(4,1fr);gap:8px;height:auto;}
-  .qa-tile{min-height:76px;font-size:11px;padding:10px 4px;border-radius:var(--radius-md);}
+  .dash-top-row{grid-template-columns:1fr;margin-bottom:16px;gap:12px;}
+  .dash-wallet .wallet-val{font-size:28px;line-height:34px;}
+  .qa-grid{grid-template-columns:repeat(2,1fr);gap:8px;height:auto;}
+  .qa-tile{min-height:76px;height:auto;font-size:11px;padding:10px 4px;border-radius:var(--radius-md);gap:10px;}
   .qa-tile i{font-size:18px;}
   .kpi-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
-  .kpi-card .val{font-size:20px;}
+  .kpi-value{font-size:16px;}
+  .kpi-label{margin-top:28px;}
   .dash-mid-row{grid-template-columns:1fr;align-items:start;}
   .trend-chart{min-height:140px;}
   .trend-bar-wrap{height:100px;}
@@ -566,6 +673,7 @@ a:focus:not(:focus-visible),
   .status-today{flex-direction:column;align-items:stretch;gap:12px;min-height:0;}
   .status-total{text-align:left;display:flex;align-items:baseline;gap:10px;}
   .status-total .n{font-size:28px;}
+  .dash-recent-head{flex-direction:column;align-items:flex-start;}
 }
 
 /* =========================================================================
@@ -1477,13 +1585,15 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
    ========================================================================= */
 /* Tablet: sidebar collapses to icon-only */
 @media (min-width:640px) and (max-width:1023px){
-  #sidebar{width:52px;}
-  #sidebar .sb-logo .qp-word,#sidebar .sb-item span:not(.soon),#sidebar .sb-item .chev,
-  #sidebar .sb-sub,#sidebar .sb-foot .name,#sidebar .sb-foot .id,#sidebar .sb-logout span{display:none;}
-  #sidebar.expanded{width:var(--sidebar-width);}
-  #sidebar.expanded .sb-logo .qp-word,#sidebar.expanded .sb-item span:not(.soon),
+  #sidebar{width:52px;padding:16px 8px;}
+  #sidebar .sb-logo .qp-word,#sidebar .sb-logo .qp-tag,#sidebar .sb-section-label,#sidebar .sb-item span:not(.soon),#sidebar .sb-item .chev,
+  #sidebar .sb-sub,#sidebar .sb-foot .name,#sidebar .sb-foot .id,#sidebar .sb-logout span,#sidebar .sb-profile{display:none;}
+  #sidebar.expanded{width:var(--sidebar-width);padding:var(--space-5) var(--space-4);}
+  #sidebar.expanded .sb-logo .qp-word,#sidebar.expanded .sb-logo .qp-tag,#sidebar.expanded .sb-section-label,#sidebar.expanded .sb-item span:not(.soon),
   #sidebar.expanded .sb-item .chev,#sidebar.expanded .sb-foot .name,
-  #sidebar.expanded .sb-foot .id,#sidebar.expanded .sb-logout span{display:inline;}
+  #sidebar.expanded .sb-foot .id,#sidebar.expanded .sb-logout span,#sidebar.expanded .sb-profile{display:revert;}
+  #sidebar.expanded .sb-profile{display:flex;}
+  #sidebar.expanded .sb-section-label{display:block;}
   #hamburger-btn{display:flex;}
   .rc-layout{grid-template-columns:1fr;}
 }
@@ -1567,32 +1677,46 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 <div id="app-shell">
   <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeDrawer()"></div>
 
-  <!-- Sidebar (desktop/tablet) -->
+  <!-- Sidebar — Figma 16:302 (256px, MAIN / BUSINESS / SUPPORT) -->
   <aside id="sidebar">
-    <div class="sb-logo">
-      <button id="hamburger-btn" class="icon-btn" style="border:none;background:none;color:#fff;margin-right:2px;" onclick="toggleSidebar()"><i class="ti ti-menu-2"></i></button>
-      <div class="qp-mark">QP</div>
-      <div class="qp-word">QuickPay</div>
-    </div>
-    <nav class="sb-nav">
-      <div class="sb-item" data-nav="dashboard" onclick="goTo('dashboard')"><i class="ti ti-layout-grid"></i><span>Dashboard</span></div>
-
-      <div class="sb-item" id="sb-recharge-toggle" onclick="toggleRechargeMenu()"><i class="ti ti-bolt"></i><span>Recharge</span><i class="ti ti-chevron-down chev"></i></div>
-      <div class="sb-sub" id="sb-recharge-sub">
-        <!-- filled by renderServiceNav() from /api/services -->
+    <div class="sb-top">
+      <div class="sb-logo">
+        <button id="hamburger-btn" class="icon-btn" style="border:none;background:none;color:#fff;margin-right:2px;width:28px;height:28px;padding:0;" onclick="toggleSidebar()" aria-label="Toggle sidebar"><i class="ti ti-menu-2"></i></button>
+        <div class="qp-mark">Q</div>
+        <div class="sb-brand-text">
+          <div class="qp-word">QuickPay</div>
+          <div class="qp-tag">Retailer Console</div>
+        </div>
       </div>
-
-      <div class="sb-item" data-nav="transactions" onclick="goTo('transactions')"><i class="ti ti-list-details"></i><span>Transactions</span></div>
-      <div class="sb-item" data-nav="ledger" onclick="goTo('ledger')"><i class="ti ti-receipt"></i><span>Ledger</span></div>
-      <div class="sb-item" data-nav="commission" onclick="goTo('commission')"><i class="ti ti-percentage"></i><span>Commission</span></div>
-      <div class="sb-item" data-nav="reports" onclick="goTo('reports')"><i class="ti ti-chart-bar"></i><span>Reports</span></div>
-      <div class="sb-item" data-nav="wallet" onclick="goTo('wallet')"><i class="ti ti-wallet"></i><span>Wallet</span></div>
-      <div class="sb-item" data-nav="support" onclick="goTo('support')"><i class="ti ti-headset"></i><span>Support</span></div>
-      <div class="sb-item" data-nav="settings" onclick="goTo('settings')"><i class="ti ti-settings"></i><span>Settings</span></div>
-    </nav>
+      <nav class="sb-nav">
+        <div class="sb-section">
+          <div class="sb-section-label">MAIN</div>
+          <div class="sb-item" data-nav="dashboard" onclick="goTo('dashboard')"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></div>
+          <div class="sb-item" id="sb-recharge-toggle" onclick="toggleRechargeMenu()"><i class="ti ti-refresh"></i><span>Recharge</span><i class="ti ti-chevron-down chev"></i></div>
+          <div class="sb-sub" id="sb-recharge-sub">
+            <!-- filled by renderServiceNav() from /api/services -->
+          </div>
+          <div class="sb-item" data-nav="transactions" onclick="goTo('transactions')"><i class="ti ti-list-details"></i><span>Transactions</span></div>
+          <div class="sb-item" data-nav="ledger" onclick="goTo('ledger')"><i class="ti ti-book"></i><span>Ledger</span></div>
+          <div class="sb-item" data-nav="wallet" onclick="goTo('wallet')"><i class="ti ti-wallet"></i><span>Wallet</span></div>
+        </div>
+        <div class="sb-section">
+          <div class="sb-section-label">BUSINESS</div>
+          <div class="sb-item" data-nav="reports" onclick="goTo('reports')"><i class="ti ti-chart-bar"></i><span>Reports</span></div>
+          <div class="sb-item" data-nav="commission" onclick="goTo('commission')"><i class="ti ti-percentage"></i><span>Commission</span></div>
+        </div>
+        <div class="sb-section">
+          <div class="sb-section-label">SUPPORT</div>
+          <div class="sb-item" data-nav="support" onclick="goTo('support')"><i class="ti ti-headset"></i><span>Support</span></div>
+          <div class="sb-item" data-nav="settings" onclick="goTo('settings')"><i class="ti ti-settings"></i><span>Settings</span></div>
+        </div>
+      </nav>
+    </div>
     <div class="sb-foot">
-      <div class="name" id="sb-retailer-name">—</div>
-      <div class="id" id="sb-retailer-id">—</div>
+      <div class="sb-profile">
+        <div class="name" id="sb-retailer-name">—</div>
+        <div class="id" id="sb-retailer-id">—</div>
+      </div>
       <button class="sb-logout" onclick="doLogout()"><i class="ti ti-logout"></i><span>Logout</span></button>
     </div>
   </aside>
@@ -1600,18 +1724,26 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
   <!-- Content -->
   <div id="content-area">
     <div id="topbar">
-      <div style="display:flex;align-items:center;gap:10px;">
+      <div class="topbar-left">
         <button type="button" id="hamburger-btn-mobile" class="icon-btn hidden" onclick="toggleSidebar()" aria-label="Open menu"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
         <div class="page-title" id="page-title">Dashboard</div>
+        <div class="topbar-search" role="search">
+          <i class="ti ti-search" aria-hidden="true"></i>
+          <input type="search" placeholder="Search retailers, TXN ID…" aria-label="Search retailers, TXN ID" autocomplete="off">
+        </div>
+        <div class="topbar-date"><i class="ti ti-calendar-event" aria-hidden="true"></i><span id="topbar-date-label">Today</span></div>
       </div>
       <div class="topbar-right">
         <div class="wallet-pill"><i class="ti ti-wallet"></i><span id="topbar-balance">₹0.00</span></div>
-        <button type="button" class="icon-btn" aria-label="Notifications unavailable" disabled title="Notifications unavailable"><i class="ti ti-bell" aria-hidden="true"></i></button>
+        <button type="button" class="icon-btn" aria-label="Notifications" title="Notifications"><i class="ti ti-bell" aria-hidden="true"></i><span class="notif-badge" aria-hidden="true">3</span></button>
         <div class="profile-dd">
           <button type="button" class="profile-trigger" onclick="toggleProfileMenu()" aria-label="Account menu" aria-haspopup="true" aria-expanded="false" id="profile-trigger-btn">
             <div class="profile-avatar" id="profile-avatar" aria-hidden="true">R</div>
-            <span id="profile-name-short">Retailer</span>
-            <i class="ti ti-chevron-down" style="font-size:13px;" aria-hidden="true"></i>
+            <span class="profile-meta">
+              <span class="profile-name" id="profile-name-short">Retailer</span>
+              <span class="profile-role">Retailer</span>
+            </span>
+            <i class="ti ti-chevron-down" aria-hidden="true"></i>
           </button>
           <div class="profile-menu" id="profile-menu">
             <a href="#" onclick="goToSettingsTab('profile'); return false;"><i class="ti ti-user"></i>Profile</a>
@@ -1625,15 +1757,15 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 
     <div id="content-inner">
 
-      <!-- ============ DASHBOARD V2.1 ============ -->
+      <!-- ============ DASHBOARD V2.1 — Figma 16:301 ============ -->
       <div class="screen" id="screen-dashboard">
         <div class="dash-header">
           <div>
             <h2 id="dash-greeting">Good morning</h2>
-            <div class="sub" id="dash-date"></div>
+            <div class="sub" id="dash-date">Ready for recharge</div>
           </div>
           <div class="dash-cta">
-            <button type="button" class="btn primary" onclick="goTo('recharge')"><i class="ti ti-bolt"></i> Recharge Now</button>
+            <button type="button" class="btn primary" onclick="goTo('recharge')"><i class="ti ti-refresh"></i> Recharge Now</button>
           </div>
         </div>
 
@@ -1647,8 +1779,8 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 
         <div class="dash-top-row">
           <div class="card dash-wallet">
-            <div class="kpi-icon kpi-icon-blue"><i class="ti ti-wallet"></i></div>
             <div class="dash-wallet-label">
+              <i class="ti ti-wallet" aria-hidden="true"></i>
               Available Balance
               <button type="button" class="eye-btn" id="dash-balance-eye" onclick="toggleDashBalanceVisibility()" aria-label="Toggle balance visibility" title="Toggle visibility">
                 <i class="ti ti-eye" id="dash-balance-eye-icon"></i>
@@ -1663,55 +1795,38 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
               <button type="button" class="btn" onclick="goTo('ledger')"><i class="ti ti-book"></i> Ledger</button>
             </div>
           </div>
-          <div>
-            <div class="section-head" style="margin-bottom:10px;"><h3 style="font-size:14px;">Quick Actions</h3></div>
+          <div class="card dash-qa-panel">
+            <h3 class="qa-title">Quick Actions</h3>
             <div class="qa-grid" id="dash-qa-grid">
               <!-- service tiles + fixed actions; rendered by renderQuickActions() -->
             </div>
           </div>
         </div>
 
-        <div class="section-head"><h3>Today's Business</h3></div>
         <div class="kpi-grid" id="dash-kpi-grid">
           <div class="card kpi-card">
-            <div class="kpi-card-header">
-              <div>
-                <div class="kpi-label">Today's Volume</div>
-                <div class="kpi-value" id="kpi-today">—</div>
-              </div>
-              <div class="kpi-icon kpi-icon-purple"><i class="ti ti-trending-up"></i></div>
-            </div>
+            <span class="kpi-badge up">↗ +8.2%</span>
+            <div class="kpi-label">Today’s Business</div>
+            <div class="kpi-value" id="kpi-today">—</div>
             <div class="kpi-sub" id="kpi-today-volume-sub">Successful recharge amount</div>
           </div>
+          <div class="card kpi-card">
+            <span class="kpi-badge up">↗ +5.1%</span>
+            <div class="kpi-label">Today’s Commission</div>
+            <div class="kpi-value" id="kpi-commission-today-val">—</div>
+            <div class="kpi-sub" id="kpi-commission-today">From successful recharges</div>
+          </div>
           <div class="card kpi-card tone-success">
-            <div class="kpi-card-header">
-              <div>
-                <div class="kpi-label">Successful Txns</div>
-                <div class="kpi-value" id="kpi-success-count">—</div>
-              </div>
-              <div class="kpi-icon kpi-icon-green"><i class="ti ti-circle-check"></i></div>
-            </div>
+            <span class="kpi-badge up">↗ +3</span>
+            <div class="kpi-label">Successful Txns</div>
+            <div class="kpi-value" id="kpi-success-count">—</div>
             <div class="kpi-sub" id="kpi-today-count">—</div>
           </div>
           <div class="card kpi-card tone-warning">
-            <div class="kpi-card-header">
-              <div>
-                <div class="kpi-label">Pending</div>
-                <div class="kpi-value" id="kpi-pending-count">—</div>
-              </div>
-              <div class="kpi-icon kpi-icon-amber"><i class="ti ti-clock"></i></div>
-            </div>
+            <span class="kpi-badge warn">↗ Needs attention</span>
+            <div class="kpi-label">Pending Txns</div>
+            <div class="kpi-value" id="kpi-pending-count">—</div>
             <div class="kpi-sub" id="kpi-pending-sub">Awaiting confirmation</div>
-          </div>
-          <div class="card kpi-card">
-            <div class="kpi-card-header">
-              <div>
-                <div class="kpi-label">Commission Today</div>
-                <div class="kpi-value" id="kpi-commission-today-val">—</div>
-              </div>
-              <div class="kpi-icon kpi-icon-green"><i class="ti ti-percentage"></i></div>
-            </div>
-            <div class="kpi-sub" id="kpi-commission-today">From successful recharges</div>
           </div>
         </div>
 
@@ -1728,12 +1843,12 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             <div class="dash-panel-head">
               <div>
                 <h3>Business Trend</h3>
-                <div class="panel-sub" id="dash-trend-sub">Successful recharge volume</div>
+                <div class="panel-sub" id="dash-trend-sub">Recharge volume · Last 7 days</div>
               </div>
               <div class="trend-filters" role="tablist">
                 <button type="button" class="trend-filter active" data-trend="7" onclick="setDashTrendRange(7)">7D</button>
                 <button type="button" class="trend-filter" data-trend="30" onclick="setDashTrendRange(30)">30D</button>
-                <button type="button" class="trend-filter" data-trend="month" onclick="setDashTrendRange('month')">Month</button>
+                <button type="button" class="trend-filter" data-trend="month" onclick="setDashTrendRange('month')">This Month</button>
               </div>
             </div>
             <div id="dash-trend-chart" class="trend-chart"></div>
@@ -1742,13 +1857,13 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             <div class="dash-panel-head">
               <div>
                 <h3>Transaction Status Today</h3>
-                <div class="panel-sub">By recharge state</div>
+                <div class="panel-sub">Live today</div>
               </div>
             </div>
             <div class="status-today">
               <div class="status-total">
                 <div class="n" id="status-today-total">0</div>
-                <div class="t">Total</div>
+                <div class="t">total</div>
               </div>
               <div class="status-legend">
                 <div class="status-legend-row"><span class="left"><span class="status-dot success"></span>Success</span><span class="count" id="status-success">0</span></div>
@@ -1760,8 +1875,14 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           </div>
         </div>
 
-        <div class="section-head"><h3>Recent Transactions</h3><a onclick="goTo('transactions')">View All</a></div>
         <div class="card dash-recent-card">
+          <div class="dash-recent-head">
+            <div>
+              <h3>Recent Transactions</h3>
+              <div class="panel-sub">Latest prepaid, DTH, and wallet activity</div>
+            </div>
+            <a onclick="goTo('transactions')">View All Transactions</a>
+          </div>
           <div id="dash-recent-wrap">
             <div class="state-block"><div class="skel skel-line" style="width:60%;margin:8px auto;"></div><div class="skel skel-line" style="width:80%;margin:8px auto;"></div></div>
           </div>
