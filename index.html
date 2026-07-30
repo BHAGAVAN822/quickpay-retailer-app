@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js" defer></script>
 <style>
 /* =========================================================================
    DESIGN SYSTEM — QuickPay Retailer V2 (Figma file rUiecXxyXGj0hMh1f8L06c)
@@ -2064,7 +2065,192 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 @media (max-width:639px){
   #bottom-nav{display:flex;}
   /* Clear ~67px nav + gap; keep toast above bottom bar */
-  #toast{bottom:calc(88px + env(safe-area-inset-bottom,0px));}
+  #toast,#toast-container{top:calc(12px + env(safe-area-inset-top,0px));right:12px;left:auto;bottom:auto;}
+}
+
+
+/* =========================================================================
+   MOTION SYSTEM V1.0 — transform/opacity only; respects prefers-reduced-motion
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .lottie-container { display: none !important; }
+  .count-animation { transition: none !important; }
+}
+.will-animate {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+@keyframes qp-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes qp-slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes qp-slide-down {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes qp-slide-right {
+  from { opacity: 0; transform: translateX(100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes qp-scale-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes qp-shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-6px); }
+  40%       { transform: translateX(6px); }
+  60%       { transform: translateX(-4px); }
+  80%       { transform: translateX(4px); }
+}
+@keyframes qp-pulse-amber {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+@keyframes qp-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes qp-count-highlight {
+  0%   { color: var(--success, #15803D); transform: scale(1.05); }
+  100% { color: inherit; transform: scale(1); }
+}
+.anim-fade-in    { animation: qp-fade-in 300ms ease forwards; }
+.anim-slide-up   { animation: qp-slide-up 350ms ease forwards; }
+.anim-slide-down { animation: qp-slide-down 250ms ease forwards; }
+.anim-scale-in   { animation: qp-scale-in 220ms ease forwards; }
+.anim-shake      { animation: qp-shake 400ms ease; }
+.anim-pulse-amber { animation: qp-pulse-amber 1.5s ease infinite; }
+.anim-spin       { animation: qp-spin 800ms linear infinite; }
+.anim-delay-1 { animation-delay: 100ms; opacity: 0; }
+.anim-delay-2 { animation-delay: 200ms; opacity: 0; }
+.anim-delay-3 { animation-delay: 300ms; opacity: 0; }
+.anim-delay-4 { animation-delay: 400ms; opacity: 0; }
+.lottie-container{display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* Modal motion */
+.modal-backdrop.show{
+  animation: qp-fade-in 200ms ease forwards;
+}
+.modal-backdrop.show .modal-box,
+.modal-backdrop.show .rc-result-card,
+.modal-backdrop.show .confirm-modal{
+  animation: qp-scale-in 220ms ease forwards;
+}
+.modal-backdrop.closing{
+  animation: qp-fade-in 150ms ease reverse forwards;
+}
+.modal-backdrop.closing .modal-box,
+.modal-backdrop.closing .rc-result-card{
+  animation: qp-scale-in 150ms ease reverse forwards;
+}
+
+/* Drawer motion — keep existing geometry; extend timing + opacity */
+.drawer{
+  transition: transform 250ms ease, opacity 250ms ease, visibility 250ms ease;
+  opacity: 0;
+}
+.drawer.show{ opacity: 1; }
+.drawer-backdrop{
+  opacity: 0;
+  transition: opacity 250ms ease;
+}
+.drawer-backdrop.show{
+  display: block;
+  opacity: 1;
+}
+
+/* Toast motion */
+#toast{
+  top: 20px; right: 20px; left: auto; bottom: auto;
+  transform: translateY(-16px);
+  transition: none;
+}
+#toast.show{
+  animation: qp-slide-down 300ms ease forwards;
+  opacity: 1;
+  transform: translateY(0);
+}
+#toast.dismissing{
+  animation: qp-slide-down 200ms ease reverse forwards;
+}
+#toast-container{
+  position:fixed;top:20px;right:20px;z-index:9999;
+  display:flex;flex-direction:column;gap:8px;pointer-events:none;
+}
+#toast-container .toast-item{
+  pointer-events:auto;background:var(--text-primary);color:#fff;
+  padding:12px 20px;border-radius:8px;font-size:13px;font-weight:500;
+  max-width:min(90vw,360px);box-shadow:0 8px 24px rgba(0,0,0,.2);
+  animation: qp-slide-down 300ms ease forwards;
+}
+#toast-container .toast-item.dismissing{
+  animation: qp-slide-down 200ms ease reverse forwards;
+}
+#toast-container .toast-item.toast-success{background:#047857;}
+#toast-container .toast-item.toast-error{background:#B91C1C;}
+
+/* Button micro-interactions (transform/opacity/shadow only) */
+.btn{
+  transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+.btn:hover:not(:disabled){
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.btn:active:not(:disabled){
+  transform: scale(0.97);
+  transition-duration: 100ms;
+}
+.btn:disabled{ transition: none; }
+
+/* Card lift */
+.card, .kpi-card, .stat-card, .tx-kpi, .reports-kpi, .wallet-bal-card, .summary-card{
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.card:hover, .kpi-card:hover, .stat-card:hover, .tx-kpi:hover, .reports-kpi:hover, .wallet-bal-card:hover, .summary-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+}
+
+/* Table row hover transition */
+.tx-table tbody tr, .ledger-table tbody tr, .wallet-table tbody tr, .reports-table tbody tr, .commission-table tbody tr{
+  transition: background 120ms ease;
+}
+.badge, .status-badge{
+  transition: background 150ms ease, color 150ms ease, opacity 150ms ease;
+}
+
+/* Sidebar micro — color/bg only; active bar via opacity on existing border feel */
+.sb-item{
+  transition: background 200ms ease, color 200ms ease;
+}
+.sb-item::after{
+  content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;
+  background:var(--color-bg-brand);border-radius:0 2px 2px 0;
+  transform: scaleY(0);opacity:0;
+  transition: transform 200ms ease, opacity 200ms ease;
+  pointer-events:none;
+}
+.sb-item.active::after{
+  transform: scaleY(1);opacity:1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:hover:not(:disabled),
+  .card:hover, .kpi-card:hover, .stat-card:hover,
+  .tx-kpi:hover, .reports-kpi:hover, .wallet-bal-card:hover, .summary-card:hover{
+    transform: none; box-shadow: inherit;
+  }
 }
 
 </style>
@@ -3339,6 +3525,8 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 <div class="modal-backdrop" id="rc-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="rc-modal-title" hidden>
   <div class="modal-box" id="rc-modal-box" data-figma="50:196/50:291"></div>
 </div>
+<!-- Motion V1 Lottie hosts (moved into modal result DOM when needed) -->
+<div id="qp-lottie-pool" hidden aria-hidden="true" data-lottie-paths="1"></div>
 
 <!-- Transaction detail drawer -->
 <div class="drawer" id="tx-drawer" role="dialog" aria-modal="true" aria-labelledby="tx-drawer-title" hidden>
@@ -3653,15 +3841,240 @@ function statusBadge(state_, refundStatus) {
   return '<span class="badge badge-pending">' + dot + escapeHtml(state_ || "Unknown") + '</span>';
 }
 
-let toastTimer = null;
-function showToast(msg) {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("toast");
-  t.classList.add("show");
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.classList.remove("show"); t.classList.remove("toast"); }, 3200);
+
+/* =========================================================================
+   MOTION SYSTEM V1.0 — UI enhancement only (never drives business logic)
+   ========================================================================= */
+function prefersReducedMotion() {
+  try {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch (_e) {
+    return false;
+  }
 }
+
+let qpLottie = { success: null, failed: null, processing: null, wallet: null, ready: false };
+const QP_LOTTIE_PATHS = {
+  success: "https://assets9.lottiefiles.com/packages/lf20_jbrw3hcz.json",
+  failed: "https://assets4.lottiefiles.com/packages/lf20_qpwbiyxf.json",
+  processing: "https://assets3.lottiefiles.com/packages/lf20_poqmycwy.json",
+};
+
+function qpLottieFallback(el, kind) {
+  if (!el) return;
+  if (kind === "success") {
+    el.innerHTML = '<i class="ti ti-circle-check" style="font-size:80px;color:#00A651" aria-hidden="true"></i>';
+  } else if (kind === "failed") {
+    el.innerHTML = '<i class="ti ti-circle-x" style="font-size:80px;color:#B91C1C" aria-hidden="true"></i>';
+  } else {
+    el.innerHTML = '<i class="ti ti-loader-2 anim-spin" style="font-size:48px;color:#1D4ED8" aria-hidden="true"></i>';
+  }
+}
+
+function qpEnsureLottie(kind) {
+  const id = "lottie-" + kind;
+  const el = document.getElementById(id);
+  if (!el) return null;
+  if (prefersReducedMotion() || typeof lottie === "undefined" || !lottie.loadAnimation) {
+    qpLottieFallback(el, kind);
+    return null;
+  }
+  try {
+    if (qpLottie[kind]) {
+      try { qpLottie[kind].destroy(); } catch (_e) {}
+      qpLottie[kind] = null;
+    }
+    el.innerHTML = "";
+    const anim = lottie.loadAnimation({
+      container: el,
+      renderer: "svg",
+      loop: kind === "processing",
+      autoplay: false,
+      path: QP_LOTTIE_PATHS[kind],
+    });
+    qpLottie[kind] = anim;
+    return anim;
+  } catch (e) {
+    qpLottieFallback(el, kind);
+    return null;
+  }
+}
+
+function qpPlayLottie(kind) {
+  const el = document.getElementById("lottie-" + kind);
+  if (!el) return;
+  el.style.display = "block";
+  ["success", "failed", "processing"].forEach(function (k) {
+    if (k === kind) return;
+    const o = document.getElementById("lottie-" + k);
+    if (o) o.style.display = "none";
+  });
+  if (prefersReducedMotion()) {
+    qpLottieFallback(el, kind);
+    return;
+  }
+  try {
+    const anim = qpEnsureLottie(kind);
+    if (anim) {
+      if (kind === "processing") anim.play();
+      else anim.goToAndPlay(0, true);
+    }
+  } catch (e) {
+    qpLottieFallback(el, kind);
+  }
+}
+
+function stopProcessingAnimation() {
+  if (processingTimer) { clearTimeout(processingTimer); processingTimer = null; }
+  try {
+    if (qpLottie.processing) qpLottie.processing.stop();
+  } catch (_e) {}
+  const live = document.getElementById("lottie-processing");
+  if (live) live.style.display = "none";
+}
+
+let processingTimer = null;
+let processingStartTime = 0;
+function startProcessingTimeout() {
+  if (processingTimer) clearTimeout(processingTimer);
+  processingStartTime = Date.now();
+  processingTimer = setTimeout(function () {
+    const msg = document.getElementById("processing-msg");
+    if (msg) {
+      msg.textContent = "Still processing...";
+      msg.classList.add("anim-fade-in");
+    }
+  }, 5000);
+}
+
+function animateRechargeSuccess(el) {
+  if (!el) return;
+  if (prefersReducedMotion()) {
+    el.classList.add("anim-fade-in");
+    const icon = el.querySelector(".rc-result-icon");
+    if (icon) icon.style.display = "";
+    const lot = el.querySelector(".lottie-container");
+    if (lot) lot.style.display = "none";
+    return;
+  }
+  qpPlayLottie("success");
+  const receipt = el.querySelector(".recharge-receipt");
+  if (receipt) receipt.classList.add("will-animate", "anim-slide-up");
+  const txnId = el.querySelector(".txn-id");
+  if (txnId) txnId.classList.add("will-animate", "anim-fade-in", "anim-delay-1");
+  const btns = el.querySelectorAll(".result-action-btn");
+  btns.forEach(function (btn, i) {
+    btn.classList.add("will-animate", "anim-fade-in");
+    btn.style.animationDelay = ((i + 2) * 150) + "ms";
+    btn.style.opacity = "0";
+  });
+}
+
+function animateRechargeFailed(el) {
+  if (!el) return;
+  if (prefersReducedMotion()) {
+    el.classList.add("anim-fade-in");
+    const icon = el.querySelector(".rc-result-icon");
+    if (icon) icon.style.display = "";
+    const lot = el.querySelector(".lottie-container");
+    if (lot) lot.style.display = "none";
+    return;
+  }
+  qpPlayLottie("failed");
+  const card = el.querySelector(".result-card") || el;
+  card.classList.add("anim-shake");
+  card.addEventListener("animationend", function () {
+    card.classList.remove("anim-shake");
+  }, { once: true });
+  const banner = el.querySelector(".error-banner");
+  if (banner) banner.classList.add("anim-fade-in");
+}
+
+function animateRechargePending(el) {
+  if (!el) return;
+  const indicator = el.querySelector(".pending-indicator");
+  if (indicator && !prefersReducedMotion()) {
+    indicator.classList.add("anim-pulse-amber");
+  }
+}
+
+let prevBalanceRupees = null;
+function animateBalanceChange(element, fromVal, toVal) {
+  if (!element) return;
+  if (prefersReducedMotion()) {
+    element.textContent = "Main " + formatMoney(toVal);
+    return;
+  }
+  const duration = 600;
+  const start = performance.now();
+  const fromN = Number(fromVal) || 0;
+  const toN = Number(toVal) || 0;
+  function update(timestamp) {
+    const elapsed = timestamp - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = fromN + (toN - fromN) * eased;
+    element.textContent = "Main " + formatMoney(current);
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    } else {
+      element.style.animation = "qp-count-highlight 500ms ease";
+      setTimeout(function () { element.style.animation = ""; }, 500);
+    }
+  }
+  requestAnimationFrame(update);
+}
+
+
+let toastTimer = null;
+const toastQueue = [];
+let toastBusy = false;
+
+function showToast(message, type, duration) {
+  type = type || "info";
+  duration = duration == null ? 4000 : duration;
+  const msg = message == null ? "" : String(message);
+
+  /* Prefer queue container when motion system active; keep #toast as a11y fallback */
+  let container = document.getElementById("toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toast-container";
+    container.setAttribute("aria-live", "polite");
+    document.body.appendChild(container);
+  }
+  const legacy = document.getElementById("toast");
+  if (legacy) {
+    legacy.textContent = msg;
+    legacy.classList.add("show");
+    /* hide legacy visually when container used */
+    legacy.style.opacity = "0";
+    legacy.style.pointerEvents = "none";
+  }
+
+  const toast = document.createElement("div");
+  toast.className = "toast-item toast-" + type + (prefersReducedMotion() ? "" : " anim-slide-down");
+  toast.setAttribute("role", "status");
+  toast.textContent = msg;
+  container.appendChild(toast);
+
+  if (toastTimer) clearTimeout(toastTimer);
+  const dismissMs = prefersReducedMotion() ? Math.min(duration, 2000) : duration;
+  setTimeout(function () {
+    if (prefersReducedMotion()) {
+      toast.remove();
+    } else {
+      toast.classList.add("dismissing");
+      toast.addEventListener("animationend", function () { toast.remove(); }, { once: true });
+      setTimeout(function () { if (toast.parentNode) toast.remove(); }, 280);
+    }
+    if (legacy) {
+      legacy.classList.remove("show");
+      legacy.style.opacity = "";
+    }
+  }, dismissMs);
+}
+
 function retryBtn(fnCall) {
   return '<br><button class="btn sm" style="margin-top:12px;" onclick="' + fnCall + '">Retry</button>';
 }
@@ -3873,8 +4286,26 @@ async function refreshWalletBalance() {
     return body;
   }
   if (body && body.status === "success") {
+    const newMain = Number(body.main_balance) || 0;
+    const balEl = document.getElementById("topbar-balance");
+    const shouldAnim = prevBalanceRupees != null && balEl && newMain !== prevBalanceRupees;
     state.wallets = { main: body.main_balance, commission: body.commission_balance, dmr: body.dmr_balance, total: body.total_balance };
-    renderIdentityAndBalance();
+    if (shouldAnim) {
+      animateBalanceChange(balEl, prevBalanceRupees, newMain);
+      /* Keep sidebar/profile in sync without overwriting the counting topbar mid-flight */
+      const name = state.retailerName || "Retailer";
+      const sn = document.getElementById("sb-retailer-name");
+      const si = document.getElementById("sb-retailer-id");
+      const pn = document.getElementById("profile-name-short");
+      const pa = document.getElementById("profile-avatar");
+      if (sn) sn.textContent = name;
+      if (si) si.textContent = "Partner #" + (state.partnerId || "-");
+      if (pn) pn.textContent = name.split(" ")[0];
+      if (pa) pa.textContent = name.charAt(0).toUpperCase();
+    } else {
+      renderIdentityAndBalance();
+    }
+    prevBalanceRupees = newMain;
   }
   return body;
 }
@@ -4830,18 +5261,24 @@ function renderInsufficientWalletModal() {
 
 function renderProcessingModal() {
   const box = document.getElementById("rc-modal-box");
-  box.className = "modal-box rc-result-card";
+  box.className = "modal-box rc-result-card result-card";
   box.innerHTML =
-    '<div class="rc-status-badge processing">Processing Recharge</div>'
-    + '<div class="spinner" aria-hidden="true"></div>'
-    + '<div class="rc-result-amount">' + formatMoney(state.rc.amount) + "</div>"
+    '<div class="rc-status-badge processing pending-indicator">Processing Recharge</div>'
+    + '<div id="lottie-processing" class="lottie-container" style="width:80px;height:80px;margin:0 auto;"></div>'
+    + '<div class="spinner" aria-hidden="true" style="display:none;"></div>'
+    + '<div class="rc-result-amount recharge-receipt">' + formatMoney(state.rc.amount) + "</div>"
     + '<div class="rc-result-meta">' + escapeHtml(operatorDisplayName()) + " · " + maskMobile(state.rc.mobile) + "</div>"
     + '<div class="result-title" id="rc-modal-title" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Processing...</div>'
-    + '<div class="rc-result-sub">Please wait while we confirm the transaction.</div>'
+    + '<div class="rc-result-sub" id="processing-msg">Please wait while we confirm the transaction.</div>'
     + '<div class="rc-result-note info">Do not close this window or submit again.</div>'
     + '<div class="modal-actions">'
     + '<button type="button" class="btn" disabled>Processing…</button>'
     + '<button type="button" class="btn" disabled>Disabled</button></div>';
+  startProcessingTimeout();
+  try { qpPlayLottie("processing"); } catch (_e) {
+    const spin = box.querySelector(".spinner");
+    if (spin) spin.style.display = "";
+  }
 }
 
 
@@ -4852,8 +5289,17 @@ function closeRcModal() {
   if (rcSubmitting) return;
   const bd = document.getElementById("rc-modal-backdrop");
   if (!bd) return;
-  bd.classList.remove("show");
-  bd.setAttribute("hidden", "");
+  stopProcessingAnimation();
+  if (prefersReducedMotion() || !bd.classList.contains("show")) {
+    bd.classList.remove("show", "closing");
+    bd.setAttribute("hidden", "");
+    return;
+  }
+  bd.classList.add("closing");
+  setTimeout(function () {
+    bd.classList.remove("show", "closing");
+    bd.setAttribute("hidden", "");
+  }, 160);
 }
 function openRcModalBackdrop() {
   const bd = document.getElementById("rc-modal-backdrop");
@@ -4930,6 +5376,8 @@ function renderRechargeResult(kind, body, opts) {
   box.className = "modal-box rc-result-card";
 
   if (kind === "network_error") {
+    stopProcessingAnimation();
+    box.className = "modal-box rc-result-card result-card";
     box.innerHTML =
       '<div class="rc-result-icon fail"><i class="ti ti-wifi-off"></i></div>'
       + '<div class="rc-status-badge failed">Connection Error</div>'
@@ -4941,76 +5389,92 @@ function renderRechargeResult(kind, body, opts) {
   }
 
   if (kind === "success") {
+    stopProcessingAnimation();
     let walletLine = opts.postTxnBalanceOk
       ? ("New Balance " + formatMoney(state.wallets.main))
       : "New Balance updating shortly";
     const commission = (body.commission != null || body.commission_amount != null)
       ? formatMoney(body.commission != null ? body.commission : body.commission_amount)
       : null;
+    box.className = "modal-box rc-result-card result-card";
     box.innerHTML =
-      '<div class="rc-result-icon ok"><i class="ti ti-check"></i></div>'
+      '<div id="lottie-success" class="lottie-container" style="width:120px;height:120px;margin:0 auto;"></div>'
+      + '<div class="rc-result-icon ok" style="display:none;"><i class="ti ti-check"></i></div>'
       + '<div class="rc-status-badge success">Recharge Successful</div>'
+      + '<div class="recharge-receipt">'
       + '<div class="rc-result-amount">' + amount + "</div>"
       + '<div class="result-title" id="rc-modal-title">' + amount + " Recharge Successful</div>"
       + '<div class="rc-result-meta">' + opMeta + "</div>"
-      + '<div class="rc-result-ref">Transaction ID: ' + escapeHtml(txnRef) + "</div>"
+      + "</div>"
+      + '<div class="rc-result-ref txn-id">Transaction ID: ' + escapeHtml(txnRef) + "</div>"
       + (commission ? '<div class="rc-result-sub">Commission earned ' + commission + "</div>" : "")
       + '<div class="rc-result-sub">' + escapeHtml(walletLine) + "</div>"
       + '<div class="modal-actions">'
-      + '<button type="button" class="btn primary" onclick="closeRcModal();resetRechargeForm();">New Recharge</button>'
-      + '<button type="button" class="btn" onclick="closeRcModal();goTo(\'transactions\');">View in Transactions</button></div>';
+      + '<button type="button" class="btn primary result-action-btn" onclick="closeRcModal();resetRechargeForm();">New Recharge</button>'
+      + '<button type="button" class="btn result-action-btn" onclick="closeRcModal();goTo(\'transactions\');">View in Transactions</button></div>';
+    animateRechargeSuccess(box);
     return;
   }
 
   if (kind === "failed") {
+    stopProcessingAnimation();
     const refunded = body.refund_status === "refunded";
+    box.className = "modal-box rc-result-card result-card";
     if (refunded) {
       box.innerHTML =
-        '<div class="rc-result-icon fail"><i class="ti ti-x"></i></div>'
+        '<div id="lottie-failed" class="lottie-container" style="width:120px;height:120px;margin:0 auto;"></div>'
+        + '<div class="rc-result-icon fail" style="display:none;"><i class="ti ti-x"></i></div>'
         + '<div class="rc-status-badge failed">Recharge Failed</div>'
         + '<div class="rc-result-amount">' + amount + "</div>"
         + '<div class="result-title" id="rc-modal-title">Recharge Failed</div>'
         + '<div class="rc-result-meta">' + opMeta + "</div>"
-        + '<div class="rc-result-ref">Transaction ID: ' + escapeHtml(txnRef) + "</div>"
-        + '<div class="rc-result-note refund">' + amount + " refunded to Main Wallet</div>"
+        + '<div class="rc-result-ref txn-id">Transaction ID: ' + escapeHtml(txnRef) + "</div>"
+        + '<div class="rc-result-note refund error-banner">' + amount + " refunded to Main Wallet</div>"
         + '<div class="rc-result-sub">New Balance ' + formatMoney(state.wallets.main) + "</div>"
         + '<div class="modal-actions">'
-        + '<button type="button" class="btn primary block" onclick="prepareRechargeAgain()">Recharge Again</button></div>';
+        + '<button type="button" class="btn primary block result-action-btn" onclick="prepareRechargeAgain()">Recharge Again</button></div>';
+      animateRechargeFailed(box);
       return;
     }
     box.innerHTML =
-      '<div class="rc-result-icon fail"><i class="ti ti-x"></i></div>'
+      '<div id="lottie-failed" class="lottie-container" style="width:120px;height:120px;margin:0 auto;"></div>'
+      + '<div class="rc-result-icon fail" style="display:none;"><i class="ti ti-x"></i></div>'
       + '<div class="rc-status-badge failed">Recharge Failed</div>'
       + '<div class="rc-result-amount">' + amount + "</div>"
       + '<div class="result-title" id="rc-modal-title">Recharge Failed</div>'
       + '<div class="rc-result-meta">' + opMeta + "</div>"
-      + '<div class="rc-result-ref">Transaction ID: ' + escapeHtml(txnRef) + "</div>"
-      + '<div class="rc-result-note danger">' + escapeHtml(sanitizeRechargeFailureMessage(body.message || body.error || "No amount was deducted from your wallet.")) + "</div>"
+      + '<div class="rc-result-ref txn-id">Transaction ID: ' + escapeHtml(txnRef) + "</div>"
+      + '<div class="rc-result-note danger error-banner">' + escapeHtml(sanitizeRechargeFailureMessage(body.message || body.error || "No amount was deducted from your wallet.")) + "</div>"
       + '<div class="modal-actions">'
-      + '<button type="button" class="btn primary" onclick="prepareRechargeAgain()">Try Again</button>'
-      + '<button type="button" class="btn" onclick="closeRcModal();goTo(\'transactions\');">View Details</button></div>';
+      + '<button type="button" class="btn primary result-action-btn" onclick="prepareRechargeAgain()">Try Again</button>'
+      + '<button type="button" class="btn result-action-btn" onclick="closeRcModal();goTo(\'transactions\');">View Details</button></div>';
+    animateRechargeFailed(box);
     return;
   }
 
   // hold / processing / queued / draft / pending — stay Pending, never Success
+  stopProcessingAnimation();
   const isProcessing = kind === "processing";
   const pendingTitle = isProcessing ? "Recharge Processing" : "Recharge Pending";
   const badge = isProcessing ? "processing" : "pending";
   const badgeLabel = isProcessing ? "Processing Recharge" : "Recharge Pending";
+  box.className = "modal-box rc-result-card result-card";
   box.innerHTML =
-    '<div class="rc-result-icon pending"><i class="ti ti-clock"></i></div>'
-    + '<div class="rc-status-badge ' + badge + '">' + badgeLabel + "</div>"
+    '<div class="rc-result-icon pending pending-indicator"><i class="ti ti-clock"></i></div>'
+    + '<div class="rc-status-badge ' + badge + ' pending-indicator">' + badgeLabel + "</div>"
     + '<div class="rc-result-amount">' + amount + "</div>"
     + '<div class="result-title" id="rc-modal-title">' + pendingTitle + "</div>"
     + '<div class="rc-result-meta">' + opMeta + "</div>"
-    + '<div class="rc-result-ref">Transaction ID: ' + escapeHtml(txnRef) + "</div>"
+    + '<div class="rc-result-ref txn-id">Transaction ID: ' + escapeHtml(txnRef) + "</div>"
     + '<div class="rc-result-note warning">Do not retry this recharge until the final status is confirmed.</div>'
     + '<div class="modal-actions">'
     + (body.recharge_id != null
-      ? '<button type="button" class="btn primary block" onclick="checkRechargeStatus(' + body.recharge_id + ')">Check Status</button>'
-      : '<button type="button" class="btn primary block" onclick="closeRcModal();goTo(\'transactions\');">View Transactions</button>')
+      ? '<button type="button" class="btn primary block result-action-btn" onclick="checkRechargeStatus(' + body.recharge_id + ')">Check Status</button>'
+      : '<button type="button" class="btn primary block result-action-btn" onclick="closeRcModal();goTo(\'transactions\');">View Transactions</button>')
     + "</div>";
+  animateRechargePending(box);
 }
+
 
 
 function prepareRechargeAgain() {
