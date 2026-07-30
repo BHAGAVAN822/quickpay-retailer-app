@@ -1376,6 +1376,83 @@ a:focus:not(:focus-visible),
 /* =========================================================================
    WALLET V2 STYLES
    ========================================================================= */
+
+.wallet-bal-grid{
+  display:grid;grid-template-columns:minmax(280px,1.35fr) repeat(2,minmax(0,1fr));
+  gap:14px;margin-bottom:16px;
+}
+.wallet-bal-card{
+  padding:16px;display:flex;flex-direction:column;gap:12px;min-height:140px;
+  border-radius:var(--radius-xl,16px);cursor:pointer;
+  box-shadow:0 2px 4px rgba(15,23,41,.04),0 4px 12px -2px rgba(15,23,41,.08);
+  border:1px solid var(--color-border-default,#E2E8F0);background:var(--color-bg-surface,#fff);
+  transition:border-color .15s ease,box-shadow .15s ease;
+}
+.wallet-bal-card:hover{border-color:var(--color-border-brand,#A7F3D0);}
+.wallet-bal-card.active{
+  border-color:var(--color-border-brand,#059669);
+  box-shadow:0 0 0 1px var(--color-border-brand,#059669),0 2px 4px rgba(15,23,41,.04),0 4px 12px -2px rgba(15,23,41,.08);
+}
+.wallet-bal-card .wallet-bal-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.wallet-bal-icon{
+  width:36px;height:36px;border-radius:var(--radius-md,8px);display:flex;align-items:center;justify-content:center;
+  background:var(--color-bg-brand-subtle,#ECFDF5);color:var(--color-text-brand,#047857);flex-shrink:0;
+}
+.wallet-bal-icon i{font-size:20px;line-height:1;}
+.wallet-bal-chip{
+  display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:500;
+  background:var(--color-bg-success,#DCFCE7);color:var(--color-text-success,#15803D);line-height:14px;
+}
+.wallet-bal-chip.warn{background:var(--color-bg-warning,#FEF3C7);color:var(--color-text-warning,#B45309);}
+.wallet-bal-chip.muted{background:var(--color-bg-muted,#F1F5F9);color:var(--color-text-secondary,#64748B);}
+.wallet-bal-card .label{font-size:12px;font-weight:400;color:var(--color-text-secondary,#64748B);line-height:16px;margin:0;}
+.wallet-bal-card .bal{
+  font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--color-text-primary,#0F172A);
+  letter-spacing:-.02em;line-height:28px;margin:0;
+}
+.wallet-bal-card.wallet-bal-main .bal{font-size:28px;line-height:34px;font-weight:700;}
+.wallet-bal-card .wallet-balance-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;}
+.wallet-bal-card .wallet-balance-actions .btn{min-height:40px;font-size:13px;}
+@media (max-width:1023px){
+  .wallet-bal-grid{grid-template-columns:1fr;}
+  .wallet-bal-card.wallet-bal-main .bal{font-size:28px;}
+}
+.upi-quick{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 14px;}
+.upi-quick .upi-chip{
+  border:1px solid var(--color-border-default,#E2E8F0);background:#fff;border-radius:999px;
+  padding:8px 14px;font-size:13px;font-weight:500;color:var(--color-text-primary,#0F172A);
+  cursor:pointer;min-height:32px;line-height:normal;
+}
+.upi-quick .upi-chip:hover{background:var(--color-bg-muted,#F1F5F9);}
+.upi-quick .upi-chip.active{
+  background:var(--color-bg-brand-subtle,#ECFDF5);border:1.5px solid var(--color-border-brand,#059669);
+  color:var(--color-text-brand,#047857);font-weight:600;
+}
+.wallet-table th{height:40px;box-sizing:border-box;}
+.wallet-table tbody tr{height:56px;}
+.wallet-table tbody tr:nth-child(even){background:#FCFDFE;}
+.comm-page-intro{margin:0 0 16px;}
+.comm-page-intro h2{margin:0 0 4px;font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--color-text-primary);}
+.comm-page-intro .sub{font-size:13px;color:var(--text-secondary);}
+.summary-grid .summary-card{
+  min-height:140px;padding:16px;border-radius:var(--radius-xl,16px);
+  box-shadow:0 2px 4px rgba(15,23,41,.04),0 4px 12px -2px rgba(15,23,41,.08);
+  display:flex;flex-direction:column;gap:12px;justify-content:flex-end;
+}
+.summary-grid .summary-card .label-caps{font-size:12px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--color-text-secondary);}
+.summary-grid .summary-card .val{font-size:20px;font-weight:600;line-height:28px;letter-spacing:-.02em;}
+.commission-table th{height:40px;}
+.commission-table tbody tr{height:56px;}
+.commission-table tbody tr:nth-child(even){background:#FCFDFE;}
+.commission-table tbody tr:hover{background:var(--color-bg-muted,#F1F5F9);}
+.reports-kpi{
+  min-height:140px;border-radius:var(--radius-xl,16px);
+  box-shadow:0 2px 4px rgba(15,23,41,.04),0 4px 12px -2px rgba(15,23,41,.08);
+  display:flex;flex-direction:column;gap:8px;justify-content:flex-end;
+}
+.reports-table th{height:40px;}
+.reports-table tbody tr{height:56px;}
+.reports-table tbody tr:nth-child(even){background:#FCFDFE;}
 .wallet-page-intro{margin:var(--space-5) 0 var(--space-4);}
 .wallet-page-intro h2{margin:0 0 4px;font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--color-text-primary);}
 .wallet-page-intro .sub{font-size:13px;color:var(--text-secondary);}
@@ -2447,7 +2524,8 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 
       <!-- ============ COMMISSION REPORT ============ -->
       <div class="screen hidden" id="screen-commission">
-        <div class="greeting-row" style="margin-top:0;">
+        <div class="comm-page-intro">
+          <h2>Commission</h2>
           <div class="sub">Your earnings from recharges</div>
         </div>
         <div class="filter-bar">
@@ -2464,15 +2542,18 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
         </div>
 
         <div class="summary-grid">
-          <div class="card summary-card credit"><div class="label-caps">Today's Earnings</div><div class="val" id="commission-sum-today">₹0.00</div></div>
+          <div class="card summary-card credit"><div class="label-caps">Today Earned</div><div class="val" id="commission-sum-today">₹0.00</div></div>
           <div class="card summary-card credit"><div class="label-caps">This Month</div><div class="val" id="commission-sum-month">₹0.00</div></div>
-          <div class="card summary-card"><div class="label-caps">Selected Period</div><div class="val" id="commission-sum-period">₹0.00</div></div>
-          <div class="card summary-card"><div class="label-caps">Transactions</div><div class="val" id="commission-sum-count">0</div></div>
+          <div class="card summary-card"><div class="label-caps">Last Month</div><div class="val" id="commission-sum-last">₹0.00</div></div>
+          <div class="card summary-card credit"><div class="label-caps">Total Earned</div><div class="val" id="commission-sum-total">₹0.00</div></div>
+          <!-- legacy aliases kept for any external readers -->
+          <span id="commission-sum-period" class="hidden" aria-hidden="true"></span>
+          <span id="commission-sum-count" class="hidden" aria-hidden="true"></span>
         </div>
 
         <div class="card" style="padding:0;overflow:hidden;">
           <div style="overflow-x:auto;">
-            <table class="tx-table" id="commission-table" style="display:none;">
+            <table class="tx-table commission-table" id="commission-table" style="display:none;">
               <thead><tr><th>Date &amp; Time</th><th>Mobile</th><th>Operator</th><th class="num">Recharge Amount</th><th class="num">Commission</th><th class="num">Rate</th></tr></thead>
               <tbody id="commission-tbody"></tbody>
             </table>
@@ -2491,7 +2572,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
         <div class="section-head" style="margin-top:24px;"><h3>By Operator</h3></div>
         <div class="card" style="padding:0;overflow:hidden;">
           <div style="overflow-x:auto;">
-            <table class="tx-table" id="commission-operator-summary-table">
+            <table class="tx-table commission-table" id="commission-operator-summary-table">
               <thead><tr><th>Operator</th><th class="num">Transactions</th><th class="num">Total Business</th><th class="num">Commission</th><th class="num">Avg Rate</th></tr></thead>
               <tbody id="commission-operator-summary-tbody"></tbody>
             </table>
@@ -2579,25 +2660,28 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           <div class="title" id="reports-summary-title">Business Summary</div>
           <div class="reports-kpi-grid" id="reports-kpi-grid">
             <div class="card reports-kpi">
-              <div class="label-caps">Recharge Volume</div>
+              <div class="label-caps">Total Recharges</div>
+              <div class="val" id="reports-kpi-total">—</div>
+              <div class="sub" id="reports-kpi-total-sub">All statuses in period</div>
+            </div>
+            <div class="card reports-kpi tone-success">
+              <div class="label-caps">Success</div>
+              <div class="val" id="reports-kpi-success">—</div>
+              <div class="sub">Successful transactions</div>
+            </div>
+            <div class="card reports-kpi tone-danger">
+              <div class="label-caps">Failed</div>
+              <div class="val" id="reports-kpi-failed">—</div>
+              <div class="sub" id="reports-kpi-failed-sub">Failed in period</div>
+            </div>
+            <div class="card reports-kpi tone-brand">
+              <div class="label-caps">Total Amount</div>
               <div class="val" id="reports-kpi-amount">—</div>
               <div class="sub">Successful recharge amount</div>
             </div>
-            <div class="card reports-kpi tone-success">
-              <div class="label-caps">Successful Txns</div>
-              <div class="val" id="reports-kpi-success">—</div>
-              <div class="sub" id="reports-kpi-total-sub">of — total</div>
-            </div>
-            <div class="card reports-kpi">
-              <div class="label-caps">Success Rate</div>
-              <div class="val" id="reports-kpi-rate">—</div>
-              <div class="sub" id="reports-kpi-failed-sub">Failed — · Pending —</div>
-            </div>
-            <div class="card reports-kpi tone-brand">
-              <div class="label-caps">Commission</div>
-              <div class="val" id="reports-kpi-commission">—</div>
-              <div class="sub">From recharge history</div>
-            </div>
+            <!-- legacy aliases -->
+            <span id="reports-kpi-rate" class="hidden" aria-hidden="true"></span>
+            <span id="reports-kpi-commission" class="hidden" aria-hidden="true"></span>
           </div>
           <div class="reports-summary-note">
             Use generated reports for operational review; Ledger remains the source for wallet movement and running balance.
@@ -2629,7 +2713,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
         </div>
 
         <div class="reports-section-head">
-          <h3>Daily Trend</h3>
+          <h3>Day-wise</h3>
         </div>
         <div class="card reports-table-card" id="reports-daily-card">
           <div class="reports-table-wrap" style="overflow-x:auto;">
@@ -2680,28 +2764,55 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           <div class="sub">Manage balance, add funds and track wallet funding.</div>
         </div>
 
-        <div class="wallet-tabs" id="wallet-tabs" role="tablist" aria-label="Wallet type"></div>
+        <div class="wallet-tabs hidden" id="wallet-tabs" role="tablist" aria-label="Wallet type" hidden></div>
 
-        <div class="wallet-hero-grid">
-          <div class="card wallet-balance-card" id="wallet-balance-card">
-            <div class="label">Current Balance</div>
-            <div class="bal" id="w-balance">—</div>
-            <div class="updated" id="w-last-updated">Last updated —</div>
-            <div class="wallet-balance-actions">
-              <button type="button" class="btn primary" onclick="toggleUpiForm()" aria-label="Add money via UPI"><i class="ti ti-plus"></i> Add Money</button>
-              <button type="button" class="btn" onclick="goTo('ledger')" aria-label="View ledger">View Ledger</button>
+        <div class="wallet-bal-grid" id="wallet-bal-grid" role="tablist" aria-label="Wallet balances">
+          <div class="card wallet-bal-card wallet-bal-main active" id="wallet-card-main" role="tab" aria-selected="true" onclick="setWalletTab('main')" data-tab="main">
+            <div class="wallet-bal-top">
+              <div class="wallet-bal-icon" aria-hidden="true"><i class="ti ti-wallet"></i></div>
+              <span class="wallet-bal-chip">Primary</span>
+            </div>
+            <div class="label">Main Wallet</div>
+            <div class="bal" id="w-main">—</div>
+            <div class="updated" id="w-last-updated" style="font-size:11.5px;color:var(--text-secondary);">Last updated —</div>
+            <div class="wallet-balance-actions" onclick="event.stopPropagation()">
+              <button type="button" class="btn primary" onclick="toggleUpiForm()" aria-label="Add Money via UPI"><i class="ti ti-plus"></i> Add Money via UPI</button>
+              <button type="button" class="btn" onclick="toggleFundForm()" aria-label="Request Fund"><i class="ti ti-file-plus"></i> Request Fund</button>
             </div>
           </div>
-          <div class="wallet-kpi-grid">
+          <div class="card wallet-bal-card" id="wallet-card-commission" role="tab" aria-selected="false" onclick="setWalletTab('commission')" data-tab="commission">
+            <div class="wallet-bal-top">
+              <div class="wallet-bal-icon" aria-hidden="true"><i class="ti ti-percentage"></i></div>
+              <span class="wallet-bal-chip muted">Earnings</span>
+            </div>
+            <div class="label">Commission Wallet</div>
+            <div class="bal" id="w-commission">—</div>
+            <div class="sub" style="font-size:11.5px;color:var(--text-secondary);">Commission earned</div>
+          </div>
+          <div class="card wallet-bal-card" id="wallet-card-dmr" role="tab" aria-selected="false" onclick="setWalletTab('dmr')" data-tab="dmr">
+            <div class="wallet-bal-top">
+              <div class="wallet-bal-icon" aria-hidden="true"><i class="ti ti-building-bank"></i></div>
+              <span class="wallet-bal-chip warn">DMR</span>
+            </div>
+            <div class="label">DMR Wallet</div>
+            <div class="bal" id="w-dmr">—</div>
+            <div class="sub" style="font-size:11.5px;color:var(--text-secondary);">Money transfer wallet</div>
+          </div>
+        </div>
+
+        <!-- Legacy sync node for active-tab balance readers -->
+        <span id="w-balance" class="hidden" aria-hidden="true"></span>
+        <!-- KPI strip retained (today credit/debit/pending) -->
+        <div class="wallet-kpi-grid" style="margin-bottom:16px;">
             <div class="card wallet-kpi tone-credit">
               <div class="label-caps">Today's Credit</div>
               <div class="val" id="w-today-credit">—</div>
-              <div class="sub">From ledger for today</div>
+              <div class="sub">From ledger for selected wallet</div>
             </div>
             <div class="card wallet-kpi tone-debit">
               <div class="label-caps">Today's Debit</div>
               <div class="val" id="w-today-debit">—</div>
-              <div class="sub">From ledger for today</div>
+              <div class="sub">From ledger for selected wallet</div>
             </div>
             <div class="card wallet-kpi tone-warn">
               <div class="label-caps">Pending Amount</div>
@@ -2709,17 +2820,11 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
               <div class="sub" id="w-pending-sub">Fund requests awaiting review</div>
             </div>
             <div class="card wallet-kpi">
-              <div class="label-caps">Wallet</div>
+              <div class="label-caps">Selected</div>
               <div class="val" id="w-tab-label" style="font-size:16px;">Main</div>
               <div class="sub" id="w-tab-hint">Selected wallet</div>
             </div>
-          </div>
         </div>
-
-        <!-- Hidden IDs kept for any legacy reads -->
-        <span id="w-main" class="hidden" aria-hidden="true"></span>
-        <span id="w-commission" class="hidden" aria-hidden="true"></span>
-        <span id="w-dmr" class="hidden" aria-hidden="true"></span>
 
         <div class="wallet-qa-grid" aria-label="Quick actions">
           <button type="button" class="w-qa" onclick="toggleUpiForm()" aria-label="Add Money"><i class="ti ti-plus"></i><span class="t">Add Money</span><span class="s">UPI top-up</span></button>
@@ -2755,12 +2860,13 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
               <label for="upi-amount">Amount</label>
               <div class="amt-input-wrap"><span class="rupee">₹</span><input type="number" id="upi-amount" placeholder="0" min="100" max="50000" style="height:44px;" aria-label="UPI amount"></div>
             </div>
-            <div class="upi-quick">
-              <button type="button" class="btn sm" onclick="setUpiAmount(500)">₹500</button>
-              <button type="button" class="btn sm" onclick="setUpiAmount(1000)">₹1,000</button>
-              <button type="button" class="btn sm" onclick="setUpiAmount(2000)">₹2,000</button>
-              <button type="button" class="btn sm" onclick="setUpiAmount(5000)">₹5,000</button>
+            <div class="upi-quick" id="upi-quick-chips">
+              <button type="button" class="upi-chip" data-amt="500" onclick="setUpiAmount(500)">₹500</button>
+              <button type="button" class="upi-chip" data-amt="1000" onclick="setUpiAmount(1000)">₹1,000</button>
+              <button type="button" class="upi-chip" data-amt="2000" onclick="setUpiAmount(2000)">₹2,000</button>
+              <button type="button" class="upi-chip" data-amt="5000" onclick="setUpiAmount(5000)">₹5,000</button>
             </div>
+            <p style="font-size:12px;color:var(--color-text-muted,#94A3B8);margin:0 0 12px;">Min ₹100 · Max ₹50,000</p>
             <button class="btn primary block" id="upi-proceed-btn" onclick="proceedUpiPay()" style="min-height:44px;">Proceed to Pay</button>
           </div>
           <div id="upi-step-redirect" class="upi-redirect" style="display:none;">
@@ -2801,7 +2907,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
               <label class="radio-opt"><input type="radio" name="pay-mode" value="IMPS" checked> IMPS</label>
               <label class="radio-opt"><input type="radio" name="pay-mode" value="NEFT"> NEFT</label>
               <label class="radio-opt"><input type="radio" name="pay-mode" value="UPI"> UPI</label>
-              <label class="radio-opt"><input type="radio" name="pay-mode" value="Cash Deposit"> Cash Deposit</label>
+              <label class="radio-opt"><input type="radio" name="pay-mode" value="Cash"> Cash</label>
             </div>
           </div>
           <div class="rc-field">
@@ -2834,12 +2940,10 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             <table class="wallet-table" id="fund-hist-table">
               <thead>
                 <tr>
-                  <th>Created</th>
+                  <th>Date</th>
                   <th class="num">Amount</th>
                   <th>Reference</th>
-                  <th>Payment Mode</th>
                   <th>Status</th>
-                  <th>Action</th>
                 </tr>
               </thead>
               <tbody id="fund-hist-tbody"></tbody>
@@ -5674,9 +5778,9 @@ async function downloadLedgerExcel() {
    COMMISSION REPORT (Phase 3A Part D)
    ========================================================================= */
 function loadCommissionScreen() {
-  document.getElementById("commission-date-pills").innerHTML =
+    document.getElementById("commission-date-pills").innerHTML =
     [["today", "Today"], ["this_week", "This Week"], ["this_month", "This Month"], ["last_month", "Last Month"], ["custom", "Custom"]]
-      .map(([k, l]) => '<div class="date-pill' + (state.commission.dateRange === k ? " active" : "") + '" onclick="setCommissionDateRange(\'' + k + '\')">' + l + "</div>").join("");
+      .map(([k, l]) => '<button type="button" class="date-pill' + (state.commission.dateRange === k ? " active" : "") + '" onclick="setCommissionDateRange(\'' + k + '\')">' + l + "</button>").join("");
   if (!state.commission.dateFrom) setCommissionDateRange("this_month", true);
   else fetchAndRenderCommission();
 }
@@ -5752,10 +5856,19 @@ async function fetchAndRenderCommission() {
       return;
     }
 
-    document.getElementById("commission-sum-period").textContent = formatMoney(body.summary.total_commission);
-    document.getElementById("commission-sum-count").textContent = body.summary.transaction_count;
-    document.getElementById("commission-sum-today").textContent = formatMoney(body.summary.today_commission);
-    document.getElementById("commission-sum-month").textContent = formatMoney(body.summary.this_month_commission);
+    const sum = body.summary || {};
+    document.getElementById("commission-sum-today").textContent = formatMoney(sum.today_commission);
+    document.getElementById("commission-sum-month").textContent = formatMoney(sum.this_month_commission);
+    const lastMonth = sum.last_month_commission != null ? sum.last_month_commission : sum.last_month;
+    document.getElementById("commission-sum-last").textContent = lastMonth != null ? formatMoney(lastMonth) : "—";
+    const totalEarned = sum.total_earned != null ? sum.total_earned
+      : (sum.lifetime_commission != null ? sum.lifetime_commission : sum.total_commission);
+    document.getElementById("commission-sum-total").textContent = totalEarned != null ? formatMoney(totalEarned) : "—";
+    /* legacy aliases */
+    const periodEl = document.getElementById("commission-sum-period");
+    if (periodEl) periodEl.textContent = formatMoney(sum.total_commission);
+    const countEl = document.getElementById("commission-sum-count");
+    if (countEl) countEl.textContent = sum.transaction_count != null ? sum.transaction_count : "";
 
     state.commission.entries = body.entries;
     renderCommissionOperatorFilterOptions(body.entries);
@@ -5768,7 +5881,7 @@ async function fetchAndRenderCommission() {
     }
     table.style.display = "";
     tbody.innerHTML = body.entries.map((e) =>
-      '<tr><td>' + formatDateTime(e.date) + '</td><td>' + escapeHtml(e.recharge_mobile || "-") + '</td>'
+      '<tr><td>' + formatDateTime(e.date) + '</td><td>' + escapeHtml(e.recharge_mobile ? maskMobile(e.recharge_mobile) : "-") + '</td>'
       + '<td><span class="op-dot" style="background:' + operatorColor(e.operator_code) + ';"></span>' + escapeHtml(e.operator_name || e.operator_code || "-") + '</td>'
       + '<td class="num">' + formatMoney(e.recharge_amount) + '</td>'
       + '<td class="num"><span class="amt amt-credit">+' + formatMoney(e.commission_amount) + '</span></td>'
@@ -5778,7 +5891,7 @@ async function fetchAndRenderCommission() {
       '<div class="tx-card"><div class="tx-card-row1">'
       + '<div class="tx-card-mobile"><span class="op-dot" style="background:' + operatorColor(e.operator_code) + ';"></span>' + escapeHtml(e.operator_name || e.operator_code || "-") + '</div>'
       + '<div class="amt amt-credit">+' + formatMoney(e.commission_amount) + '</div></div>'
-      + '<div class="tx-card-row2"><div class="tx-card-time">' + escapeHtml(e.recharge_mobile || "-") + ' · ' + formatMoney(e.recharge_amount) + '</div>'
+      + '<div class="tx-card-row2"><div class="tx-card-time">' + escapeHtml(e.recharge_mobile ? maskMobile(e.recharge_mobile) : "-") + ' · ' + formatMoney(e.recharge_amount) + '</div>'
       + '<div style="color:var(--text-muted);font-size:12.5px;">' + (e.commission_rate != null ? e.commission_rate.toFixed(1) + "%" : "-") + '</div></div></div>'
     ).join("");
 
@@ -6084,7 +6197,7 @@ function filterReportsRows(rows) {
   });
 }
 function setReportsKpisLoading() {
-  ["amount", "success", "rate", "commission"].forEach((k) => {
+  ["total", "success", "failed", "amount", "rate", "commission"].forEach((k) => {
     const el = document.getElementById("reports-kpi-" + k);
     if (el) el.textContent = "…";
   });
@@ -6096,14 +6209,14 @@ function setReportsKpisLoading() {
   if (title) title.textContent = reportsSummaryTitle();
 }
 function setReportsKpisDash() {
-  ["amount", "success", "rate", "commission"].forEach((k) => {
+  ["total", "success", "failed", "amount", "rate", "commission"].forEach((k) => {
     const el = document.getElementById("reports-kpi-" + k);
     if (el) el.textContent = "—";
   });
   const totalSub = document.getElementById("reports-kpi-total-sub");
   const failedSub = document.getElementById("reports-kpi-failed-sub");
-  if (totalSub) totalSub.textContent = "of — total";
-  if (failedSub) failedSub.textContent = "Failed — · Pending —";
+  if (totalSub) totalSub.textContent = "All statuses in period";
+  if (failedSub) failedSub.textContent = "Failed in period";
 }
 function renderOperatorReport(byOp) {
   const opBody = document.getElementById("reports-operator-tbody");
@@ -6251,12 +6364,20 @@ async function fetchAndRenderReports() {
     const commission = rows.reduce((acc, r) => acc + (Number(r.commission_amount) || 0), 0);
     const rate = rows.length ? ((success.length / rows.length) * 100) : null;
 
-    document.getElementById("reports-kpi-amount").textContent = reportsMoney(amount);
+    const totalEl = document.getElementById("reports-kpi-total");
+    if (totalEl) totalEl.textContent = String(rows.length);
     document.getElementById("reports-kpi-success").textContent = String(success.length);
-    document.getElementById("reports-kpi-rate").textContent = rate == null ? "—" : rate.toFixed(1) + "%";
-    document.getElementById("reports-kpi-commission").textContent = reportsMoney(commission);
-    document.getElementById("reports-kpi-total-sub").textContent = "of " + rows.length + " total";
-    document.getElementById("reports-kpi-failed-sub").textContent = "Failed " + failed.length + " · Pending " + pending.length;
+    const failedEl = document.getElementById("reports-kpi-failed");
+    if (failedEl) failedEl.textContent = String(failed.length);
+    document.getElementById("reports-kpi-amount").textContent = reportsMoney(amount);
+    const rateEl = document.getElementById("reports-kpi-rate");
+    if (rateEl) rateEl.textContent = rate == null ? "—" : rate.toFixed(1) + "%";
+    const commEl = document.getElementById("reports-kpi-commission");
+    if (commEl) commEl.textContent = reportsMoney(commission);
+    const totalSub = document.getElementById("reports-kpi-total-sub");
+    if (totalSub) totalSub.textContent = pending.length ? (pending.length + " pending") : "All statuses in period";
+    const failedSub = document.getElementById("reports-kpi-failed-sub");
+    if (failedSub) failedSub.textContent = "Failed in period";
     document.getElementById("reports-summary-title").textContent = reportsSummaryTitle();
 
     const byOp = new Map();
@@ -6396,6 +6517,9 @@ async function loadWalletScreen() {
   if (!state.wallet) state.wallet = { tab: "main", lastUpdated: null, recent: [], fundRequests: [], bank: null };
   renderWalletTabs();
   setText("w-balance", "…");
+  setText("w-main", "…");
+  setText("w-commission", "…");
+  setText("w-dmr", "…");
   setText("w-today-credit", "…");
   setText("w-today-debit", "…");
   setText("w-pending-amount", "…");
@@ -6430,13 +6554,23 @@ async function loadWalletScreen() {
 
 function renderWalletTabs() {
   const tab = (state.wallet && state.wallet.tab) || "main";
-  document.getElementById("wallet-tabs").innerHTML =
-    [["main", "Main Wallet"], ["commission", "Commission Wallet"], ["dmr", "DMR Wallet"]]
-      .map(([k, l]) =>
-        '<button type="button" role="tab" class="wallet-tab' + (tab === k ? " active" : "")
-        + '" aria-selected="' + (tab === k ? "true" : "false") + '" onclick="setWalletTab(\'' + k + '\')">'
-        + l + "</button>"
-      ).join("");
+  const tabsHost = document.getElementById("wallet-tabs");
+  if (tabsHost) {
+    tabsHost.innerHTML =
+      [["main", "Main"], ["commission", "Commission"], ["dmr", "DMR"]]
+        .map(([k, l]) =>
+          '<button type="button" role="tab" class="wallet-tab' + (tab === k ? " active" : "")
+          + '" aria-selected="' + (tab === k ? "true" : "false") + '" onclick="setWalletTab(\'' + k + '\')">'
+          + l + "</button>"
+        ).join("");
+  }
+  ["main", "commission", "dmr"].forEach(function (k) {
+    const card = document.getElementById("wallet-card-" + k);
+    if (!card) return;
+    const on = tab === k;
+    card.classList.toggle("active", on);
+    card.setAttribute("aria-selected", on ? "true" : "false");
+  });
   setText("w-tab-label", walletTabLabel());
   const hint = document.getElementById("w-tab-hint");
   if (hint) {
@@ -6457,14 +6591,19 @@ function setWalletTab(tab) {
 
 function renderWalletSummary() {
   const bal = walletTabBalance();
-  // Only show a number after a successful refresh; otherwise keep — if never loaded.
   if (state.wallet && state.wallet.lastUpdated) {
+    setText("w-main", formatMoney(state.wallets.main));
+    setText("w-commission", formatMoney(state.wallets.commission));
+    setText("w-dmr", formatMoney(state.wallets.dmr));
     setText("w-balance", formatMoney(bal));
     const d = state.wallet.lastUpdated;
     setText("w-last-updated", "Last updated " + d.toLocaleString("en-IN", {
       day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"
     }));
   } else {
+    setText("w-main", "—");
+    setText("w-commission", "—");
+    setText("w-dmr", "—");
     setText("w-balance", "—");
     setText("w-last-updated", "Last updated —");
   }
@@ -6650,9 +6789,10 @@ function fundHistNextPage() { if (state.fundHist.page < state.fundHist.totalPage
 
 function fundStatusBadge(stateLabel) {
   const s = (stateLabel || "").toLowerCase();
-  if (s === "approved") return '<span class="badge badge-success">Approved</span>';
-  if (s === "rejected") return '<span class="badge badge-failed">Rejected</span>';
-  return '<span class="badge badge-pending">Pending</span>';
+  const dot = '<span class="badge-dot" aria-hidden="true"></span>';
+  if (s === "approved") return '<span class="badge badge-success">' + dot + 'Approved</span>';
+  if (s === "rejected") return '<span class="badge badge-failed">' + dot + 'Rejected</span>';
+  return '<span class="badge badge-pending">' + dot + 'Pending</span>';
 }
 
 async function fetchAndRenderFundHistory() {
@@ -6660,7 +6800,7 @@ async function fetchAndRenderFundHistory() {
   const cards = document.getElementById("fund-hist-cards");
   const stateEl = document.getElementById("fund-hist-state");
   const paginationEl = document.getElementById("fund-hist-pagination");
-  tbody.innerHTML = Array(3).fill('<tr><td colspan="6"><div class="skel skel-line"></div></td></tr>').join("");
+  tbody.innerHTML = Array(3).fill('<tr><td colspan="4"><div class="skel skel-line"></div></td></tr>').join("");
   cards.innerHTML = '<div class="skel skel-card"></div>';
   stateEl.innerHTML = "";
   paginationEl.style.display = "none";
@@ -6692,9 +6832,7 @@ async function fetchAndRenderFundHistory() {
         + '<td class="muted">' + escapeHtml(formatDateTime(r.date)) + "</td>"
         + '<td class="num">' + (r.amount != null ? formatMoney(r.amount) : "—") + "</td>"
         + '<td>' + escapeHtml(ref) + "</td>"
-        + '<td>' + escapeHtml(mode) + "</td>"
         + '<td>' + fundStatusBadge(r.state_label) + "</td>"
-        + '<td><button type="button" class="wallet-view-link" onclick="event.stopPropagation();openFundRequestDetails(' + idx + ')">View</button></td>'
         + "</tr>";
     }).join("");
     cards.innerHTML = list.map((r, idx) => {
@@ -6827,9 +6965,15 @@ function toggleFundForm() {
   document.getElementById("upi-form-card").classList.remove("show");
 }
 function setUpiAmount(n) {
-  document.getElementById("upi-amount").value = n;
+  const el = document.getElementById("upi-amount");
+  if (el) el.value = n;
+  document.querySelectorAll("#upi-quick-chips .upi-chip").forEach(function (chip) {
+    chip.classList.toggle("active", String(chip.getAttribute("data-amt")) === String(n));
+  });
   const btn = document.getElementById("upi-proceed-btn");
-  if (btn) btn.textContent = "Proceed to Pay ₹" + Number(n).toLocaleString("en-IN");
+  if (btn && !btn.disabled) {
+    btn.textContent = n ? ("Proceed to Pay ₹" + Number(n).toLocaleString("en-IN")) : "Proceed to Pay";
+  }
 }
 function hideUpiSteps() {
   document.getElementById("upi-step-amount").style.display = "none";
@@ -6846,6 +6990,7 @@ function resetUpiForm() {
   document.getElementById("upi-amount").value = "";
   document.getElementById("upi-proceed-btn").disabled = false;
   document.getElementById("upi-proceed-btn").textContent = "Proceed to Pay";
+  document.querySelectorAll("#upi-quick-chips .upi-chip").forEach(function (chip) { chip.classList.remove("active"); });
 }
 function showUpiResult(html) {
   if (state.upi.pollTimer) { clearInterval(state.upi.pollTimer); state.upi.pollTimer = null; }
