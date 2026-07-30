@@ -145,16 +145,19 @@ a:focus:not(:focus-visible),
   border-radius:8px;
   box-shadow:0 1px 3px rgba(0,0,0,0.05);
   padding:20px;
+  transition:transform .18s ease,box-shadow .18s ease;
 }
+.card:hover,.kpi-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.10);}
 
 /* Buttons */
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
   border:1px solid var(--border);background:#fff;color:var(--text-primary);
   border-radius:8px;padding:10px 16px;font-weight:600;font-size:14px;
-  transition:background .12s,border-color .12s;
+  transition:all .15s ease;
 }
 .btn:hover{background:#F8FAFC;}
+.btn:active{transform:scale(.97);transition:transform .1s ease;}
 .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff;}
 .btn.primary:hover{background:var(--primary-dark);border-color:var(--primary-dark);}
 .btn.primary:disabled{background:#A7F3D0;border-color:#A7F3D0;color:var(--color-text-on-brand);cursor:not-allowed;opacity:1;}
@@ -168,6 +171,10 @@ a:focus:not(:focus-visible),
   display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:9999px;
   font-size:11px;font-weight:700;white-space:nowrap;letter-spacing:.03em;text-transform:uppercase;
 }
+.badge::before{
+  content:"";display:inline-block;width:5px;height:5px;border-radius:50%;
+  background:currentColor;opacity:.7;flex-shrink:0;
+}
 .badge-success{background:var(--color-bg-success);color:var(--color-text-success);}
 .badge-pending{background:var(--color-bg-warning);color:var(--color-text-warning);}
 .badge-processing{background:#DBEAFE;color:#1D4ED8;}
@@ -175,10 +182,17 @@ a:focus:not(:focus-visible),
 .badge-refunded{background:#EDE7F6;color:#4527A0;}
 
 /* Skeleton loading */
-@keyframes shimmer{0%{background-position:-200px 0;}100%{background-position:200px 0;}}
-.skel{background:linear-gradient(90deg,#EEF2F6 25%,#E2E8F0 37%,#EEF2F6 63%);background-size:400px 100%;animation:shimmer 1.4s infinite linear;border-radius:6px;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+.skel,.skeleton{
+  background:linear-gradient(90deg,#F1F5F9 25%,#E2E8F0 50%,#F1F5F9 75%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius-sm);
+}
 .skel-line{height:14px;margin:6px 0;}
 .skel-card{height:96px;border-radius:8px;}
+.skeleton-text{height:14px;margin-bottom:8px;border-radius:4px;}
+.skeleton-text-sm{height:12px;width:60%;}
+.skeleton-amount{height:28px;width:40%;}
+.skeleton-badge{height:22px;width:70px;}
 
 /* Toast */
 #toast{
@@ -187,7 +201,9 @@ a:focus:not(:focus-visible),
   font-size:13px;font-weight:500;opacity:0;pointer-events:none;transition:all .2s;
   z-index:9999;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.2);
 }
+.toast{animation:slideInRight .3s ease;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@keyframes slideInRight{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
 
 /* Empty / error state */
 .state-block{text-align:center;padding:48px 20px;color:var(--text-secondary);}
@@ -254,6 +270,7 @@ a:focus:not(:focus-visible),
   display:flex;align-items:center;gap:var(--space-3);padding:10px var(--space-3);border-radius:var(--radius-md);
   color:var(--color-text-sidebar);font-size:14px;font-weight:500;margin-bottom:2px;
   border-left:3px solid transparent;cursor:pointer;position:relative;white-space:nowrap;
+  transition:background .15s ease,color .15s ease;
 }
 .sb-item i{font-size:18px;width:20px;text-align:center;flex-shrink:0;color:var(--color-icon-sidebar);}
 .sb-item:hover{background:var(--color-bg-sidebar-hover);color:var(--color-text-sidebar-active);}
@@ -313,7 +330,7 @@ a:focus:not(:focus-visible),
 .wallet-pill{
   display:flex;align-items:center;gap:6px;background:var(--color-bg-brand-subtle);border:1px solid var(--color-border-brand);
   border-radius:var(--radius-full);padding:7px 14px;font-size:13px;font-weight:700;color:var(--color-text-brand);
-  font-variant-numeric:tabular-nums;
+  font-variant-numeric:tabular-nums;transition:all .15s ease;
 }
 .wallet-pill i{color:var(--color-icon-brand);font-size:15px;}
 .icon-btn{
@@ -405,7 +422,7 @@ a:focus:not(:focus-visible),
 .qa-tile i{font-size:22px;color:var(--color-icon-default);}
 .qa-tile:hover,.quick-action-card:hover{
   border-color:var(--color-border-brand);background:var(--color-bg-brand-subtle);
-  transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.10);
+  transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.12);
 }
 .qa-tile:hover i{color:var(--color-icon-brand);}
 .qa-tile.primary{
@@ -419,22 +436,29 @@ a:focus:not(:focus-visible),
 .kpi-grid{
   display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-3);margin-bottom:var(--space-4);
 }
-.kpi-card{padding:var(--space-4);position:relative;}
+.kpi-card{padding:var(--space-4);position:relative;display:flex;flex-direction:column;gap:12px;}
+.kpi-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px;}
+.kpi-value,.balance-amount,.wallet-pill-amount{
+  font-size:28px;font-weight:800;color:var(--text-primary);letter-spacing:-.5px;
+  font-variant-numeric:tabular-nums;line-height:1.1;transition:opacity .3s ease;
+}
+.kpi-value.loading{opacity:.3;}
+.kpi-sub{font-size:12px;color:var(--text-secondary);margin-top:4px;}
 .kpi-card .label-caps{margin-bottom:8px;font-size:11px;}
 .kpi-card .val{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:6px;color:var(--color-text-primary);}
 .kpi-card .sub{font-size:12px;color:var(--text-secondary);}
 .kpi-card.tone-warning .val{color:var(--color-text-warning);}
 .kpi-card.tone-success .val{color:var(--color-text-success);}
 .kpi-icon{
-  position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;font-size:20px;
+  width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
 }
-.kpi-icon.wallet{background:rgba(0,102,255,.10);color:#0066FF;}
-.kpi-icon.commission{background:rgba(34,197,94,.10);color:#16A34A;}
-.kpi-icon.business{background:rgba(147,51,234,.10);color:#9333EA;}
-.kpi-icon.success{background:rgba(34,197,94,.10);color:#16A34A;}
-.kpi-icon.pending{background:rgba(245,158,11,.10);color:#D97706;}
-.kpi-icon.failed{background:rgba(239,68,68,.10);color:#DC2626;}
+.kpi-icon-blue{background:rgba(0,102,255,.10);color:#0066FF;}
+.kpi-icon-green{background:rgba(0,166,81,.10);color:#00A651;}
+.kpi-icon-purple{background:rgba(124,58,237,.10);color:#7C3AED;}
+.kpi-icon-amber{background:rgba(245,158,11,.10);color:#F59E0B;}
+.kpi-icon-red{background:rgba(229,57,53,.10);color:#E53935;}
 
 .dash-mid-row{
   display:grid;grid-template-columns:1.65fr 1fr;gap:var(--space-4);margin-bottom:var(--space-4);
@@ -463,11 +487,14 @@ a:focus:not(:focus-visible),
 }
 .trend-bar.today{background:var(--color-bg-brand);border-color:var(--color-bg-brand);}
 .trend-day{font-size:11px;font-weight:600;color:var(--text-secondary);}
-.trend-empty,.chart-empty{
+.trend-empty,.chart-empty,.chart-empty-state{
   min-height:160px;padding:36px 12px;text-align:center;color:var(--text-secondary);font-size:13px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
 }
 .chart-empty p{margin:0;}
+.chart-empty-state{padding:32px 16px;gap:8px;}
+.chart-empty-title{font-size:14px;font-weight:600;color:var(--text-secondary);margin:0;}
+.chart-empty-sub{font-size:12px;color:var(--text-muted);margin:0;}
 
 .status-today{display:flex;align-items:center;gap:var(--space-5);min-height:0;}
 .status-total{text-align:center;min-width:88px;flex-shrink:0;}
@@ -732,6 +759,7 @@ a:focus:not(:focus-visible),
    TRANSACTIONS
    ========================================================================= */
 .filter-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px;}
+.filter-bar,.date-pills,.status-tabs{transition:all .2s ease;}
 .status-tabs{display:flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:3px;}
 .status-tab{padding:7px 14px;border-radius:6px;font-size:12.5px;font-weight:600;color:var(--text-secondary);border:none;background:transparent;cursor:pointer;min-height:40px;}
 .status-tab.active{background:var(--primary);color:#fff;}
@@ -777,9 +805,16 @@ a:focus:not(:focus-visible),
   text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-secondary);
   padding:12px 14px;border-bottom:1px solid var(--border);background:var(--color-bg-muted);font-weight:600;white-space:nowrap;
 }
+.tx-table thead tr,.table-header,.txn-header{background:#F8FAFC;border-bottom:2px solid var(--border);}
+.table-header th,.txn-header th,.txn-header div{
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);padding:10px 16px;
+}
 .tx-table td{padding:14px 16px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;color:var(--color-text-primary);}
 .tx-table tr{min-height:52px;}
 .txn-row,.transaction-row{padding:14px 16px;min-height:52px;}
+.tx-table tbody .txn-row:nth-child(even),.table-row:nth-child(even){background:rgba(244,246,249,.6);}
+.txn-row,.table-row{transition:background .12s ease;cursor:pointer;}
+.txn-row:hover,.table-row:hover{background:rgba(0,102,255,.04) !important;}
 .tx-table td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;}
 .tx-table td.amt-debit{color:var(--color-text-debit);}
 .tx-table td.muted{color:var(--text-secondary);font-size:12.5px;}
@@ -842,6 +877,9 @@ a:focus:not(:focus-visible),
   .tx-filters .search-input{min-width:0;width:100%;}
   .drawer{width:100%;max-width:100%;}
 }
+.screen{animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+.pill-btn.active,.filter-pill.active{transform:scale(1.02);transition:all .15s ease;}
 @media (min-width:640px){
   .tx-cards{display:none;}
   .tx-table-wrap{display:block;}
@@ -1635,7 +1673,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 
         <div class="dash-top-row">
           <div class="card dash-wallet">
-            <div class="kpi-icon wallet"><i class="ti ti-wallet"></i></div>
+            <div class="kpi-icon kpi-icon-blue"><i class="ti ti-wallet"></i></div>
             <div class="dash-wallet-label">
               Available Balance
               <button type="button" class="eye-btn" id="dash-balance-eye" onclick="toggleDashBalanceVisibility()" aria-label="Toggle balance visibility" title="Toggle visibility">
@@ -1662,37 +1700,53 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
         <div class="section-head"><h3>Today's Business</h3></div>
         <div class="kpi-grid" id="dash-kpi-grid">
           <div class="card kpi-card">
-            <div class="kpi-icon business"><i class="ti ti-trending-up"></i></div>
-            <div class="label-caps">Today's Volume</div>
-            <div class="val" id="kpi-today">—</div>
-            <div class="sub" id="kpi-today-volume-sub">Successful recharge amount</div>
+            <div class="kpi-card-header">
+              <div>
+                <div class="kpi-label">Today's Volume</div>
+                <div class="kpi-value" id="kpi-today">—</div>
+              </div>
+              <div class="kpi-icon kpi-icon-purple"><i class="ti ti-trending-up"></i></div>
+            </div>
+            <div class="kpi-sub" id="kpi-today-volume-sub">Successful recharge amount</div>
           </div>
           <div class="card kpi-card tone-success">
-            <div class="kpi-icon success"><i class="ti ti-circle-check"></i></div>
-            <div class="label-caps">Successful Txns</div>
-            <div class="val" id="kpi-success-count">—</div>
-            <div class="sub" id="kpi-today-count">—</div>
+            <div class="kpi-card-header">
+              <div>
+                <div class="kpi-label">Successful Txns</div>
+                <div class="kpi-value" id="kpi-success-count">—</div>
+              </div>
+              <div class="kpi-icon kpi-icon-green"><i class="ti ti-circle-check"></i></div>
+            </div>
+            <div class="kpi-sub" id="kpi-today-count">—</div>
           </div>
           <div class="card kpi-card tone-warning">
-            <div class="kpi-icon pending"><i class="ti ti-clock"></i></div>
-            <div class="label-caps">Pending</div>
-            <div class="val" id="kpi-pending-count">—</div>
-            <div class="sub" id="kpi-pending-sub">Awaiting confirmation</div>
+            <div class="kpi-card-header">
+              <div>
+                <div class="kpi-label">Pending</div>
+                <div class="kpi-value" id="kpi-pending-count">—</div>
+              </div>
+              <div class="kpi-icon kpi-icon-amber"><i class="ti ti-clock"></i></div>
+            </div>
+            <div class="kpi-sub" id="kpi-pending-sub">Awaiting confirmation</div>
           </div>
           <div class="card kpi-card">
-            <div class="kpi-icon commission"><i class="ti ti-percentage"></i></div>
-            <div class="label-caps">Commission Today</div>
-            <div class="val" id="kpi-commission-today-val">—</div>
-            <div class="sub" id="kpi-commission-today">From successful recharges</div>
+            <div class="kpi-card-header">
+              <div>
+                <div class="kpi-label">Commission Today</div>
+                <div class="kpi-value" id="kpi-commission-today-val">—</div>
+              </div>
+              <div class="kpi-icon kpi-icon-green"><i class="ti ti-percentage"></i></div>
+            </div>
+            <div class="kpi-sub" id="kpi-commission-today">From successful recharges</div>
           </div>
         </div>
 
         <!-- Hidden legacy perf nodes kept for any external refs; UI uses status-today below -->
         <div class="perf-row" id="dash-perf-row" aria-hidden="true">
-          <div class="card perf-stat success"><div class="kpi-icon success"><i class="ti ti-circle-check"></i></div><div class="n" id="perf-success">0</div><div class="t">Success</div></div>
-          <div class="card perf-stat pending"><div class="kpi-icon pending"><i class="ti ti-clock"></i></div><div class="n" id="perf-pending">0</div><div class="t">Pending</div></div>
-          <div class="card perf-stat failed"><div class="kpi-icon failed"><i class="ti ti-circle-x"></i></div><div class="n" id="perf-failed">0</div><div class="t">Failed/Refunded</div></div>
-          <div class="card perf-stat"><div class="kpi-icon wallet"><i class="ti ti-wallet"></i></div><div class="n" id="perf-total">0</div><div class="t">Total Today</div></div>
+          <div class="card perf-stat success"><div class="kpi-icon kpi-icon-green"><i class="ti ti-circle-check"></i></div><div class="n" id="perf-success">0</div><div class="t">Success</div></div>
+          <div class="card perf-stat pending"><div class="kpi-icon kpi-icon-amber"><i class="ti ti-clock"></i></div><div class="n" id="perf-pending">0</div><div class="t">Pending</div></div>
+          <div class="card perf-stat failed"><div class="kpi-icon kpi-icon-red"><i class="ti ti-circle-x"></i></div><div class="n" id="perf-failed">0</div><div class="t">Failed/Refunded</div></div>
+          <div class="card perf-stat"><div class="kpi-icon kpi-icon-blue"><i class="ti ti-wallet"></i></div><div class="n" id="perf-total">0</div><div class="t">Total Today</div></div>
         </div>
 
         <div class="dash-mid-row">
@@ -1847,7 +1901,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           <div class="tx-table-wrap" style="overflow-x:auto;">
             <table class="tx-table" id="tx-table">
               <thead>
-                <tr>
+                <tr class="txn-header">
                   <th>Date / Time</th>
                   <th>Transaction ID</th>
                   <th>Mobile</th>
@@ -3000,9 +3054,10 @@ let toastTimer = null;
 function showToast(msg) {
   const t = document.getElementById("toast");
   t.textContent = msg;
+  t.classList.add("toast");
   t.classList.add("show");
   if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove("show"), 3200);
+  toastTimer = setTimeout(() => { t.classList.remove("show"); t.classList.remove("toast"); }, 3200);
 }
 function retryBtn(fnCall) {
   return '<br><button class="btn sm" style="margin-top:12px;" onclick="' + fnCall + '">Retry</button>';
@@ -3346,9 +3401,9 @@ function renderQuickActions() {
 
   grid.innerHTML = tiles.slice(0, 4).map((t) => {
     if (t.disabled) {
-      return '<div class="qa-tile disabled" aria-disabled="true"><i class="' + t.icon + '"></i>' + escapeHtml(t.label) + "</div>";
+      return '<div class="qa-tile quick-action-card disabled" aria-disabled="true"><i class="' + t.icon + '"></i>' + escapeHtml(t.label) + "</div>";
     }
-    const cls = "qa-tile" + (t.primary ? " primary" : "");
+    const cls = "qa-tile quick-action-card" + (t.primary ? " primary" : "");
     return '<div class="' + cls + '" onclick="' + t.onclick + '"><i class="' + t.icon + '"></i>' + escapeHtml(t.label) + "</div>";
   }).join("");
 }
@@ -3427,7 +3482,18 @@ function renderBusinessTrend(history) {
   const hasAny = buckets.some((b) => b.amount > 0 || b.count > 0);
   if (!hasAny) {
     chart.className = "trend-empty";
-    chart.innerHTML = '<div class="chart-empty"><i class="ti ti-chart-bar" style="font-size:32px;color:#CBD5E1"></i><p>No recharge data for this period</p></div>';
+    chart.innerHTML = `<div class="chart-empty-state">
+  <svg width="120" height="80" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="10" y="50" width="16" height="25" rx="3" fill="#E2E8F0"/>
+    <rect x="34" y="35" width="16" height="40" rx="3" fill="#E2E8F0"/>
+    <rect x="58" y="42" width="16" height="33" rx="3" fill="#E2E8F0"/>
+    <rect x="82" y="25" width="16" height="50" rx="3" fill="#CBD5E1"/>
+    <rect x="106" y="38" width="16" height="37" rx="3" fill="#E2E8F0"/>
+    <polyline points="18,52 42,37 66,44 90,27 114,40" stroke="#0066FF" stroke-width="2" stroke-dasharray="4 3" opacity="0.4" fill="none"/>
+  </svg>
+  <p class="chart-empty-title">No data for this period</p>
+  <p class="chart-empty-sub">Recharge activity will appear here</p>
+</div>`;
     setText("dash-trend-sub", "Successful recharge volume");
     return;
   }
@@ -3568,7 +3634,18 @@ async function loadDashboard() {
       const trend = document.getElementById("dash-trend-chart");
       if (trend) {
         trend.className = "trend-empty";
-        trend.innerHTML = '<div class="chart-empty"><i class="ti ti-chart-bar" style="font-size:32px;color:#CBD5E1"></i><p>No data available.</p></div>';
+        trend.innerHTML = `<div class="chart-empty-state">
+  <svg width="120" height="80" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="10" y="50" width="16" height="25" rx="3" fill="#E2E8F0"/>
+    <rect x="34" y="35" width="16" height="40" rx="3" fill="#E2E8F0"/>
+    <rect x="58" y="42" width="16" height="33" rx="3" fill="#E2E8F0"/>
+    <rect x="82" y="25" width="16" height="50" rx="3" fill="#CBD5E1"/>
+    <rect x="106" y="38" width="16" height="37" rx="3" fill="#E2E8F0"/>
+    <polyline points="18,52 42,37 66,44 90,27 114,40" stroke="#0066FF" stroke-width="2" stroke-dasharray="4 3" opacity="0.4" fill="none"/>
+  </svg>
+  <p class="chart-empty-title">No data for this period</p>
+  <p class="chart-empty-sub">Recharge activity will appear here</p>
+</div>`;
       }
     }
   } catch (e) {
@@ -4577,7 +4654,7 @@ function renderTransactionsTable(list) {
   stateEl.innerHTML = "";
   tbody.innerHTML = list.map((r) => {
     const svc = txServiceLabel(r);
-    return '<tr>'
+    return '<tr class="txn-row table-row">'
       + '<td class="muted">' + escapeHtml(formatDateTime(r.date)) + '</td>'
       + '<td class="tx-id">' + escapeHtml(txDisplayId(r)) + '</td>'
       + '<td>' + escapeHtml(maskMobile(r.mobile_number)) + '</td>'
