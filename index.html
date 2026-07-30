@@ -1815,6 +1815,67 @@ a:focus:not(:focus-visible),
 
 .support-hidden{display:none !important;}
 
+.support-coming-soon{
+  display:none;text-align:center;padding:48px 20px 40px;margin:8px 0 20px;
+  background:var(--color-bg-surface,#fff);border:1px solid var(--color-border-default,#E2E8F0);
+  border-radius:var(--radius-xl,16px);
+  box-shadow:0 1px 2px rgba(15,23,41,.06);
+}
+.support-coming-soon.show{display:block;}
+.support-coming-soon .ico{
+  width:72px;height:72px;margin:0 auto 16px;border-radius:20px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--color-bg-muted,#F1F5F9);color:var(--color-text-muted,#94A3B8);
+}
+.support-coming-soon .ico i{font-size:36px;line-height:1;}
+.support-coming-soon h3{
+  margin:0 0 8px;font-size:18px;font-weight:700;letter-spacing:-.02em;color:var(--color-text-primary,#0F172A);
+}
+.support-coming-soon p{
+  margin:0 auto 20px;max-width:420px;font-size:13px;line-height:1.5;color:var(--color-text-secondary,#64748B);
+}
+.support-coming-contacts{
+  display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:8px;
+}
+.support-coming-contacts a,.support-coming-contacts .chip{
+  display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:8px 14px;
+  border:1px solid var(--color-border-default,#E2E8F0);border-radius:8px;background:#fff;
+  font-size:13px;font-weight:600;color:var(--color-text-primary);text-decoration:none;
+}
+.support-coming-contacts a:hover{border-color:var(--color-border-brand,#A7F3D0);background:var(--color-bg-brand-subtle,#ECFDF5);}
+.support-full-ui.hidden-soft{display:none !important;}
+.support-alert-info{
+  display:flex;gap:12px;align-items:flex-start;min-height:56px;padding:12px 16px;margin-bottom:14px;
+  border-radius:8px;background:var(--color-bg-info,#DBEAFE);
+}
+.support-alert-info .t{font-size:14px;font-weight:500;color:var(--color-text-info,#1D4ED8);line-height:20px;}
+.support-alert-info .s{font-size:12px;color:var(--color-text-secondary,#64748B);line-height:16px;margin-top:2px;}
+.settings-role-badge{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;
+  background:var(--color-bg-brand-subtle,#ECFDF5);color:var(--color-text-brand,#047857);
+  font-size:12px;font-weight:600;
+}
+.settings-logout-danger{
+  background:#fff;border:1px solid var(--color-border-danger,#FECACA);color:var(--color-text-danger,#B91C1C);
+}
+.settings-logout-danger:hover{background:var(--color-bg-danger,#FEE2E2);}
+.settings-theme-seg{
+  display:inline-flex;gap:4px;padding:4px;border-radius:10px;
+  background:var(--color-bg-muted,#F1F5F9);border:1px solid var(--color-border-default,#E2E8F0);
+}
+.settings-theme-seg button{
+  appearance:none;border:1px solid transparent;background:transparent;cursor:pointer;
+  padding:8px 12px;min-height:36px;border-radius:8px;font-size:12px;font-weight:500;
+  color:var(--color-text-secondary,#64748B);
+}
+.settings-theme-seg button.active{
+  background:#fff;border-color:var(--color-border-brand,#059669);
+  color:var(--color-text-brand,#047857);font-weight:600;
+}
+.settings-about-list a{color:var(--color-text-brand,#047857);font-weight:600;text-decoration:none;}
+.settings-about-list a:hover{text-decoration:underline;}
+
+
 @media (min-width:640px) and (max-width:1023px){
   .support-contact-grid,.support-faq-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
   .support-form-grid{grid-template-columns:1fr;}
@@ -1843,15 +1904,19 @@ a:focus:not(:focus-visible),
 .settings-page-intro .sub{font-size:13px;color:var(--text-secondary);max-width:560px;}
 
 .settings-tabs{
-  display:flex;gap:4px;flex-wrap:wrap;background:#fff;border:1px solid var(--border);
+  display:flex;gap:4px;flex-wrap:wrap;
+  background:var(--color-bg-muted,#F1F5F9);border:1px solid var(--color-border-default,#E2E8F0);
   border-radius:10px;padding:4px;margin-bottom:14px;
 }
 .settings-tab{
-  appearance:none;border:none;background:transparent;cursor:pointer;
-  padding:12px 18px;min-height:44px;border-radius:8px;font-size:12.5px;font-weight:600;
-  color:var(--text-secondary);
+  appearance:none;border:1px solid transparent;background:transparent;cursor:pointer;
+  padding:10px 16px;min-height:44px;border-radius:8px;font-size:13px;font-weight:500;
+  color:var(--color-text-secondary,#64748B);
 }
-.settings-tab.active{color:var(--color-text-brand,#047352);background:var(--color-bg-brand-subtle,#E8FCF2);}
+.settings-tab.active{
+  color:var(--color-text-brand,#047857);font-weight:600;
+  background:var(--color-bg-surface,#fff);border-color:var(--color-border-brand,#059669);
+}
 .settings-tab:focus-visible{outline:2px solid var(--color-bg-brand,var(--primary));outline-offset:2px;}
 
 .settings-panel{display:none;}
@@ -3006,6 +3071,14 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           </button>
         </div>
 
+        <div class="support-coming-soon" id="support-coming-soon" aria-live="polite">
+          <div class="ico" aria-hidden="true"><i class="ti ti-headset"></i></div>
+          <h3>Support Coming Soon</h3>
+          <p>Our support team will be available here shortly.</p>
+          <div class="support-coming-contacts" id="support-coming-contacts"></div>
+        </div>
+
+        <div id="support-full-ui">
         <div class="card support-search-card">
           <div class="title">How can we help?</div>
           <div class="support-search-wrap">
@@ -3087,6 +3160,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           Do not retry the same recharge while it is pending. Open the transaction, refresh status, then raise a ticket with the TXN ID if required.
           <div style="margin-top:6px;font-weight:700;">Support will never ask for your password or OTP.</div>
         </div>
+        </div><!-- /#support-full-ui -->
       </div>
 
 <!-- ============ SETTINGS V2 ============ -->
@@ -3122,12 +3196,12 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
                 </div>
                 <div class="settings-field" id="settings-field-role">
                   <label>Role</label>
-                  <div class="value" id="settings-role">—</div>
+                  <div class="value" id="settings-role-wrap"><span class="settings-role-badge" id="settings-role">—</span></div>
                 </div>
               </div>
               <div class="settings-field-row">
                 <div class="settings-field" id="settings-field-partner">
-                  <label>Partner ID</label>
+                  <label>Partner / Retailer ID</label>
                   <div class="value" id="settings-partner">—</div>
                 </div>
                 <div class="settings-field settings-hidden" id="settings-field-email">
@@ -3174,12 +3248,28 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             <div class="settings-warn">Never share password, OTP or authentication codes.</div>
           </div>
 
+          <div class="card settings-card">
+            <div class="title">Session</div>
+            <ul class="settings-about-list">
+              <li><span class="k">Device</span><span class="v" id="settings-session-device">This browser</span></li>
+              <li><span class="k">Signed in as</span><span class="v" id="settings-session-mobile">—</span></li>
+              <li><span class="k">Partner ID</span><span class="v" id="settings-session-partner">—</span></li>
+            </ul>
+            <div class="settings-row" style="border-bottom:none;padding-top:8px;">
+              <div>
+                <div class="t">Logout all devices</div>
+                <div class="s">Requires a multi-device session API (not available).</div>
+              </div>
+              <button type="button" class="btn" id="settings-logout-all-btn" disabled title="Not available" style="min-height:44px;opacity:.55;cursor:not-allowed;">Logout all</button>
+            </div>
+          </div>
+
           <div class="card settings-logout-card">
             <div>
               <div class="t">Logout</div>
               <div class="s">Sign out of this device and clear the local session.</div>
             </div>
-            <button type="button" class="btn" onclick="doLogout()" style="min-height:44px;"><i class="ti ti-logout"></i> Logout</button>
+            <button type="button" class="btn settings-logout-danger" onclick="doLogout()" style="min-height:44px;"><i class="ti ti-logout"></i> Logout</button>
           </div>
         </div>
 
@@ -3201,6 +3291,16 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
               </div>
               <button type="button" class="settings-toggle" id="settings-toggle-largeText" onclick="toggleSettingsAppearance('largeText')" aria-pressed="false">Off</button>
             </div>
+            <div class="settings-row" style="border-bottom:none;">
+              <div>
+                <div class="t">Theme preference</div>
+                <div class="s">Stored on this device only. Light keeps the Figma design system.</div>
+              </div>
+              <div class="settings-theme-seg" role="group" aria-label="Theme">
+                <button type="button" id="settings-theme-light" class="active" onclick="setSettingsTheme('light')">Light</button>
+                <button type="button" id="settings-theme-system" onclick="setSettingsTheme('system')">System</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -3208,11 +3308,15 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           <div class="card settings-card">
             <div class="title">About</div>
             <ul class="settings-about-list">
-              <li><span class="k">Application</span><span class="v">QuickPay Retailer Portal</span></li>
+              <li><span class="k">App name</span><span class="v">QuickPay Retailer Portal</span></li>
+              <li><span class="k">Version</span><span class="v" id="settings-about-version">v1.1.0</span></li>
+              <li><span class="k">Build date</span><span class="v" id="settings-about-build">30 Jul 2026</span></li>
               <li id="settings-about-role-row"><span class="k">Signed-in role</span><span class="v" id="settings-about-role">—</span></li>
               <li id="settings-about-partner-row"><span class="k">Partner ID</span><span class="v" id="settings-about-partner">—</span></li>
+              <li><span class="k">Privacy Policy</span><span class="v"><a href="#" onclick="event.preventDefault();showToast('Privacy Policy will be available soon');">View</a></span></li>
+              <li><span class="k">Terms</span><span class="v"><a href="#" onclick="event.preventDefault();showToast('Terms will be available soon');">View</a></span></li>
             </ul>
-            <div class="settings-note">Only session-backed details are shown. App version and environment fields are omitted when not provided by the backend.</div>
+            <div class="settings-note">QuickPay Retailer Portal · Figma MCP pixel-perfect release track.</div>
           </div>
         </div>
       </div>
@@ -7568,6 +7672,38 @@ function setSupportTicketsLoading() {
   if (stateEl) stateEl.innerHTML = "";
 }
 
+
+function setSupportComingSoonMode(on, contacts) {
+  const soon = document.getElementById("support-coming-soon");
+  const full = document.getElementById("support-full-ui");
+  const newBtn = document.getElementById("support-new-ticket-btn");
+  if (soon) soon.classList.toggle("show", !!on);
+  if (full) full.classList.toggle("hidden-soft", !!on);
+  if (newBtn) newBtn.style.display = on ? "none" : "";
+  const host = document.getElementById("support-coming-contacts");
+  if (!host) return;
+  host.innerHTML = "";
+  if (!on || !contacts || !contacts.length) return;
+  host.innerHTML = contacts.map(function (c) {
+    const title = escapeHtml(c.name || c.type || "Contact");
+    const detail = escapeHtml(c.detail || "");
+    let href = c.href || "";
+    const low = (c.name + " " + c.type + " " + c.detail).toLowerCase();
+    if (!href && c.detail && (low.indexOf("whatsapp") >= 0 || /^\+?[0-9\-\s()]{8,}$/.test(c.detail))) {
+      const digits = String(c.detail).replace(/[^0-9+]/g, "");
+      href = low.indexOf("whatsapp") >= 0
+        ? ("https://wa.me/" + digits.replace(/^\+/, ""))
+        : ("tel:" + digits);
+    } else if (!href && c.detail && c.detail.indexOf("@") > 0) {
+      href = "mailto:" + c.detail;
+    }
+    if (href) {
+      return '<a href="' + escapeHtml(href) + '" target="_blank" rel="noopener noreferrer"><i class="ti ti-phone"></i> ' + title + (detail ? (" · " + detail) : "") + "</a>";
+    }
+    return '<span class="chip">' + title + (detail ? (" · " + detail) : "") + "</span>";
+  }).join("");
+}
+
 async function loadSupportScreen() {
   if (!state.support) {
     state.support = {
@@ -7581,8 +7717,12 @@ async function loadSupportScreen() {
   document.getElementById("support-faq-section").classList.add("support-hidden");
   document.getElementById("support-hours-section").classList.add("support-hidden");
   updateSupportTicketFormAvailability();
+  setSupportComingSoonMode(false);
 
   try {
+    const rootProbe = await apiSupportFetch("/api/support").catch(function () {
+      return { httpStatus: 404, available: false, body: null };
+    });
     const [contactsRes, ticketsRes, faqRes, hoursRes, createProbe] = await Promise.all([
       apiSupportTryGet(["/api/support/contacts", "/api/support/contact", "/api/contacts"]),
       apiSupportTryGet(["/api/support/tickets", "/api/tickets"]),
@@ -7635,6 +7775,20 @@ async function loadSupportScreen() {
     renderSupportTickets(state.support.tickets);
     updateSupportTicketFormAvailability();
 
+    const anySupport =
+      !!rootProbe.available ||
+      state.support.contactsAvailable ||
+      state.support.faqAvailable ||
+      state.support.ticketsAvailable ||
+      state.support.hoursAvailable ||
+      state.support.createAvailable;
+    state.support.rootAvailable = !!rootProbe.available;
+    if (!anySupport) {
+      setSupportComingSoonMode(true, state.support.contacts);
+    } else {
+      setSupportComingSoonMode(false, state.support.contacts);
+    }
+
     // Network-level failure (5xx) on tickets → error state
     if (ticketsRes.error) {
       document.getElementById("support-tickets-tbody").innerHTML = "";
@@ -7662,13 +7816,16 @@ function settingsDash(v) {
   return String(v);
 }
 function loadSettingsAppearance() {
-  let compact = false, largeText = false;
+  let compact = false, largeText = false, theme = "light";
   try {
     compact = localStorage.getItem("qp_settings_compact") === "1";
     largeText = localStorage.getItem("qp_settings_largeText") === "1";
+    theme = localStorage.getItem("qp_settings_theme") || "light";
   } catch (_e) {}
   document.documentElement.classList.toggle("qp-compact", compact);
   document.documentElement.classList.toggle("qp-large-text", largeText);
+  /* System theme: only light palette is designed in Figma; system maps to light for now. */
+  document.documentElement.setAttribute("data-theme", theme === "system" ? "system" : "light");
   const cBtn = document.getElementById("settings-toggle-compact");
   const lBtn = document.getElementById("settings-toggle-largeText");
   if (cBtn) {
@@ -7681,6 +7838,17 @@ function loadSettingsAppearance() {
     lBtn.setAttribute("aria-pressed", largeText ? "true" : "false");
     lBtn.textContent = largeText ? "On" : "Off";
   }
+  const lightBtn = document.getElementById("settings-theme-light");
+  const sysBtn = document.getElementById("settings-theme-system");
+  if (lightBtn) lightBtn.classList.toggle("active", theme !== "system");
+  if (sysBtn) sysBtn.classList.toggle("active", theme === "system");
+}
+function setSettingsTheme(theme) {
+  const next = theme === "system" ? "system" : "light";
+  try { localStorage.setItem("qp_settings_theme", next); }
+  catch (_e) { showToast("Could not save preference on this device"); return; }
+  loadSettingsAppearance();
+  showToast("Theme preference saved on this device");
 }
 function toggleSettingsAppearance(key) {
   let next = false;
@@ -7767,6 +7935,11 @@ function renderSettingsProfile() {
   if (aboutPartner) aboutPartner.textContent = settingsDash(partnerId);
   if (aboutRoleRow) aboutRoleRow.style.display = role ? "" : "none";
   if (aboutPartnerRow) aboutPartnerRow.style.display = partnerId ? "" : "none";
+
+  const sessMobile = document.getElementById("settings-session-mobile");
+  const sessPartner = document.getElementById("settings-session-partner");
+  if (sessMobile) sessMobile.textContent = mobile ? maskMobile(mobile) : "—";
+  if (sessPartner) sessPartner.textContent = settingsDash(partnerId);
 }
 
 async function refreshSettingsProfileName() {
