@@ -744,171 +744,271 @@ a:focus:not(:focus-visible),
 }
 
 /* =========================================================================
-   RECHARGE V2 — Figma Desktop + responsive
+   RECHARGE V2 — Figma MCP SoT
+   Main: 51:291 (MCP cache) · Confirm: 50:196 · Results: 50:291
+   Controls: 47:205 / 47:215 / 10:313 / 5:86 · Summary: 48:206 · Plans: 48:185
    ========================================================================= */
 .rc-page-intro{margin:var(--space-5) 0 var(--space-4);}
-.rc-page-intro h2{margin:0 0 4px;font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--color-text-primary);}
-.rc-page-intro .sub{font-size:13px;color:var(--text-secondary);}
+.rc-page-intro h2{margin:0 0 4px;font:var(--text-h1);letter-spacing:-.02em;color:var(--color-text-primary);}
+.rc-page-intro .sub{font-size:14px;font-weight:500;line-height:20px;color:var(--color-text-secondary);}
 
+/* Segmented Control — Figma 47:205 */
 .rc-service-tabs{
-  display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:var(--space-4);max-width:520px;
+  display:inline-flex;align-items:stretch;gap:4px;margin-bottom:var(--space-4);
+  padding:4px;background:var(--color-bg-muted);border:1px solid var(--color-border-default);
+  border-radius:10px;max-width:100%;box-sizing:border-box;
 }
 .rc-service-tab{
-  display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:var(--radius-lg);
-  border:1.5px solid var(--color-border-default);background:var(--color-bg-surface);
-  font-size:14px;font-weight:700;color:var(--color-text-primary);text-align:left;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px 16px;border-radius:8px;border:1px solid transparent;background:transparent;
+  font-size:13px;font-weight:500;color:var(--color-text-secondary);text-align:center;white-space:nowrap;
 }
-.rc-service-tab i{font-size:20px;color:var(--color-icon-default);}
+.rc-service-tab i{font-size:16px;color:var(--color-icon-muted);}
 .rc-service-tab.active{
-  border-color:var(--color-border-brand);background:var(--color-bg-brand-subtle);color:var(--color-text-brand);
+  background:var(--color-bg-surface);border-color:var(--color-border-brand);
+  color:var(--color-text-brand);font-weight:600;
 }
 .rc-service-tab.active i{color:var(--color-icon-brand);}
-.rc-service-tab:disabled,.rc-service-tab.disabled{
-  opacity:.5;cursor:not-allowed;
-}
-.rc-service-tab .tab-meta{display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-top:2px;}
+.rc-service-tab:disabled,.rc-service-tab.disabled{opacity:.45;cursor:not-allowed;}
+.rc-service-tab .tab-meta{display:none;}
 
 .rc-layout{
-  display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);gap:20px;align-items:start;
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,360px);gap:24px;align-items:start;
 }
 .rc-main-col,.rc-side-col{display:flex;flex-direction:column;gap:16px;min-width:0;}
-.rc-form-card{padding:var(--space-5);}
-.rc-field{margin-bottom:18px;}
-.rc-field:last-child{margin-bottom:0;}
-.rc-field label{
+.rc-form-card{padding:24px;display:flex;flex-direction:column;gap:16px;}
+.rc-form-title{margin:0;font-size:16px;font-weight:600;line-height:24px;color:var(--color-text-primary);}
+.rc-field{margin-bottom:0;display:flex;flex-direction:column;gap:4px;}
+.rc-field label,.rc-field .rc-label{
   display:flex;align-items:center;justify-content:space-between;gap:8px;
-  font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
-  color:var(--text-secondary);margin-bottom:8px;
+  font-size:12px;font-weight:500;line-height:16px;letter-spacing:.1px;
+  color:var(--color-text-secondary);margin:0;text-transform:none;
 }
-.rc-field label .rc-label-action{
-  text-transform:none;letter-spacing:0;font-weight:600;font-size:12.5px;color:var(--color-text-brand);cursor:pointer;
+.rc-field label .rc-label-action,.rc-label-action{
+  text-transform:none;letter-spacing:.1px;font-weight:500;font-size:12px;line-height:16px;
+  color:var(--color-text-brand);cursor:pointer;border:none;background:none;padding:0;
 }
 .rc-field input[type="tel"],
 .rc-field input[type="number"],
 .rc-field select{
-  width:100%;padding:12px 14px;border:1px solid var(--color-border-default);border-radius:var(--radius-md);
-  font-size:16px;font-weight:600;height:48px;background:#fff;color:var(--color-text-primary);
+  width:100%;padding:12px;border:1px solid var(--color-border-default);border-radius:var(--radius-md);
+  font-size:14px;font-weight:400;line-height:20px;min-height:44px;height:auto;
+  background:var(--color-bg-surface);color:var(--color-text-primary);box-sizing:border-box;
 }
 .rc-field input[type="tel"]:focus,
 .rc-field input[type="number"]:focus,
 .rc-field select:focus{outline:none;}
 .rc-field input[type="tel"]:focus-visible,
 .rc-field input[type="number"]:focus-visible,
-.rc-field select:focus-visible{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(5,150,105,.12);}
-.rc-field .hint{font-size:12px;color:var(--text-secondary);margin-top:6px;}
+.rc-field select:focus-visible{
+  outline:none;border-color:var(--color-border-focus);
+  box-shadow:0 0 0 3px var(--color-bg-focus-ring);
+}
+.rc-field.has-error input[type="tel"],
+.rc-field.has-error input[type="number"],
+.rc-field.has-error .amt-input-wrap{
+  border-color:var(--color-border-danger);
+}
+.rc-field.has-error .amt-input-wrap{border:1px solid var(--color-border-danger);border-radius:var(--radius-md);}
+.rc-field.has-error .amt-input-wrap input{border:none !important;box-shadow:none !important;}
+.rc-field .hint{font-size:12px;font-weight:400;line-height:16px;color:var(--color-text-muted);margin:0;}
 .rc-detect{
-  display:none;align-items:flex-start;gap:8px;margin-top:10px;padding:10px 12px;
-  border-radius:var(--radius-md);background:var(--color-bg-brand-subtle);border:1px solid #A7F3D0;
-  font-size:12.5px;color:var(--color-text-brand);font-weight:600;
+  display:none;align-items:flex-start;gap:8px;margin-top:4px;padding:8px 12px;
+  border-radius:var(--radius-md);background:var(--color-bg-brand-subtle);border:none;
+  font-size:12px;font-weight:500;color:var(--color-text-brand);
 }
 .rc-detect.show{display:flex;}
-.rc-detect.warn{background:var(--color-bg-warning);border-color:#FDE68A;color:var(--color-text-warning);}
-.rc-detect.muted{background:var(--color-bg-muted);border-color:var(--color-border-default);color:var(--text-secondary);}
-.op-pills{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
-.op-pill{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:9px 16px;border-radius:var(--radius-full);border:1.5px solid var(--border);font-size:13.5px;font-weight:700;
-  background:#fff;color:var(--text-secondary);
-}
-.op-pill.active{color:#fff;border-color:transparent;}
-.op-pill-logo{height:22px;width:auto;max-width:36px;object-fit:contain;border-radius:4px;background:#fff;flex-shrink:0;}
-.field-error{color:var(--danger);font-size:12.5px;margin-top:6px;display:none;}
-.field-error.show{display:block;}
-.amt-input-wrap{position:relative;}
-.amt-input-wrap .rupee{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;font-weight:700;color:var(--text-primary);}
-.amt-input-wrap input{padding-left:32px !important;font-size:18px !important;font-weight:700 !important;height:52px;}
-.qa-pills{display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding-bottom:2px;}
-.qa-pill{
-  flex-shrink:0;padding:8px 14px;border-radius:var(--radius-full);border:1.5px solid var(--border);
-  background:#fff;font-size:13.5px;font-weight:700;color:var(--text-primary);
-}
-.qa-pill.active{background:var(--color-bg-brand-subtle);border-color:var(--color-border-brand);color:var(--color-text-brand);}
-.rc-cta{margin-top:8px;}
-.rc-cta .btn{width:100%;min-height:48px;font-size:15px;}
+.rc-detect.warn{background:var(--color-bg-warning);color:var(--color-text-warning);}
+.rc-detect.muted{background:var(--color-bg-muted);color:var(--color-text-secondary);}
 
-.rc-recent-card{padding:var(--space-4);}
-.rc-recent-card .rc-card-title{font-size:14px;font-weight:700;margin:0 0 4px;}
-.rc-recent-card .rc-card-sub{font-size:11.5px;color:var(--text-secondary);margin-bottom:10px;line-height:1.4;}
+/* Operator pills — API-driven; selected = brand chip (Figma quick-chip / plan selected language) */
+.op-pills{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;}
+.op-pill{
+  display:inline-flex;align-items:center;gap:8px;height:40px;
+  padding:8px 14px;border-radius:var(--radius-full);border:1px solid var(--color-border-default);
+  font-size:13px;font-weight:500;background:var(--color-bg-surface);color:var(--color-text-primary);
+  box-sizing:border-box;
+}
+.op-pill:hover{background:var(--color-bg-muted);}
+.op-pill.active{
+  background:var(--color-bg-brand-subtle);border:1.5px solid var(--color-border-brand);
+  color:var(--color-text-brand);font-weight:600;padding:7.5px 13.5px;
+}
+.op-pill-logo{height:20px;width:20px;object-fit:contain;border-radius:4px;background:#fff;flex-shrink:0;}
+.op-dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.field-error{color:var(--color-text-danger);font-size:12px;font-weight:400;line-height:16px;margin:0;display:none;}
+.field-error.show{display:block;}
+
+/* Amount field — Figma 10:313 */
+.amt-input-wrap{
+  display:flex;align-items:center;gap:8px;width:100%;min-height:44px;
+  padding:12px;background:var(--color-bg-surface);border:1px solid var(--color-border-default);
+  border-radius:var(--radius-md);box-sizing:border-box;
+}
+.amt-input-wrap .rupee{
+  position:static;transform:none;left:auto;top:auto;
+  font-size:16px;font-weight:600;line-height:24px;letter-spacing:-.1px;color:var(--color-text-secondary);flex-shrink:0;
+}
+.amt-input-wrap input{
+  border:none !important;outline:none !important;box-shadow:none !important;padding:0 !important;height:auto !important;min-height:0 !important;
+  font-size:16px !important;font-weight:600 !important;line-height:28px !important;letter-spacing:-.2px;
+  color:var(--color-text-amount) !important;background:transparent !important;width:100%;
+}
+.amt-input-wrap:focus-within{border-color:var(--color-border-focus);box-shadow:0 0 0 3px var(--color-bg-focus-ring);}
+.qa-pills{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;overflow-x:auto;padding-bottom:2px;}
+.qa-pill{
+  flex-shrink:0;padding:8px 14px;border-radius:999px;border:1px solid var(--color-border-default);
+  background:var(--color-bg-surface);font-size:13px;font-weight:500;color:var(--color-text-primary);
+}
+.qa-pill:hover{background:var(--color-bg-muted);}
+.qa-pill.active{
+  background:var(--color-bg-brand-subtle);border:1.5px solid var(--color-border-brand);
+  color:var(--color-text-brand);font-weight:600;padding:7.5px 13.5px;
+}
+.rc-cta{margin-top:0;}
+.rc-cta .btn{
+  width:100%;min-height:48px;height:48px;font-size:14px;font-weight:500;line-height:20px;
+  border-radius:var(--radius-md);padding:12px 24px;
+}
+
+.rc-recent-card{padding:16px 20px;}
+.rc-recent-card .rc-card-title,.rc-plans-card .rc-card-title,.rc-summary-card .rc-card-title{
+  font-size:14px;font-weight:600;margin:0 0 2px;color:var(--color-text-primary);
+}
+.rc-recent-card .rc-card-sub,.rc-plans-card .rc-card-sub{font-size:12px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.4;}
 .rc-recent-row{
   display:flex;align-items:center;justify-content:space-between;gap:10px;
-  padding:10px 0;border-bottom:1px solid #F1F5F9;
+  padding:10px 0;border-bottom:1px solid var(--color-bg-muted);
 }
 .rc-recent-row:last-child{border-bottom:none;}
 .rc-recent-row .main{font-size:13px;font-weight:600;color:var(--color-text-primary);}
-.rc-recent-row .meta{font-size:11.5px;color:var(--text-secondary);margin-top:2px;}
+.rc-recent-row .meta{font-size:11.5px;color:var(--color-text-secondary);margin-top:2px;}
 .rc-recent-row .btn-link{
-  border:none;background:transparent;color:var(--color-text-brand);font-size:12.5px;font-weight:700;cursor:pointer;padding:4px;
+  border:none;background:transparent;color:var(--color-text-brand);font-size:12.5px;font-weight:600;cursor:pointer;padding:4px;
 }
 
-.rc-plans-card,.rc-summary-card{padding:var(--space-4);}
-.rc-plans-card .rc-card-title,.rc-summary-card .rc-card-title{font-size:14px;font-weight:700;margin:0 0 2px;}
-.rc-plans-card .rc-card-sub{font-size:11.5px;color:var(--text-secondary);margin-bottom:12px;}
+.rc-plans-card,.rc-summary-card{padding:20px;}
 .plans-placeholder{
-  text-align:center;padding:36px 16px;color:var(--text-secondary);font-size:13px;line-height:1.55;
+  text-align:center;padding:36px 16px;color:var(--color-text-secondary);font-size:13px;line-height:1.55;
   background:var(--color-bg-muted);border-radius:var(--radius-md);border:1px dashed var(--color-border-default);
 }
-.plans-placeholder i{font-size:28px;color:var(--text-muted);margin-bottom:8px;display:block;}
+.plans-placeholder i{font-size:28px;color:var(--color-text-muted);margin-bottom:8px;display:block;}
+.plans-placeholder strong{display:block;margin-bottom:4px;color:var(--color-text-primary);}
 
-.rc-summary-rows{display:flex;flex-direction:column;gap:0;}
-.rc-summary-row{
-  display:flex;justify-content:space-between;gap:12px;padding:10px 0;
-  border-bottom:1px solid #F1F5F9;font-size:13.5px;
+/* Plan rows when available — Figma 48:185 */
+.rc-plan-row{
+  display:flex;align-items:center;gap:16px;padding:12px 16px;margin-bottom:8px;
+  background:var(--color-bg-surface);border:1px solid var(--color-border-default);border-radius:8px;
 }
-.rc-summary-row:last-child{border-bottom:none;}
-.rc-summary-row .k{color:var(--text-secondary);}
+.rc-plan-row.selected{background:var(--color-bg-brand-subtle);border:1.5px solid var(--color-border-brand);}
+.rc-plan-row .plan-info{flex:1;min-width:0;}
+.rc-plan-row .plan-amt{font-size:16px;font-weight:700;color:var(--color-text-primary);}
+.rc-plan-row .plan-meta{font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-top:2px;}
+.rc-plan-row .plan-select{
+  width:120px;height:32px;border-radius:4px;border:1px solid var(--color-border-strong);
+  background:#fff;font-size:12px;font-weight:500;color:var(--color-text-primary);
+}
+.rc-plan-row.selected .plan-select{background:var(--color-bg-brand);border-color:var(--color-bg-brand);color:#fff;}
+
+/* Summary — Figma 48:206 */
+.rc-summary-rows{display:flex;flex-direction:column;gap:12px;}
+.rc-summary-row{display:flex;justify-content:space-between;gap:12px;padding:0;border:none;font-size:13px;}
+.rc-summary-row .k{font-weight:500;color:var(--color-text-secondary);}
 .rc-summary-row .v{font-weight:600;color:var(--color-text-primary);text-align:right;}
-.rc-summary-row.after .v{color:var(--color-text-brand);font-size:15px;font-weight:700;}
-.rc-summary-empty{font-size:12.5px;color:var(--text-secondary);padding:8px 0;}
+.rc-summary-row.after .v,.rc-summary-row.plan .v{color:var(--color-text-brand);font-size:16px;font-weight:700;}
+.rc-summary-empty{font-size:12.5px;color:var(--color-text-secondary);padding:8px 0;}
 .rc-dth-banner{
   display:none;padding:12px 14px;border-radius:var(--radius-md);margin-bottom:var(--space-4);
   background:var(--color-bg-warning);border:1px solid #FDE68A;color:var(--color-text-warning);font-size:13px;
 }
 .rc-dth-banner.show{display:block;}
 
-/* Modal / result polish (shared with confirm flow) */
-.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;z-index:300;padding:16px;}
-.modal-backdrop.show{display:flex;} .modal-backdrop.show[hidden]{display:flex;}
-.modal-box{
-  background:#fff;border-radius:14px;max-width:440px;width:100%;padding:26px;
-  box-shadow:0 24px 60px rgba(0,0,0,.25);max-height:min(90vh,720px);overflow:auto;
+/* ---- Modals / Transaction Result — Figma 50:196 + 50:291 ---- */
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;z-index:300;padding:16px;}
+.modal-backdrop.show{display:flex;}
+.modal-backdrop.show[hidden]{display:flex;}
+.modal-box,.rc-result-card{
+  background:var(--color-bg-surface);border:1px solid var(--color-border-default);border-radius:12px;
+  max-width:440px;width:100%;padding:24px;box-shadow:var(--elevation-md);
+  max-height:min(90vh,760px);overflow:auto;box-sizing:border-box;
 }
-.modal-box h3{margin:0 0 6px;font-size:18px;font-weight:700;text-align:center;}
-.modal-lead{text-align:center;font-size:13px;color:var(--text-secondary);margin:0 0 16px;line-height:1.4;}
-.modal-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:14px;border-bottom:1px solid #F1F5F9;}
-.modal-row .k{color:var(--text-secondary);}
-.modal-row .v{font-weight:600;text-align:right;}
-.modal-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;}
-.modal-actions .btn{flex:1;min-width:120px;}
+.rc-result-card{max-width:420px;padding:28px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;}
+.modal-box h3,.rc-confirm-title{margin:0 0 0;font-size:20px;font-weight:700;text-align:left;color:var(--color-text-primary);width:100%;}
+.modal-lead{display:none;}
+.rc-confirm-details{
+  width:100%;background:var(--color-bg-muted);border-radius:8px;padding:16px;
+  display:flex;flex-direction:column;gap:10px;box-sizing:border-box;margin-top:16px;
+}
+.modal-row,.rc-confirm-details .modal-row{
+  display:flex;justify-content:space-between;gap:12px;padding:0;font-size:13px;border:none;background:transparent;
+}
+.modal-row .k{font-weight:500;color:var(--color-text-secondary);}
+.modal-row .v{font-weight:600;text-align:right;color:var(--color-text-primary);}
+.modal-actions{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;width:100%;justify-content:flex-end;}
+.modal-actions .btn{flex:0 1 auto;min-width:120px;height:40px;min-height:40px;padding:8px 16px;font-size:14px;font-weight:500;}
+.modal-actions .btn.primary,.modal-actions .btn.lg-confirm{min-height:48px;height:48px;padding:12px 24px;}
 .modal-warn{
-  margin:12px 0 0;padding:10px 12px;border-radius:var(--radius-md);font-size:12.5px;line-height:1.45;
-  background:var(--color-bg-warning);border:1px solid #FDE68A;color:var(--color-text-warning);
+  margin:16px 0 0;padding:10px 12px;border-radius:8px;font-size:12px;font-weight:500;line-height:1.45;
+  background:var(--color-bg-warning);border:none;color:var(--color-text-warning);width:100%;box-sizing:border-box;text-align:left;
 }
-.result-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:32px;}
-.result-icon.ok{background:var(--color-bg-success);color:var(--color-text-success);}
+.rc-status-badge{
+  display:inline-flex;align-items:center;padding:6px 12px;border-radius:999px;
+  font-size:12px;font-weight:600;line-height:1.2;
+}
+.rc-status-badge.processing{background:var(--color-bg-info);color:var(--color-text-info);}
+.rc-status-badge.success{background:var(--color-bg-success);color:var(--color-text-success);}
+.rc-status-badge.pending{background:var(--color-bg-warning);color:var(--color-text-warning);}
+.rc-status-badge.failed{background:var(--color-bg-danger);color:var(--color-text-danger);}
+.rc-result-amount{margin:0;font-size:32px;font-weight:700;line-height:1.1;color:var(--color-text-primary);}
+.rc-result-meta{margin:0;font-size:14px;font-weight:500;color:var(--color-text-secondary);}
+.rc-result-ref{margin:0;font-size:13px;font-weight:600;color:var(--color-text-primary);}
+.rc-result-sub{margin:0;font-size:13px;font-weight:500;color:var(--color-text-secondary);line-height:1.45;max-width:360px;}
+.rc-result-note{
+  width:100%;padding:10px 12px;border-radius:8px;font-size:12px;font-weight:500;line-height:1.45;text-align:left;box-sizing:border-box;
+}
+.rc-result-note.info{background:var(--color-bg-info);color:var(--color-text-info);}
+.rc-result-note.warning{background:var(--color-bg-warning);color:var(--color-text-warning);}
+.rc-result-note.danger{background:var(--color-bg-danger);color:var(--color-text-danger);}
+.rc-result-note.success,.rc-result-note.refund{background:var(--color-bg-success);color:var(--color-text-success);}
+.rc-result-icon{
+  width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;
+}
+.rc-result-icon.ok{background:var(--color-bg-success);color:var(--color-text-success);animation:rcPop .45s ease;}
+.rc-result-icon.fail{background:var(--color-bg-danger);color:var(--color-text-danger);}
+.rc-result-icon.pending{background:var(--color-bg-warning);color:var(--color-text-warning);}
+.rc-result-icon.warn{background:var(--color-bg-warning);color:var(--color-text-warning);}
+@keyframes rcPop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+/* legacy aliases used by older render paths */
+.result-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:28px;}
+.result-icon.ok{background:var(--color-bg-success);color:var(--color-text-success);animation:rcPop .45s ease;}
 .result-icon.fail{background:var(--color-bg-danger);color:var(--color-text-danger);}
 .result-icon.pending{background:var(--color-bg-warning);color:var(--color-text-warning);}
-.result-icon.info{background:#DBEAFE;color:#1D4ED8;}
-.result-title{text-align:center;font-size:18px;font-weight:700;margin-bottom:4px;}
-.result-sub{text-align:center;font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.4;}
-.result-note{background:#F8FAFC;border-radius:8px;padding:11px 13px;font-size:12.5px;color:var(--text-secondary);margin:12px 0;text-align:center;line-height:1.45;}
-.result-note.refund{background:#F3E8FF;color:#5B21B6;}
+.result-icon.info{background:var(--color-bg-info);color:var(--color-text-info);}
+.result-title{text-align:center;font-size:18px;font-weight:700;margin-bottom:4px;color:var(--color-text-primary);}
+.result-sub{text-align:center;font-size:13px;color:var(--color-text-secondary);margin-bottom:8px;line-height:1.4;}
+.result-note{background:var(--color-bg-muted);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--color-text-secondary);margin:8px 0;text-align:left;line-height:1.45;width:100%;box-sizing:border-box;}
+.result-note.refund{background:var(--color-bg-success);color:var(--color-text-success);}
 .result-note.danger{background:var(--color-bg-danger);color:var(--color-text-danger);}
-.spinner{width:36px;height:36px;border:3px solid #E2E8F0;border-top-color:var(--primary);border-radius:50%;margin:0 auto 16px;animation:spin .7s linear infinite;}
+.spinner{width:36px;height:36px;border:3px solid #E2E8F0;border-top-color:var(--color-bg-brand);border-radius:50%;margin:0 auto;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
+.rc-result-card .modal-actions{justify-content:center;}
+.rc-result-card .modal-actions .btn.block{width:100%;flex:1 1 100%;}
 
 @media (min-width:640px) and (max-width:1023px){
   .rc-layout{grid-template-columns:1fr;}
-  .rc-service-tabs{max-width:none;}
+  .rc-service-tabs{width:100%;}
 }
 @media (max-width:639px){
   .rc-page-intro{margin-top:12px;}
-  .rc-page-intro h2{font-size:20px;}
+  .rc-page-intro h2{font-size:20px;line-height:28px;}
   .rc-layout{grid-template-columns:1fr;gap:14px;}
-  .rc-service-tabs{grid-template-columns:1fr 1fr;gap:8px;max-width:none;}
-  .rc-service-tab{padding:12px;font-size:13px;}
+  .rc-service-tabs{width:100%;display:flex;}
+  .rc-service-tab{flex:1;padding:10px 8px;font-size:12px;}
   .rc-form-card{padding:16px;}
   .rc-cta{position:sticky;bottom:72px;z-index:5;padding-top:8px;background:linear-gradient(180deg,transparent,var(--color-bg-canvas) 28%);}
   .rc-side-col{order:3;}
+  .modal-box,.rc-result-card{padding:20px;}
+  .rc-result-amount{font-size:28px;}
 }
 
 /* =========================================================================
@@ -1977,7 +2077,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
       <div class="screen hidden" id="screen-recharge">
         <div class="rc-page-intro">
           <h2>Recharge</h2>
-          <div class="sub">Process mobile and DTH recharges with your live wallet.</div>
+          <div class="sub">Process mobile and DTH recharges</div>
         </div>
 
         <div class="rc-service-tabs" id="rc-service-tabs" role="tablist"></div>
@@ -1986,32 +2086,33 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
         <div class="rc-layout">
           <div class="rc-main-col">
             <div class="card rc-form-card">
-              <div class="rc-field">
+              <h3 class="rc-form-title" id="rc-form-title">Mobile Recharge</h3>
+              <div class="rc-field" id="rc-field-mobile">
                 <label id="rc-mobile-label">Mobile Number</label>
                 <input type="tel" id="rc-mobile" inputmode="numeric" placeholder="Enter 10-digit mobile number" oninput="onRcMobileInput()" onblur="onRcMobileBlur()" autocomplete="tel">
-                <div class="hint" id="rc-mobile-hint">10-digit Indian mobile number.</div>
+                <div class="hint" id="rc-mobile-hint">10-digit Indian mobile number</div>
                 <div class="field-error" id="rc-mobile-error"></div>
-                <div class="rc-detect muted" id="rc-op-detect"><i class="ti ti-info-circle" style="flex-shrink:0;margin-top:1px;"></i><span id="rc-op-detect-label">Select an operator below.</span></div>
+                <div class="rc-detect muted" id="rc-op-detect"><span id="rc-op-detect-label">Select an operator below.</span></div>
               </div>
 
-              <div class="rc-field">
+              <div class="rc-field" id="rc-field-operator">
                 <label>Operator</label>
                 <div class="op-pills" id="rc-op-pills"></div>
-                <div class="hint">Change if the operator shown is incorrect.</div>
+                <div class="hint">Change if detection is incorrect</div>
               </div>
 
-              <div class="rc-field">
+              <div class="rc-field" id="rc-field-amount">
                 <label>
-                  Amount
-                  <a class="rc-label-action" onclick="focusPlansPanel()">Browse Plans</a>
+                  Recharge Amount
+                  <button type="button" class="rc-label-action" onclick="focusPlansPanel()">Browse Plans</button>
                 </label>
                 <div class="amt-input-wrap">
-                  <span class="rupee">₹</span>
-                  <input type="number" id="rc-amount" placeholder="Enter amount" min="1" step="1" oninput="onRcAmountInput()" onblur="onRcAmountBlur()">
+                  <span class="rupee" aria-hidden="true">₹</span>
+                  <input type="number" id="rc-amount" placeholder="0" min="1" step="1" oninput="onRcAmountInput()" onblur="onRcAmountBlur()" inputmode="numeric">
                 </div>
-                <div class="hint">Or pick a quick amount below. Chips fill amount only — they never submit.</div>
+                <div class="hint">Or pick a quick amount below</div>
                 <div class="field-error" id="rc-amount-error"></div>
-                <div class="qa-pills" id="rc-quick-amounts"></div>
+                <div class="qa-pills" id="rc-quick-amounts" aria-label="Quick amounts"></div>
               </div>
 
               <div class="rc-cta">
@@ -2028,7 +2129,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 
           <div class="rc-side-col">
             <div class="card rc-plans-card" id="rc-plans-card">
-              <div class="rc-card-title">Browse Plans</div>
+              <div class="rc-card-title">Plans &amp; Offers</div>
               <div class="rc-card-sub">Choose a plan when available, or enter the amount manually.</div>
               <div class="plans-placeholder" id="rc-plans-panel">
                 <i class="ti ti-device-mobile"></i>
@@ -2914,7 +3015,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 
 <!-- Recharge confirm / result modal -->
 <div class="modal-backdrop" id="rc-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="rc-modal-title" hidden>
-  <div class="modal-box" id="rc-modal-box"></div>
+  <div class="modal-box" id="rc-modal-box" data-figma="50:196/50:291"></div>
 </div>
 
 <!-- Transaction detail drawer -->
@@ -3978,13 +4079,12 @@ function renderRcServiceTabs() {
   const cur = (state.rc.serviceType || "mobile").toLowerCase();
 
   wrap.innerHTML =
-    '<button type="button" class="rc-service-tab' + (cur === "mobile" ? " active" : "") + '" onclick="setRcServiceType(\'mobile\')">'
-    + '<i class="ti ti-device-mobile"></i><span>Mobile Recharge<span class="tab-meta">Prepaid mobile</span></span></button>'
-    + '<button type="button" class="rc-service-tab' + (cur === "dth" ? " active" : "") + (dthAvailable ? "" : " disabled") + '"'
+    '<button type="button" role="tab" aria-selected="' + (cur === "mobile" ? "true" : "false") + '" class="rc-service-tab'
+    + (cur === "mobile" ? " active" : "") + '" onclick="setRcServiceType(\'mobile\')">Mobile Recharge</button>'
+    + '<button type="button" role="tab" aria-selected="' + (cur === "dth" ? "true" : "false") + '" class="rc-service-tab'
+    + (cur === "dth" ? " active" : "") + (dthAvailable ? "" : " disabled") + '"'
     + (dthAvailable ? " onclick=\"setRcServiceType('dth')\"" : " disabled aria-disabled=\"true\"")
-    + '><i class="ti ti-device-tv"></i><span>DTH Recharge<span class="tab-meta">'
-    + (dthAvailable ? "Set-top box" : "Not available yet")
-    + "</span></span></button>";
+    + '>DTH Recharge</button>';
 }
 
 async function setRcServiceType(code) {
@@ -4025,12 +4125,14 @@ function applyRcServiceChrome() {
   const label = document.getElementById("rc-mobile-label");
   const hint = document.getElementById("rc-mobile-hint");
   const mobileInput = document.getElementById("rc-mobile");
+  const formTitle = document.getElementById("rc-form-title");
+  if (formTitle) formTitle.textContent = st === "dth" ? "DTH Recharge" : "Mobile Recharge";
 
   if (label) label.textContent = st === "dth" ? "Customer / Account Number" : "Mobile Number";
   if (hint) {
     hint.textContent = st === "dth"
       ? "Enter the DTH customer/account number required by the selected operator."
-      : "10-digit Indian mobile number.";
+      : "10-digit Indian mobile number";
   }
   if (mobileInput && st === "dth") {
     mobileInput.placeholder = "Enter customer / account number";
@@ -4082,7 +4184,7 @@ function updateRcSummary() {
   html += '<div class="rc-summary-row"><span class="k">' + ((state.rc.serviceType || "mobile") === "dth" ? "Account" : "Mobile Number") + '</span><span class="v">'
     + escapeHtml(mobile ? maskMobile(mobile) : "—") + "</span></div>";
   html += '<div class="rc-summary-row"><span class="k">Operator</span><span class="v">' + escapeHtml(opName || "—") + "</span></div>";
-  html += '<div class="rc-summary-row"><span class="k">Amount</span><span class="v">' + (amount > 0 ? formatMoney(amount) : "—") + "</span></div>";
+  html += '<div class="rc-summary-row plan"><span class="k">Amount</span><span class="v">' + (amount > 0 ? formatMoney(amount) : "—") + "</span></div>";
   html += '<div class="rc-summary-row"><span class="k">Wallet Balance</span><span class="v">' + formatMoney(bal) + "</span></div>";
   if (after != null) {
     html += '<div class="rc-summary-row after"><span class="k">After Recharge</span><span class="v">' + formatMoney(after) + "</span></div>";
@@ -4258,7 +4360,7 @@ function renderPlansPanel() {
   const needLen = (state.rc.serviceType || "mobile") === "mobile" ? 10 : 1;
   if (state.rc.mobile.length >= needLen) {
     panel.innerHTML = '<i class="ti ti-clipboard-list"></i>'
-      + "<strong>Plans unavailable</strong><br>"
+      + "<strong>Plans & Offers unavailable</strong><br>"
       + "Recharge plans are currently unavailable. Enter the amount manually.";
   } else {
     panel.innerHTML = '<i class="ti ti-device-mobile"></i>Enter a '
@@ -4340,7 +4442,8 @@ async function openRechargeConfirm() {
   if (!mobileOk || !amountOk) return;
 
   const box = document.getElementById("rc-modal-box");
-  box.innerHTML = '<div class="spinner"></div><div class="result-title" id="rc-modal-title">Loading current balance...</div><div class="result-sub">Wallet balance is refreshed from the server.</div>';
+  box.className = "modal-box rc-result-card";
+  box.innerHTML = '<div class="spinner"></div><div class="result-title" id="rc-modal-title">Loading current balance...</div><div class="rc-result-sub">Wallet balance is refreshed from the server.</div>';
   openRcModalBackdrop();
   try {
     await refreshWalletBalance();
@@ -4364,47 +4467,60 @@ function renderRechargeConfirmModal() {
   const after = available - state.rc.amount;
   const box = document.getElementById("rc-modal-box");
   const accountLabel = (state.rc.serviceType || "mobile") === "dth" ? "Account" : "Mobile";
+  box.className = "modal-box";
   box.innerHTML =
-    '<h3>Confirm Recharge</h3>'
-    + '<p class="modal-lead">Please verify the details. Successful recharges may not be reversible.</p>'
+    '<h3 class="rc-confirm-title" id="rc-modal-title">Confirm Recharge</h3>'
+    + '<div class="rc-confirm-details">'
     + modalRow(accountLabel, maskMobile(state.rc.mobile))
     + modalRow("Operator", operatorDisplayName())
     + modalRow("Amount", formatMoney(state.rc.amount))
-    + modalRow("Wallet Before", formatMoney(available))
-    + modalRow("Wallet After", formatMoney(after))
-    + '<div class="modal-warn"><i class="ti ti-alert-triangle"></i> Please confirm only once. We\'ll safely process your recharge.</div>'
+    + modalRow("Available", formatMoney(available))
+    + modalRow("After Recharge", formatMoney(after))
+    + "</div>"
+    + '<div class="modal-warn">Please verify the mobile number and recharge details. Successful recharges may not be reversible.</div>'
     + '<div class="modal-actions">'
     + '<button type="button" class="btn" id="rc-cancel-btn" onclick="closeRcModal()">Cancel</button>'
-    + '<button type="button" class="btn primary" id="rc-confirm-btn" onclick="submitRecharge()">Confirm ' + formatMoney(state.rc.amount) + "</button></div>";
+    + '<button type="button" class="btn primary lg-confirm" id="rc-confirm-btn" onclick="submitRecharge()">Confirm ' + formatMoney(state.rc.amount) + "</button></div>";
   openRcModalBackdrop();
 }
+
 
 function renderInsufficientWalletModal() {
   const available = Number(state.wallets.main) || 0;
-  const shortfall = Math.max(0, state.rc.amount - available);
   const box = document.getElementById("rc-modal-box");
+  box.className = "modal-box rc-result-card";
   box.innerHTML =
-    '<div class="result-icon fail"><i class="ti ti-wallet-off"></i></div>'
-    + '<div class="result-title" id="rc-modal-title">Insufficient Wallet Balance</div>'
-    + '<div class="result-sub">This recharge needs ' + formatMoney(state.rc.amount) + '. Your main wallet has ' + formatMoney(available) + '.</div>'
-    + modalRow("Required", formatMoney(state.rc.amount))
-    + modalRow("Available", formatMoney(available))
-    + modalRow("Shortfall", formatMoney(shortfall))
-    + '<div class="result-note">No recharge was submitted. Wallet was not changed.</div>'
+    '<div class="rc-result-icon warn"><i class="ti ti-alert-triangle"></i></div>'
+    + '<div class="rc-status-badge pending">Insufficient Balance</div>'
+    + '<div class="result-title" id="rc-modal-title">Insufficient Balance</div>'
+    + '<div class="rc-result-sub">This recharge needs ' + formatMoney(state.rc.amount) + '. Your main wallet has ' + formatMoney(available) + '.</div>'
+    + '<div class="rc-confirm-details" style="text-align:left;">'
+    + modalRow("Current Balance", formatMoney(available))
+    + modalRow("Required Amount", formatMoney(state.rc.amount))
+    + "</div>"
     + '<div class="modal-actions">'
-    + '<button type="button" class="btn" onclick="closeRcModal()">Close</button>'
-    + '<button type="button" class="btn primary" onclick="closeRcModal();openFundRequest();">Add Money</button></div>';
+    + '<button type="button" class="btn primary" onclick="closeRcModal();openFundRequest();">Add Money</button>'
+    + '<button type="button" class="btn" onclick="closeRcModal()">Cancel</button></div>';
   openRcModalBackdrop();
 }
 
+
 function renderProcessingModal() {
   const box = document.getElementById("rc-modal-box");
+  box.className = "modal-box rc-result-card";
   box.innerHTML =
-    '<div class="spinner"></div>'
-    + '<div class="result-title" id="rc-modal-title">Processing Recharge</div>'
-    + '<div class="result-sub">' + escapeHtml(operatorDisplayName()) + " · " + maskMobile(state.rc.mobile) + "<br>" + formatMoney(state.rc.amount) + "</div>"
-    + '<div class="result-note">Please wait. Do not close this window or submit the recharge again.</div>';
+    '<div class="rc-status-badge processing">Processing Recharge</div>'
+    + '<div class="spinner" aria-hidden="true"></div>'
+    + '<div class="rc-result-amount">' + formatMoney(state.rc.amount) + "</div>"
+    + '<div class="rc-result-meta">' + escapeHtml(operatorDisplayName()) + " · " + maskMobile(state.rc.mobile) + "</div>"
+    + '<div class="result-title" id="rc-modal-title" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Processing...</div>'
+    + '<div class="rc-result-sub">Please wait while we confirm the transaction.</div>'
+    + '<div class="rc-result-note info">Do not close this window or submit again.</div>'
+    + '<div class="modal-actions">'
+    + '<button type="button" class="btn" disabled>Processing…</button>'
+    + '<button type="button" class="btn" disabled>Disabled</button></div>';
 }
+
 
 function modalRow(k, v) {
   return '<div class="modal-row"><span class="k">' + escapeHtml(k) + '</span><span class="v">' + escapeHtml(v) + "</span></div>";
@@ -4484,38 +4600,42 @@ function renderRechargeResult(kind, body, opts) {
   const mobile = maskMobile(state.rc.mobile);
   const amount = formatMoney(state.rc.amount);
   const accountLabel = (state.rc.serviceType || "mobile") === "dth" ? "Account" : "Mobile";
+  const opMeta = escapeHtml(operatorDisplayName()) + " · " + mobile;
+  const txnRef = body && body.recharge_id != null ? ("QP-" + body.recharge_id) : "—";
   body = body || {};
   opts = opts || {};
+  box.className = "modal-box rc-result-card";
 
   if (kind === "network_error") {
     box.innerHTML =
-      '<div class="result-icon fail"><i class="ti ti-wifi-off"></i></div>'
+      '<div class="rc-result-icon fail"><i class="ti ti-wifi-off"></i></div>'
+      + '<div class="rc-status-badge failed">Connection Error</div>'
       + '<div class="result-title" id="rc-modal-title">Unable to connect</div>'
-      + '<div class="result-sub">Please check your connection.</div>'
-      + '<div class="result-note">Your wallet was not changed by this attempt. You can try again safely.</div>'
-      + '<div class="modal-actions"><button type="button" class="btn block primary" onclick="submitRecharge()">Try Again</button></div>';
+      + '<div class="rc-result-sub">Please check your connection.</div>'
+      + '<div class="rc-result-note danger">Your wallet was not changed by this attempt. You can try again safely.</div>'
+      + '<div class="modal-actions"><button type="button" class="btn primary block" onclick="submitRecharge()">Try Again</button></div>';
     return;
   }
 
   if (kind === "success") {
-    let walletRow = "";
-    if (opts.postTxnBalanceOk) {
-      walletRow = modalRow("Wallet Balance", formatMoney(state.wallets.main));
-    } else {
-      walletRow = modalRow("Wallet Balance", "Updating shortly");
-    }
+    let walletLine = opts.postTxnBalanceOk
+      ? ("New Balance " + formatMoney(state.wallets.main))
+      : "New Balance updating shortly";
+    const commission = (body.commission != null || body.commission_amount != null)
+      ? formatMoney(body.commission != null ? body.commission : body.commission_amount)
+      : null;
     box.innerHTML =
-      '<div class="result-icon ok"><i class="ti ti-check"></i></div>'
-      + '<div class="result-title" id="rc-modal-title">Recharge Successful</div>'
-      + '<div class="result-sub">' + amount + " · " + escapeHtml(operatorDisplayName()) + " · " + mobile + "</div>"
-      + modalRow("Transaction ID", "QP-" + (body.recharge_id != null ? body.recharge_id : "—"))
-      + (body.transaction_id ? modalRow("Operator Reference", body.transaction_id) : "")
-      + modalRow(accountLabel, mobile)
-      + modalRow("Operator", operatorDisplayName())
-      + modalRow("Amount", amount)
-      + walletRow
-      + '<div class="modal-actions"><button type="button" class="btn" onclick="closeRcModal();resetRechargeForm();">New Recharge</button>'
-      + '<button type="button" class="btn primary" onclick="closeRcModal();goTo(\'transactions\');">View in Transactions</button></div>';
+      '<div class="rc-result-icon ok"><i class="ti ti-check"></i></div>'
+      + '<div class="rc-status-badge success">Recharge Successful</div>'
+      + '<div class="rc-result-amount">' + amount + "</div>"
+      + '<div class="result-title" id="rc-modal-title">' + amount + " Recharge Successful</div>"
+      + '<div class="rc-result-meta">' + opMeta + "</div>"
+      + '<div class="rc-result-ref">Transaction ID: ' + escapeHtml(txnRef) + "</div>"
+      + (commission ? '<div class="rc-result-sub">Commission earned ' + commission + "</div>" : "")
+      + '<div class="rc-result-sub">' + escapeHtml(walletLine) + "</div>"
+      + '<div class="modal-actions">'
+      + '<button type="button" class="btn primary" onclick="closeRcModal();resetRechargeForm();">New Recharge</button>'
+      + '<button type="button" class="btn" onclick="closeRcModal();goTo(\'transactions\');">View in Transactions</button></div>';
     return;
   }
 
@@ -4523,44 +4643,52 @@ function renderRechargeResult(kind, body, opts) {
     const refunded = body.refund_status === "refunded";
     if (refunded) {
       box.innerHTML =
-        '<div class="result-icon fail"><i class="ti ti-rotate"></i></div>'
-        + '<div class="result-title" id="rc-modal-title">Recharge Failed · Refunded</div>'
-        + '<div class="result-sub">' + amount + " · " + escapeHtml(operatorDisplayName()) + " · " + mobile + "</div>"
-        + '<div class="result-note refund">' + amount + " has been refunded to your Main Wallet.</div>"
-        + modalRow("Transaction ID", "QP-" + (body.recharge_id != null ? body.recharge_id : "—"))
-        + modalRow("Current Balance", formatMoney(state.wallets.main))
-        + '<div class="modal-actions"><button type="button" class="btn" onclick="prepareRechargeAgain()">Recharge Again</button>'
-        + '<button type="button" class="btn primary" onclick="closeRcModal();goTo(\'transactions\');">View Details</button></div>';
+        '<div class="rc-result-icon fail"><i class="ti ti-x"></i></div>'
+        + '<div class="rc-status-badge failed">Recharge Failed</div>'
+        + '<div class="rc-result-amount">' + amount + "</div>"
+        + '<div class="result-title" id="rc-modal-title">Recharge Failed</div>'
+        + '<div class="rc-result-meta">' + opMeta + "</div>"
+        + '<div class="rc-result-ref">Transaction ID: ' + escapeHtml(txnRef) + "</div>"
+        + '<div class="rc-result-note refund">' + amount + " refunded to Main Wallet</div>"
+        + '<div class="rc-result-sub">New Balance ' + formatMoney(state.wallets.main) + "</div>"
+        + '<div class="modal-actions">'
+        + '<button type="button" class="btn primary block" onclick="prepareRechargeAgain()">Recharge Again</button></div>';
       return;
     }
     box.innerHTML =
-      '<div class="result-icon fail"><i class="ti ti-x"></i></div>'
+      '<div class="rc-result-icon fail"><i class="ti ti-x"></i></div>'
+      + '<div class="rc-status-badge failed">Recharge Failed</div>'
+      + '<div class="rc-result-amount">' + amount + "</div>"
       + '<div class="result-title" id="rc-modal-title">Recharge Failed</div>'
-      + '<div class="result-sub">' + amount + " · " + escapeHtml(operatorDisplayName()) + " · " + mobile + "</div>"
-      + '<div class="result-note">' + escapeHtml(sanitizeRechargeFailureMessage(body.message || body.error)) + "</div>"
-      + modalRow("Transaction ID", "QP-" + (body.recharge_id != null ? body.recharge_id : "—"))
-      + modalRow("Current Balance", formatMoney(state.wallets.main))
-      + '<div class="modal-actions"><button type="button" class="btn" onclick="prepareRechargeAgain()">Recharge Again</button>'
-      + '<button type="button" class="btn primary" onclick="closeRcModal();goTo(\'transactions\');">View Details</button></div>';
+      + '<div class="rc-result-meta">' + opMeta + "</div>"
+      + '<div class="rc-result-ref">Transaction ID: ' + escapeHtml(txnRef) + "</div>"
+      + '<div class="rc-result-note danger">' + escapeHtml(sanitizeRechargeFailureMessage(body.message || body.error || "No amount was deducted from your wallet.")) + "</div>"
+      + '<div class="modal-actions">'
+      + '<button type="button" class="btn primary" onclick="prepareRechargeAgain()">Try Again</button>'
+      + '<button type="button" class="btn" onclick="closeRcModal();goTo(\'transactions\');">View Details</button></div>';
     return;
   }
 
   // hold / processing / queued / draft / pending — stay Pending, never Success
-  const pendingTitle = (kind === "processing") ? "Recharge Processing" : "Recharge Pending";
+  const isProcessing = kind === "processing";
+  const pendingTitle = isProcessing ? "Recharge Processing" : "Recharge Pending";
+  const badge = isProcessing ? "processing" : "pending";
+  const badgeLabel = isProcessing ? "Processing Recharge" : "Recharge Pending";
   box.innerHTML =
-    '<div class="result-icon pending"><i class="ti ti-clock"></i></div>'
+    '<div class="rc-result-icon pending"><i class="ti ti-clock"></i></div>'
+    + '<div class="rc-status-badge ' + badge + '">' + badgeLabel + "</div>"
+    + '<div class="rc-result-amount">' + amount + "</div>"
     + '<div class="result-title" id="rc-modal-title">' + pendingTitle + "</div>"
-    + '<div class="result-sub">Do not recharge again. Waiting for operator confirmation.</div>'
-    + modalRow("Status", String(kind || "pending"))
-    + modalRow("Transaction ID", "QP-" + (body.recharge_id != null ? body.recharge_id : "—"))
-    + modalRow(accountLabel, mobile)
-    + modalRow("Amount", amount)
+    + '<div class="rc-result-meta">' + opMeta + "</div>"
+    + '<div class="rc-result-ref">Transaction ID: ' + escapeHtml(txnRef) + "</div>"
+    + '<div class="rc-result-note warning">Do not retry this recharge until the final status is confirmed.</div>'
     + '<div class="modal-actions">'
     + (body.recharge_id != null
       ? '<button type="button" class="btn primary block" onclick="checkRechargeStatus(' + body.recharge_id + ')">Check Status</button>'
       : '<button type="button" class="btn primary block" onclick="closeRcModal();goTo(\'transactions\');">View Transactions</button>')
     + "</div>";
 }
+
 
 function prepareRechargeAgain() {
   // Keep fields; mint a NEW idempotency key for a fresh attempt. Never auto-submit.
