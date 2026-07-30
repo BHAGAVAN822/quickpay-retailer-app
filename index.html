@@ -85,8 +85,8 @@
   --text-muted:var(--color-text-muted);
   --sidebar-bg:var(--color-bg-sidebar);
   --sidebar-active:var(--color-bg-brand);
-  --sidebar-width:256px;
-  --topbar-height:64px;
+  --sidebar-width:240px;
+  --topbar-height:72px;
   --font-sans:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,sans-serif;
 }
 *{box-sizing:border-box;}
@@ -275,7 +275,8 @@ a:focus:not(:focus-visible),
 .sb-item:hover{background:var(--color-bg-sidebar-hover);color:var(--color-text-sidebar-active);}
 .sb-item:hover i{color:var(--color-text-sidebar-active);}
 .sb-item.active{
-  background:var(--color-bg-sidebar-active);color:var(--color-text-sidebar-active);font-weight:500;
+  background:var(--color-bg-sidebar-hover);color:var(--color-text-sidebar-active);font-weight:500;
+  border-left:3px solid var(--color-bg-brand);padding-left:9px;
 }
 .sb-item.active i{color:var(--color-text-sidebar-active);}
 .sb-item.disabled{opacity:.35;cursor:not-allowed;}
@@ -316,12 +317,12 @@ a:focus:not(:focus-visible),
 
 /* --- Content area --- */
 #content-area{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--color-bg-canvas);}
-#content-inner{max-width:1136px;margin:0 auto;width:100%;padding:0 24px 40px;}
+#content-inner{max-width:992px;margin:0 auto;width:100%;padding:0 24px 40px;}
 
 /* --- Top bar — Figma 55:2100 exact: h-64, search 360x40, avatar 36 --- */
 #topbar{
   height:var(--topbar-height);display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);
-  padding:0 24px;position:sticky;top:0;z-index:40;
+  padding:0 40px;position:sticky;top:0;z-index:40;
   max-width:none;margin:0;width:100%;
   background:var(--color-bg-surface);border-bottom:1px solid var(--color-border-default);
   box-sizing:border-box;
@@ -346,6 +347,10 @@ a:focus:not(:focus-visible),
 }
 .topbar-date i{font-size:15px;color:var(--color-icon-muted);}
 .topbar-right{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+/* Figma 1280 topbar has no wallet pill; keep node for JS, hide on desktop */
+@media (min-width:1024px){
+  .wallet-pill{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;}
+}
 .wallet-pill{
   display:flex;align-items:center;gap:6px;background:var(--color-bg-brand-subtle);border:1px solid var(--color-border-brand);
   border-radius:var(--radius-full);padding:7px 14px;font-size:13px;font-weight:700;color:var(--color-text-brand);
@@ -353,7 +358,7 @@ a:focus:not(:focus-visible),
 }
 .wallet-pill i{color:var(--color-icon-brand);font-size:15px;}
 .icon-btn{
-  width:40px;height:40px;border-radius:var(--radius-md);border:1px solid transparent;background:transparent;
+  width:44px;height:44px;border-radius:22px;border:1px solid transparent;background:var(--color-bg-muted);
   display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--color-icon-default);
   position:relative;
 }
@@ -370,8 +375,8 @@ a:focus:not(:focus-visible),
 }
 .profile-trigger:hover{background:transparent;opacity:.92;}
 .profile-avatar{
-  width:36px;height:36px;border-radius:18px;background:var(--color-bg-brand);color:var(--color-text-on-brand);
-  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;
+  width:38px;height:38px;border-radius:19px;background:var(--color-bg-brand);color:var(--color-text-on-brand);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;
 }
 .profile-meta{display:flex;flex-direction:column;align-items:flex-start;gap:0;line-height:1.2;}
 .profile-meta .profile-name{font-size:13px;font-weight:600;color:var(--color-text-primary);}
@@ -397,171 +402,191 @@ a:focus:not(:focus-visible),
 #hamburger-btn{display:none;}
 
 /* =========================================================================
-   DASHBOARD V2.1 — Figma node 16:301 / Content 55:2113 pixel specs
-   Frame content: pad 24; wallet 360x160; QA 760x160 tiles 168x94;
-   KPI 268x132 x4; trend 760x250; status 360x250; recent 1136
+   DASHBOARD V2 — Figma 85:208 (1280px) primary; fluid to 1440+
+   Sidebar 240 · Topbar 72 · Content 992 · Hero teal 420 · KPI 239x160
    ========================================================================= */
-.dash-header{
-  display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);
-  margin:24px 0 16px;
+.dash-hero-row{
+  display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:24px;
+  margin:24px 0 28px;align-items:stretch;
 }
-.dash-header h2{margin:0 0 4px;font-size:22px;font-weight:700;line-height:28px;letter-spacing:0;color:var(--color-text-primary);}
-.dash-header .sub{color:var(--color-text-secondary);font-size:13px;line-height:16px;font-weight:400;}
-.dash-header .dash-cta{flex-shrink:0;margin-top:-2px;}
-.dash-header .dash-cta .btn{
-  height:44px;min-height:44px;padding:0 18px;border-radius:var(--radius-md);
-  font-size:13px;font-weight:600;gap:8px;
+.dash-greeting-col{display:flex;flex-direction:column;gap:12px;min-width:0;}
+.dash-greeting-col h2{
+  margin:0;font-size:28px;font-weight:700;line-height:36px;color:var(--color-text-primary);letter-spacing:-.02em;
 }
+.dash-greeting-col .sub{
+  margin:0;font-size:14px;line-height:20px;color:var(--color-text-secondary);max-width:548px;
+}
+.dash-info-banner{
+  display:flex;align-items:center;gap:20px;padding:16px;margin-top:8px;
+  background:#EFF6FF;border:1px solid #DBEAFE;border-radius:12px;
+}
+.dash-info-banner .info-icon{
+  width:36px;height:36px;border-radius:18px;background:#3B82F6;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+}
+.dash-info-banner .info-title{font-size:13px;font-weight:600;color:var(--color-text-primary);line-height:17px;}
+.dash-info-banner .info-msg{font-size:12px;color:var(--color-text-secondary);margin-top:2px;line-height:15px;}
 
 .dash-alert{
   display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-3);
-  padding:12px var(--space-4);border-radius:var(--radius-md);margin-bottom:var(--space-4);
-  border:1px solid transparent;
+  padding:12px var(--space-4);border-radius:12px;margin-bottom:16px;border:1px solid transparent;
 }
 .dash-alert.warning{background:var(--color-bg-warning);border-color:#FDE68A;color:var(--color-text-warning);}
 .dash-alert .dash-alert-body{flex:1;min-width:0;}
 .dash-alert .dash-alert-title{font-weight:700;font-size:13px;margin-bottom:2px;}
 .dash-alert .dash-alert-msg{font-size:12.5px;opacity:.95;}
 
-/* Top row: Available Balance 360 + Quick Actions 760, gap 16 */
-.dash-top-row{
-  display:grid;grid-template-columns:360px minmax(0,1fr);gap:16px;
-  margin-bottom:16px;align-items:stretch;
-}
+/* Teal Balance Hero — Figma 85:249 */
 .dash-wallet{
-  width:100%;min-height:160px;padding:18px 16px 16px;display:flex;flex-direction:column;
-  gap:0;position:relative;border-radius:12px;box-sizing:border-box;
+  width:100%;min-height:185px;padding:24px;box-sizing:border-box;border-radius:16px;
+  background:linear-gradient(90deg,#0F766E 0%,#134E4A 100%);
+  border:none;box-shadow:0 4px 8px rgba(0,0,0,.04);
+  display:flex;flex-direction:column;gap:20px;color:#fff;position:relative;
 }
-.dash-wallet .kpi-icon{display:none;}
+.dash-wallet-head{display:flex;align-items:center;justify-content:space-between;gap:12px;}
 .dash-wallet-label{
-  display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;
-  text-transform:none;letter-spacing:0;color:var(--color-text-secondary);line-height:15px;
+  display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.04em;color:rgba(255,255,255,.85);line-height:14px;
 }
 .dash-wallet-label .eye-btn{
-  border:none;background:transparent;color:var(--color-icon-muted);padding:2px;display:inline-flex;
-  cursor:pointer;border-radius:var(--radius-sm);margin-left:2px;
+  border:none;background:transparent;color:rgba(255,255,255,.8);padding:2px;display:inline-flex;
+  cursor:pointer;border-radius:4px;
 }
-.dash-wallet-label .eye-btn:hover{color:var(--color-text-primary);background:var(--color-bg-muted);}
+.dash-wallet-label .eye-btn:hover{color:#fff;background:rgba(255,255,255,.12);}
+.dash-wallet-ledger{
+  display:inline-flex;align-items:center;gap:4px;background:none;border:none;color:#fff;
+  font-size:12px;font-weight:600;cursor:pointer;padding:0;opacity:.95;
+}
+.dash-wallet-ledger:hover{opacity:1;text-decoration:underline;}
 .dash-wallet .wallet-val{
-  font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:0;
-  color:var(--color-text-amount);line-height:38px;margin-top:18px;
+  font-size:36px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+  color:#fff;line-height:45px;margin:0;
 }
 .dash-wallet .wallet-status{
-  display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;
-  color:var(--color-text-success);margin-top:6px;
+  display:none;align-items:center;gap:6px;font-size:12px;font-weight:500;color:rgba(255,255,255,.9);
 }
-.dash-wallet .wallet-status .dot{width:6px;height:6px;border-radius:50%;background:var(--color-bg-brand);}
-.dash-wallet-actions{display:flex;flex-wrap:wrap;align-items:center;gap:22px;margin-top:auto;padding-top:14px;}
-.dash-wallet-actions .btn.primary{
-  min-height:36px;height:36px;padding:0 14px;border-radius:6px;font-size:12px;font-weight:500;
+.dash-wallet .wallet-status .dot{width:6px;height:6px;border-radius:50%;background:#A7F3D0;}
+.dash-wallet-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:auto;}
+.dash-wallet-actions .btn-hero-primary{
+  height:36px;padding:0 16px;border-radius:8px;border:none;background:#fff;color:#0F766E;
+  font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:8px;cursor:pointer;
 }
-.dash-wallet-actions .btn:not(.primary){
-  min-height:36px;height:36px;padding:0;border:none;background:transparent;box-shadow:none;
-  color:var(--color-text-primary);font-size:12px;font-weight:500;
+.dash-wallet-actions .btn-hero-primary:hover{background:#F0FDFA;}
+.dash-wallet-actions .btn-hero-ghost{
+  height:36px;padding:0 16px;border-radius:8px;border:1px solid rgba(255,255,255,.55);
+  background:transparent;color:#fff;font-size:14px;font-weight:500;
+  display:inline-flex;align-items:center;gap:8px;cursor:pointer;
 }
-.dash-wallet-actions .btn:not(.primary):hover{background:var(--color-bg-muted);}
+.dash-wallet-actions .btn-hero-ghost:hover{background:rgba(255,255,255,.1);}
 
-.dash-qa-panel{
-  min-height:160px;padding:16px;border-radius:12px;box-sizing:border-box;
-  display:flex;flex-direction:column;gap:15px;
-}
-.dash-qa-panel .qa-title{
-  margin:0;font-size:15px;font-weight:600;line-height:19px;color:var(--color-text-primary);
+/* Quick Services — compact horizontal cards 239x44 */
+.dash-section{margin-bottom:28px;}
+.dash-section-title{
+  margin:0 0 16px;font-size:15px;font-weight:700;line-height:20px;color:var(--color-text-primary);
 }
 .qa-grid{
   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;
-  align-content:stretch;flex:1;min-height:0;
 }
-.qa-tile{
-  background:var(--color-bg-muted);border:1px solid transparent;border-radius:10px;
-  min-height:94px;height:94px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
-  font-size:12px;font-weight:500;color:var(--color-text-primary);text-align:center;padding:18px 8px 15px;
-  box-sizing:border-box;
+.qa-tile,.qa-service-card{
+  background:#fff;border:1px solid var(--color-border-default);border-radius:12px;
+  min-height:44px;height:auto;padding:2px 16px;box-sizing:border-box;
+  display:flex;flex-direction:row;align-items:center;gap:16px;
+  font-size:14px;font-weight:600;color:var(--color-text-primary);text-align:left;
+  cursor:pointer;box-shadow:0 1px 2px rgba(15,23,42,.04);
 }
-.qa-tile i{font-size:16px;color:var(--color-icon-default);line-height:20px;}
-.qa-tile:hover,.quick-action-card:hover{border-color:var(--color-border-brand);background:var(--color-bg-brand-subtle);color:var(--color-text-brand);}
-.qa-tile:hover i{color:var(--color-icon-brand);}
-.qa-tile.primary{
-  border-color:var(--color-border-brand);background:var(--color-bg-brand-subtle);color:var(--color-text-brand);
+.qa-tile i.ti:first-child,.qa-service-card .qa-icon{
+  width:40px;height:40px;border-radius:20px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
 }
-.qa-tile.primary i{color:var(--color-icon-brand);}
+.qa-icon.tone-green,.qa-tile.primary i:first-child{background:#F0FDF4;color:#059669;}
+.qa-icon.tone-blue{background:#EFF6FF;color:#2563EB;}
+.qa-icon.tone-pink{background:#FDF2F8;color:#DB2777;}
+.qa-icon.tone-purple{background:#F5F3FF;color:#7C3AED;}
+.qa-tile:not(.primary) i:first-child{background:#F1F5F9;color:var(--color-icon-default);}
+.qa-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}
+.qa-info .qa-label,.qa-tile .qa-label{font-size:13px;font-weight:600;line-height:18px;color:var(--color-text-primary);}
+.qa-info .qa-sub,.qa-tile .qa-sub{font-size:11px;font-weight:400;line-height:14px;color:var(--color-text-secondary);}
+.qa-tile .ti-chevron-right,.qa-service-card .ti-chevron-right{margin-left:auto;color:var(--color-icon-muted);font-size:16px;flex-shrink:0;}
+.qa-tile:hover,.qa-service-card:hover{border-color:var(--color-border-brand);background:#fff;}
+.qa-tile.primary{border-color:var(--color-border-default);background:#fff;color:var(--color-text-primary);}
 .qa-tile.disabled{opacity:.45;cursor:not-allowed;}
-.qa-tile.disabled:hover{border-color:transparent;background:var(--color-bg-muted);color:var(--color-text-primary);}
-.qa-tile.disabled i{color:var(--color-icon-muted);}
+.qa-tile.disabled:hover{border-color:var(--color-border-default);}
 
-/* KPI row: 4 x 268x132, gap 16 */
+/* Today's Insights — 239x160 */
 .kpi-grid{
-  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:0 0 16px;
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0;
 }
 .kpi-card{
-  min-height:132px;padding:16px;position:relative;display:flex;flex-direction:column;
-  gap:0;border-radius:12px;box-sizing:border-box;
+  min-height:160px;padding:20px;position:relative;display:flex;flex-direction:column;gap:16px;
+  border-radius:12px;box-sizing:border-box;border-color:#F1F5F9;
+  box-shadow:0 2px 4px rgba(0,0,0,.04),0 1px 1px rgba(0,0,0,.04);
 }
-.kpi-card-header{display:none;}
+.kpi-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .kpi-badge{
-  position:absolute;top:16px;right:16px;display:inline-flex;align-items:center;
-  padding:5px 10px;border-radius:999px;font-size:11px;font-weight:600;line-height:14px;white-space:nowrap;
+  display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;
+  font-size:11px;font-weight:600;line-height:13px;white-space:nowrap;flex-shrink:0;
 }
-.kpi-badge.up{background:var(--color-bg-brand-subtle);color:var(--color-text-brand);}
-.kpi-badge.warn{background:#FFF6C7;color:#A65C08;}
+.kpi-badge.up{background:#ECFDF5;color:#059669;}
+.kpi-badge.warn{background:#FEF3C7;color:#B45309;}
 .kpi-label{
   font-size:12px;font-weight:500;text-transform:none;letter-spacing:0;
-  color:var(--color-text-secondary);margin:32px 0 0;line-height:15px;
+  color:var(--color-text-secondary);margin:0;line-height:16px;
 }
 .kpi-value{
-  font-size:18px;font-weight:700;color:var(--color-text-primary);letter-spacing:0;
-  font-variant-numeric:tabular-nums;line-height:23px;margin-top:12px;
+  font-size:28px;font-weight:700;color:var(--color-text-primary);letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;line-height:38px;margin:0;
 }
 .balance-amount,.wallet-pill-amount{
   font-size:28px;font-weight:800;color:var(--text-primary);letter-spacing:-.5px;
   font-variant-numeric:tabular-nums;line-height:1.1;
 }
-.kpi-sub{font-size:11px;color:var(--color-text-secondary);margin-top:8px;line-height:14px;}
+.kpi-sub{font-size:11px;color:var(--color-text-secondary);margin-top:auto;line-height:14px;}
 .kpi-card .label-caps{margin-bottom:8px;font-size:11px;}
-.kpi-card .val{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:6px;color:var(--color-text-primary);}
+.kpi-card .val{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--color-text-primary);}
 .kpi-card .sub{font-size:12px;color:var(--text-secondary);}
 .kpi-card.tone-warning .val{color:var(--color-text-warning);}
 .kpi-card.tone-success .val{color:var(--color-text-success);}
 .kpi-icon{
-  width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;
-  font-size:22px;flex-shrink:0;
+  width:40px;height:40px;border-radius:20px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
 }
-.kpi-icon-blue{background:rgba(0,102,255,.10);color:#0066FF;}
-.kpi-icon-green{background:rgba(5,150,105,.10);color:#059669;}
-.kpi-icon-purple{background:rgba(124,58,237,.10);color:#7C3AED;}
-.kpi-icon-amber{background:rgba(245,158,11,.10);color:#F59E0B;}
-.kpi-icon-red{background:rgba(229,57,53,.10);color:#E53935;}
+.kpi-icon-blue{background:#EFF6FF;color:#2563EB;}
+.kpi-icon-green{background:#F0FDF4;color:#059669;}
+.kpi-icon-purple{background:#F5F3FF;color:#7C3AED;}
+.kpi-icon-amber{background:#FFFBEB;color:#F59E0B;}
+.kpi-icon-red{background:#FEF2F2;color:#DC2626;}
 
-/* Mid: Business Trend 760 + Status 360 */
+/* Charts: 616 + 360 gap 16 */
 .dash-mid-row{
-  display:grid;grid-template-columns:minmax(0,760fr) minmax(0,360fr);gap:16px;margin-bottom:16px;
+  display:grid;grid-template-columns:minmax(0,616fr) minmax(280px,360fr);gap:16px;margin-bottom:28px;
 }
-.dash-panel{padding:16px;border-radius:12px;min-height:250px;box-sizing:border-box;}
+.dash-panel{padding:24px;border-radius:12px;min-height:266px;box-sizing:border-box;}
 .dash-panel-head{
-  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px;
 }
 .dash-panel-head h3{margin:0;font-size:15px;font-weight:600;line-height:19px;color:var(--color-text-primary);}
-.dash-panel-head .panel-sub{font-size:11px;color:var(--color-text-secondary);margin-top:10px;line-height:14px;}
-.trend-filters{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.dash-panel-head .panel-sub{font-size:12px;color:var(--color-text-secondary);margin-top:4px;line-height:15px;}
+.trend-filters{
+  display:inline-flex;align-items:center;gap:0;background:var(--color-bg-muted);
+  border-radius:8px;padding:4px;
+}
 .trend-filter{
   border:none;background:transparent;color:var(--color-text-secondary);
-  border-radius:var(--radius-full);padding:5px 10px;font-size:11px;font-weight:500;
+  border-radius:6px;padding:6px 12px;font-size:11px;font-weight:600;
 }
-.trend-filter.active{
-  background:var(--color-bg-muted);border:none;color:var(--color-text-primary);font-weight:600;
-}
+.trend-filter.active{background:#fff;color:var(--color-text-primary);box-shadow:0 1px 2px rgba(15,23,42,.06);}
 .trend-chart{
   display:flex;align-items:flex-end;justify-content:space-between;gap:8px;min-height:160px;padding-top:8px;
 }
-.trend-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;}
-.trend-val{font-size:10px;font-weight:500;color:var(--color-text-secondary);font-variant-numeric:tabular-nums;white-space:nowrap;}
-.trend-bar-wrap{width:100%;height:120px;display:flex;align-items:flex-end;justify-content:center;}
+.trend-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;}
+.trend-val{font-size:10px;font-weight:600;color:var(--color-text-secondary);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.trend-bar-wrap{width:100%;height:132px;display:flex;align-items:flex-end;justify-content:center;}
 .trend-bar{
-  width:42px;max-width:70%;border-radius:4px;background:var(--color-bg-brand-subtle);
+  width:28px;max-width:70%;border-radius:6px 6px 0 0;background:#0D9488;
   border:none;min-height:4px;transition:height .2s;
 }
-.trend-bar.today{background:var(--color-bg-brand);}
-.trend-day{font-size:10px;font-weight:400;color:var(--color-text-secondary);}
+.trend-bar.today{background:#059669;}
+.trend-day{font-size:11px;font-weight:600;color:var(--color-text-secondary);}
 .trend-empty,.chart-empty,.chart-empty-state{
   min-height:160px;padding:36px 12px;text-align:center;color:var(--text-secondary);font-size:13px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
@@ -572,10 +597,14 @@ a:focus:not(:focus-visible),
 .chart-empty-sub{font-size:12px;color:var(--text-muted);margin:0;}
 
 .status-today{display:flex;align-items:center;gap:24px;min-height:0;padding:8px 0 0;}
-.status-total{text-align:center;min-width:88px;flex-shrink:0;}
-.status-total .n{font-size:35px;font-weight:700;color:var(--color-text-primary);line-height:35px;}
-.status-total .t{font-size:11px;color:var(--color-text-secondary);margin-top:0;line-height:13px;}
-.status-legend{flex:1;display:flex;flex-direction:column;gap:20px;}
+.status-total{
+  width:110px;height:110px;border-radius:55px;flex-shrink:0;
+  border:4px solid var(--color-bg-brand);background:#ECFDF5;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+}
+.status-total .n{font-size:24px;font-weight:700;color:var(--color-text-primary);line-height:30px;}
+.status-total .t{font-size:11px;color:var(--color-text-secondary);margin-top:0;line-height:14px;text-transform:none;}
+.status-legend{flex:1;display:flex;flex-direction:column;gap:8px;}
 .status-legend-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;}
 .status-legend-row .left{display:flex;align-items:center;gap:8px;color:var(--color-text-secondary);font-size:12px;font-weight:500;}
 .status-legend-row .count{font-weight:700;font-size:13px;color:var(--color-text-primary);font-variant-numeric:tabular-nums;}
@@ -589,25 +618,25 @@ a:focus:not(:focus-visible),
 .section-head h3{font-size:16px;font-weight:700;margin:0;}
 .section-head a{font-size:13px;font-weight:600;color:var(--color-text-brand);cursor:pointer;}
 
-.dash-recent-card{padding:0;overflow:hidden;border-radius:12px;}
+.dash-recent-card{padding:0;overflow:hidden;border-radius:12px;border:1px solid #F1F5F9;}
 .dash-recent-head{
   display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
-  padding:16px 16px 12px;
+  padding:0 0 16px;background:transparent;border:none;
 }
 .dash-recent-head h3{margin:0;font-size:15px;font-weight:600;line-height:19px;color:var(--color-text-primary);}
-.dash-recent-head .panel-sub{font-size:11px;color:var(--color-text-secondary);margin-top:7px;line-height:14px;}
-.dash-recent-head a{font-size:12px;font-weight:600;color:var(--color-text-brand);cursor:pointer;white-space:nowrap;padding-top:4px;}
+.dash-recent-head .panel-sub{font-size:12px;color:var(--color-text-secondary);margin-top:4px;line-height:15px;}
+.dash-recent-head a{font-size:13px;font-weight:600;color:var(--color-text-brand);cursor:pointer;white-space:nowrap;padding-top:2px;display:inline-flex;align-items:center;gap:4px;}
 .mini-table{width:100%;border-collapse:collapse;}
 .mini-table th{
-  text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--color-text-secondary);
-  padding:13px 16px;border-bottom:1px solid var(--border);background:var(--color-bg-muted);font-weight:600;line-height:13px;
+  text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--color-text-secondary);
+  padding:14px 24px;border-bottom:1px solid #F1F5F9;background:#F8FAFC;font-weight:700;line-height:14px;
 }
-.mini-table td{padding:16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:500;color:var(--color-text-primary);line-height:15px;height:auto;}
-.mini-table td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;}
-.mini-table td.amt-debit{color:var(--color-text-debit);}
+.mini-table td{padding:16px 24px;border-bottom:1px solid #F1F5F9;font-size:13px;font-weight:500;color:var(--color-text-primary);line-height:16px;height:48px;box-sizing:border-box;}
+.mini-table td.num{text-align:left;font-variant-numeric:tabular-nums;font-weight:600;}
+.mini-table td.amt-debit{color:var(--color-text-primary);font-weight:700;}
 .mini-table td.muted{color:var(--color-text-primary);font-weight:600;}
-.mini-table tr:last-child td{border-bottom:none;}
 .mini-table tr:nth-child(even) td{background:#FAFBFC;}
+.mini-table tr:last-child td{border-bottom:none;}
 .mini-table tr:hover td{background:#F8FAFC;}
 .dash-tx-cards{display:none;padding:8px 12px 12px;}
 .dash-tx-card{
@@ -621,59 +650,59 @@ a:focus:not(:focus-visible),
 .dash-tx-card .amt{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;}
 .dash-tx-card .badge{margin-top:6px;}
 
-/* Status badges — Figma 24px pills with dot */
 #screen-dashboard .badge{
-  display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;
-  border-radius:999px;font-size:11px;font-weight:600;line-height:14px;
+  display:inline-flex;align-items:center;gap:4px;height:18px;padding:0 10px;
+  border-radius:999px;font-size:11px;font-weight:500;line-height:14px;
 }
-#screen-dashboard .badge i{font-size:10px;}
-#screen-dashboard .badge-success{background:var(--color-bg-brand-subtle);color:var(--color-text-brand);}
-#screen-dashboard .badge-pending{background:#FFF6C7;color:#A65C08;}
-#screen-dashboard .badge-processing{background:#DBEAFE;color:#1D4ED8;}
-#screen-dashboard .badge-failed{background:var(--color-bg-danger);color:var(--color-text-danger);}
+#screen-dashboard .badge i{display:none;}
+#screen-dashboard .badge-success{background:#ECFDF5;color:#059669;}
+#screen-dashboard .badge-pending{background:#FEF3C7;color:#B45309;}
+#screen-dashboard .badge-processing{background:#EFF6FF;color:#1D4ED8;}
+#screen-dashboard .badge-failed{background:#FEF2F2;color:#DC2626;}
 
 .perf-row{display:none;}
+.dash-header{display:none;} /* replaced by dash-hero-row in 1280 layout */
 
-@media (min-width:1024px){
-  .dash-top-row{grid-template-columns:360px minmax(0,1fr);}
-  .dash-wallet{padding:18px 16px 16px;}
+/* 1440+ — keep 1280 composition, let content breathe */
+@media (min-width:1440px){
+  #content-inner{max-width:1136px;}
+  .dash-hero-row{grid-template-columns:minmax(0,1fr) 420px;}
+  .dash-mid-row{grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);}
+}
+@media (min-width:1024px) and (max-width:1279px){
+  .dash-hero-row{grid-template-columns:minmax(0,1fr) minmax(320px,380px);gap:16px;}
   .dash-wallet .wallet-val{font-size:30px;line-height:38px;}
-  .qa-tile{min-height:94px;height:94px;}
+  .qa-grid{grid-template-columns:repeat(2,1fr);}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .dash-mid-row{grid-template-columns:1fr;}
 }
 @media (min-width:640px) and (max-width:1023px){
-  .dash-top-row{grid-template-columns:1fr;margin-bottom:16px;gap:16px;}
-  .dash-top-row > div{min-width:0;}
-  .qa-grid{grid-template-columns:repeat(4,1fr);height:auto;}
-  .qa-tile{min-height:88px;height:auto;}
-  .kpi-grid{grid-template-columns:repeat(2,1fr);margin-top:0;}
-  .dash-mid-row{grid-template-columns:1fr;align-items:start;gap:16px;}
+  .dash-hero-row{grid-template-columns:1fr;gap:16px;}
+  .qa-grid{grid-template-columns:repeat(2,1fr);}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .dash-mid-row{grid-template-columns:1fr;gap:16px;}
   .dash-mid-row .dash-panel{height:auto;min-height:0;}
-  .status-today{min-height:0;align-items:flex-start;gap:var(--space-4);padding-top:0;}
-  .status-legend{gap:12px;}
-  .status-total .n{font-size:32px;}
+  .status-today{align-items:flex-start;gap:var(--space-4);}
 }
 @media (max-width:639px){
-  .dash-header{flex-direction:column;align-items:stretch;margin-top:12px;}
-  .dash-header h2{font-size:22px;}
-  .dash-header .dash-cta{width:100%;}
-  .dash-header .dash-cta .btn{width:100%;}
-  .dash-top-row{grid-template-columns:1fr;margin-bottom:16px;gap:12px;}
+  .dash-hero-row{grid-template-columns:1fr;margin:12px 0 20px;gap:12px;}
+  .dash-greeting-col h2{font-size:22px;line-height:28px;}
+  .dash-wallet{min-height:0;padding:18px;}
   .dash-wallet .wallet-val{font-size:28px;line-height:34px;}
-  .qa-grid{grid-template-columns:repeat(2,1fr);gap:8px;height:auto;}
-  .qa-tile{min-height:76px;height:auto;font-size:11px;padding:10px 4px;border-radius:var(--radius-md);gap:10px;}
-  .qa-tile i{font-size:18px;}
+  .qa-grid{grid-template-columns:1fr;gap:8px;}
+  .qa-tile,.qa-service-card{min-height:52px;}
   .kpi-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
-  .kpi-value{font-size:16px;}
-  .kpi-label{margin-top:28px;}
-  .dash-mid-row{grid-template-columns:1fr;align-items:start;}
+  .kpi-value{font-size:22px;line-height:28px;}
+  .kpi-card{min-height:0;padding:14px;gap:10px;}
+  .dash-mid-row{grid-template-columns:1fr;}
   .trend-chart{min-height:140px;}
   .trend-bar-wrap{height:100px;}
   .mini-table{display:none;}
   .dash-tx-cards{display:block;}
-  .status-today{flex-direction:column;align-items:stretch;gap:12px;min-height:0;}
-  .status-total{text-align:left;display:flex;align-items:baseline;gap:10px;}
-  .status-total .n{font-size:28px;}
+  .status-today{flex-direction:column;align-items:stretch;gap:12px;}
+  .status-total{width:88px;height:88px;border-radius:44px;}
   .dash-recent-head{flex-direction:column;align-items:flex-start;}
+  .dash-info-banner{gap:12px;padding:12px;}
 }
 
 /* =========================================================================
@@ -1729,12 +1758,13 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
         <div class="page-title" id="page-title">Dashboard</div>
         <div class="topbar-search" role="search">
           <i class="ti ti-search" aria-hidden="true"></i>
-          <input type="search" placeholder="Search retailers, TXN ID…" aria-label="Search retailers, TXN ID" autocomplete="off">
+          <input type="search" placeholder="Search transactions, services, retailers..." aria-label="Search transactions, services, retailers" autocomplete="off">
         </div>
         <div class="topbar-date"><i class="ti ti-calendar-event" aria-hidden="true"></i><span id="topbar-date-label">Today</span></div>
       </div>
       <div class="topbar-right">
         <div class="wallet-pill"><i class="ti ti-wallet"></i><span id="topbar-balance">₹0.00</span></div>
+        <button type="button" class="icon-btn" aria-label="Help" title="Help" onclick="goTo('support')"><i class="ti ti-help" aria-hidden="true"></i></button>
         <button type="button" class="icon-btn" aria-label="Notifications" title="Notifications"><i class="ti ti-bell" aria-hidden="true"></i><span class="notif-badge" aria-hidden="true">3</span></button>
         <div class="profile-dd">
           <button type="button" class="profile-trigger" onclick="toggleProfileMenu()" aria-label="Account menu" aria-haspopup="true" aria-expanded="false" id="profile-trigger-btn">
@@ -1743,7 +1773,6 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
               <span class="profile-name" id="profile-name-short">Retailer</span>
               <span class="profile-role">Retailer</span>
             </span>
-            <i class="ti ti-chevron-down" aria-hidden="true"></i>
           </button>
           <div class="profile-menu" id="profile-menu">
             <a href="#" onclick="goToSettingsTab('profile'); return false;"><i class="ti ti-user"></i>Profile</a>
@@ -1757,18 +1786,8 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 
     <div id="content-inner">
 
-      <!-- ============ DASHBOARD V2.1 — Figma 16:301 ============ -->
+      <!-- ============ DASHBOARD V2 — Figma 85:208 (1280px) ============ -->
       <div class="screen" id="screen-dashboard">
-        <div class="dash-header">
-          <div>
-            <h2 id="dash-greeting">Good morning</h2>
-            <div class="sub" id="dash-date">Ready for recharge</div>
-          </div>
-          <div class="dash-cta">
-            <button type="button" class="btn primary" onclick="goTo('recharge')"><i class="ti ti-refresh"></i> Recharge Now</button>
-          </div>
-        </div>
-
         <div class="dash-alert warning" id="dash-low-balance" style="display:none;" role="status">
           <div class="dash-alert-body">
             <div class="dash-alert-title">Low wallet balance</div>
@@ -1777,60 +1796,85 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           <button type="button" class="btn sm" onclick="openFundRequest()">Add Money</button>
         </div>
 
-        <div class="dash-top-row">
-          <div class="card dash-wallet">
-            <div class="dash-wallet-label">
-              <i class="ti ti-wallet" aria-hidden="true"></i>
-              Available Balance
-              <button type="button" class="eye-btn" id="dash-balance-eye" onclick="toggleDashBalanceVisibility()" aria-label="Toggle balance visibility" title="Toggle visibility">
-                <i class="ti ti-eye" id="dash-balance-eye-icon"></i>
-              </button>
+        <div class="dash-hero-row">
+          <div class="dash-greeting-col">
+            <h2 id="dash-greeting">Good morning</h2>
+            <div class="sub" id="dash-date">Welcome back. Keep monitoring your daily business goals below.</div>
+            <div class="dash-info-banner" role="status">
+              <div class="info-icon"><i class="ti ti-alert-circle" aria-hidden="true"></i></div>
+              <div>
+                <div class="info-title">Recharge Alert</div>
+                <div class="info-msg">You have pending transactions that need immediate attention.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dash-wallet">
+            <div class="dash-wallet-head">
+              <div class="dash-wallet-label">
+                <i class="ti ti-wallet" aria-hidden="true"></i>
+                Available Balance
+                <button type="button" class="eye-btn" id="dash-balance-eye" onclick="toggleDashBalanceVisibility()" aria-label="Toggle balance visibility" title="Toggle visibility">
+                  <i class="ti ti-eye" id="dash-balance-eye-icon"></i>
+                </button>
+              </div>
+              <button type="button" class="dash-wallet-ledger" onclick="goTo('ledger')">Ledger <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
             </div>
             <div class="wallet-val" id="kpi-main">—</div>
-            <!-- Legacy commission slot kept for JS compatibility (hidden) -->
             <div id="kpi-commission" style="display:none;" aria-hidden="true">—</div>
             <div class="wallet-status" id="dash-wallet-status"><span class="dot"></span> Ready for recharges</div>
             <div class="dash-wallet-actions">
-              <button type="button" class="btn primary" onclick="openFundRequest()"><i class="ti ti-plus"></i> Add Money</button>
-              <button type="button" class="btn" onclick="goTo('ledger')"><i class="ti ti-book"></i> Ledger</button>
-            </div>
-          </div>
-          <div class="card dash-qa-panel">
-            <h3 class="qa-title">Quick Actions</h3>
-            <div class="qa-grid" id="dash-qa-grid">
-              <!-- service tiles + fixed actions; rendered by renderQuickActions() -->
+              <button type="button" class="btn-hero-primary" onclick="openFundRequest()"><i class="ti ti-plus"></i> Add Money</button>
+              <button type="button" class="btn-hero-ghost" onclick="goTo('recharge')"><i class="ti ti-refresh"></i> Instant Transfer</button>
             </div>
           </div>
         </div>
 
-        <div class="kpi-grid" id="dash-kpi-grid">
-          <div class="card kpi-card">
-            <span class="kpi-badge up">↗ +8.2%</span>
-            <div class="kpi-label">Today’s Business</div>
-            <div class="kpi-value" id="kpi-today">—</div>
-            <div class="kpi-sub" id="kpi-today-volume-sub">Successful recharge amount</div>
-          </div>
-          <div class="card kpi-card">
-            <span class="kpi-badge up">↗ +5.1%</span>
-            <div class="kpi-label">Today’s Commission</div>
-            <div class="kpi-value" id="kpi-commission-today-val">—</div>
-            <div class="kpi-sub" id="kpi-commission-today">From successful recharges</div>
-          </div>
-          <div class="card kpi-card tone-success">
-            <span class="kpi-badge up">↗ +3</span>
-            <div class="kpi-label">Successful Txns</div>
-            <div class="kpi-value" id="kpi-success-count">—</div>
-            <div class="kpi-sub" id="kpi-today-count">—</div>
-          </div>
-          <div class="card kpi-card tone-warning">
-            <span class="kpi-badge warn">↗ Needs attention</span>
-            <div class="kpi-label">Pending Txns</div>
-            <div class="kpi-value" id="kpi-pending-count">—</div>
-            <div class="kpi-sub" id="kpi-pending-sub">Awaiting confirmation</div>
+        <div class="dash-section">
+          <h3 class="dash-section-title">Quick Services</h3>
+          <div class="qa-grid" id="dash-qa-grid">
+            <!-- rendered by renderQuickActions() -->
           </div>
         </div>
 
-        <!-- Hidden legacy perf nodes kept for any external refs; UI uses status-today below -->
+        <div class="dash-section">
+          <h3 class="dash-section-title">Today's Insights</h3>
+          <div class="kpi-grid" id="dash-kpi-grid">
+            <div class="card kpi-card">
+              <div class="kpi-card-top">
+                <div class="kpi-label">Today's Business</div>
+                <span class="kpi-badge up">+8.2%</span>
+              </div>
+              <div class="kpi-value" id="kpi-today">—</div>
+              <div class="kpi-sub" id="kpi-today-volume-sub">Compared to yesterday</div>
+            </div>
+            <div class="card kpi-card">
+              <div class="kpi-card-top">
+                <div class="kpi-label">Today's Commission</div>
+                <span class="kpi-badge up">+5.1%</span>
+              </div>
+              <div class="kpi-value" id="kpi-commission-today-val">—</div>
+              <div class="kpi-sub" id="kpi-commission-today">Compared to yesterday</div>
+            </div>
+            <div class="card kpi-card tone-success">
+              <div class="kpi-card-top">
+                <div class="kpi-label">Successful Txns</div>
+                <span class="kpi-badge up">+3</span>
+              </div>
+              <div class="kpi-value" id="kpi-success-count">—</div>
+              <div class="kpi-sub" id="kpi-today-count">Compared to yesterday</div>
+            </div>
+            <div class="card kpi-card tone-warning">
+              <div class="kpi-card-top">
+                <div class="kpi-label">Pending Txns</div>
+                <span class="kpi-badge warn">Needs attention</span>
+              </div>
+              <div class="kpi-value" id="kpi-pending-count">—</div>
+              <div class="kpi-sub" id="kpi-pending-sub">Compared to yesterday</div>
+            </div>
+          </div>
+        </div>
+
         <div class="perf-row" id="dash-perf-row" aria-hidden="true">
           <div class="card perf-stat success"><div class="kpi-icon kpi-icon-green"><i class="ti ti-circle-check"></i></div><div class="n" id="perf-success">0</div><div class="t">Success</div></div>
           <div class="card perf-stat pending"><div class="kpi-icon kpi-icon-amber"><i class="ti ti-clock"></i></div><div class="n" id="perf-pending">0</div><div class="t">Pending</div></div>
@@ -1842,13 +1886,13 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           <div class="card dash-panel">
             <div class="dash-panel-head">
               <div>
-                <h3>Business Trend</h3>
-                <div class="panel-sub" id="dash-trend-sub">Recharge volume · Last 7 days</div>
+                <h3>Business Volume Trend</h3>
+                <div class="panel-sub" id="dash-trend-sub">Recharge volume last 7 days</div>
               </div>
               <div class="trend-filters" role="tablist">
                 <button type="button" class="trend-filter active" data-trend="7" onclick="setDashTrendRange(7)">7D</button>
                 <button type="button" class="trend-filter" data-trend="30" onclick="setDashTrendRange(30)">30D</button>
-                <button type="button" class="trend-filter" data-trend="month" onclick="setDashTrendRange('month')">This Month</button>
+                <button type="button" class="trend-filter" data-trend="month" onclick="setDashTrendRange('month')" style="display:none;">Month</button>
               </div>
             </div>
             <div id="dash-trend-chart" class="trend-chart"></div>
@@ -1856,14 +1900,14 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           <div class="card dash-panel">
             <div class="dash-panel-head">
               <div>
-                <h3>Transaction Status Today</h3>
-                <div class="panel-sub">Live today</div>
+                <h3>Today's Transactions Status</h3>
+                <div class="panel-sub">28 total · live breakdown</div>
               </div>
             </div>
             <div class="status-today">
               <div class="status-total">
                 <div class="n" id="status-today-total">0</div>
-                <div class="t">total</div>
+                <div class="t">Txns</div>
               </div>
               <div class="status-legend">
                 <div class="status-legend-row"><span class="left"><span class="status-dot success"></span>Success</span><span class="count" id="status-success">0</span></div>
@@ -1875,16 +1919,18 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           </div>
         </div>
 
-        <div class="card dash-recent-card">
+        <div class="dash-section" style="margin-bottom:0;">
           <div class="dash-recent-head">
             <div>
-              <h3>Recent Transactions</h3>
-              <div class="panel-sub">Latest prepaid, DTH, and wallet activity</div>
+              <h3>Recent Activity Ledger</h3>
+              <div class="panel-sub">Latest prepaid, DTH, and wallet loading activity</div>
             </div>
-            <a onclick="goTo('transactions')">View All Transactions</a>
+            <a onclick="goTo('transactions')">View All Transactions <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
           </div>
-          <div id="dash-recent-wrap">
-            <div class="state-block"><div class="skel skel-line" style="width:60%;margin:8px auto;"></div><div class="skel skel-line" style="width:80%;margin:8px auto;"></div></div>
+          <div class="card dash-recent-card">
+            <div id="dash-recent-wrap">
+              <div class="state-block"><div class="skel skel-line" style="width:60%;margin:8px auto;"></div><div class="skel skel-line" style="width:80%;margin:8px auto;"></div></div>
+            </div>
           </div>
         </div>
       </div>
@@ -3467,39 +3513,32 @@ function renderQuickActions() {
   const list = (state.services || []).filter((s) => s.available);
   const tiles = [];
 
-  // Prefer Mobile + DTH from API when available; fall back to Mobile only.
+  // Figma 1280 Quick Services: Mobile, DTH, Add Money, View Ledger
   const mobile = list.find((s) => (s.code || "").toLowerCase() === "mobile");
   const dth = list.find((s) => (s.code || "").toLowerCase() === "dth");
   if (mobile) {
-    tiles.push({ label: mobile.name || "Mobile Recharge", icon: "ti ti-" + (mobile.icon || "device-mobile"), primary: true, onclick: "openService('mobile')" });
+    tiles.push({ label: mobile.name || "Mobile Recharge", icon: "ti ti-" + (mobile.icon || "device-mobile"), tone: "tone-green", primary: true, onclick: "openService('mobile')" });
   } else {
-    tiles.push({ label: "Mobile Recharge", icon: "ti ti-device-mobile", primary: true, onclick: "goTo('recharge')" });
+    tiles.push({ label: "Mobile Recharge", icon: "ti ti-device-mobile", tone: "tone-green", primary: true, onclick: "goTo('recharge')" });
   }
   if (dth) {
-    tiles.push({ label: dth.name || "DTH", icon: "ti ti-" + (dth.icon || "device-tv"), onclick: "openService('dth')" });
+    tiles.push({ label: dth.name || "DTH Recharge", icon: "ti ti-" + (dth.icon || "device-tv"), tone: "tone-blue", onclick: "openService('dth')" });
   } else {
-    // Keep slot for Figma layout; disabled until service is available from API.
-    tiles.push({ label: "DTH", icon: "ti ti-device-tv", disabled: true });
+    tiles.push({ label: "DTH Recharge", icon: "ti ti-device-tv", tone: "tone-blue", disabled: true });
   }
-  tiles.push({ label: "Transactions", icon: "ti ti-list-details", onclick: "goTo('transactions')" });
-  tiles.push({ label: "Ledger", icon: "ti ti-book", onclick: "goTo('ledger')" });
-
-  // Include any other available services beyond Mobile/DTH (no duplicate nav logic).
-  list.forEach((s) => {
-    const code = (s.code || "").toLowerCase();
-    if (code === "mobile" || code === "dth") return;
-    if (tiles.length >= 4) return;
-    tiles.splice(tiles.length - 1, 0, {
-      label: s.name, icon: "ti ti-" + (s.icon || "apps"), onclick: "openService('" + escapeHtml(s.code) + "')"
-    });
-  });
+  tiles.push({ label: "Add Money", icon: "ti ti-plus", tone: "tone-pink", onclick: "openFundRequest()" });
+  tiles.push({ label: "View Ledger", icon: "ti ti-database", tone: "tone-purple", onclick: "goTo('ledger')" });
 
   grid.innerHTML = tiles.slice(0, 4).map((t) => {
+    const sub = '<div class="qa-sub">Perform instant action</div>';
+    const info = '<div class="qa-info"><div class="qa-label">' + escapeHtml(t.label) + "</div>" + sub + "</div>";
+    const icon = '<div class="qa-icon ' + (t.tone || "") + '"><i class="' + t.icon + '"></i></div>';
+    const chev = '<i class="ti ti-chevron-right" aria-hidden="true"></i>';
     if (t.disabled) {
-      return '<div class="qa-tile quick-action-card disabled" aria-disabled="true"><i class="' + t.icon + '"></i>' + escapeHtml(t.label) + "</div>";
+      return '<div class="qa-tile qa-service-card disabled" aria-disabled="true">' + icon + info + chev + "</div>";
     }
-    const cls = "qa-tile quick-action-card" + (t.primary ? " primary" : "");
-    return '<div class="' + cls + '" onclick="' + t.onclick + '"><i class="' + t.icon + '"></i>' + escapeHtml(t.label) + "</div>";
+    const cls = "qa-tile qa-service-card quick-action-card" + (t.primary ? " primary" : "");
+    return '<div class="' + cls + '" onclick="' + t.onclick + '">' + icon + info + chev + "</div>";
   }).join("");
 }
 
@@ -3635,7 +3674,7 @@ async function loadDashboard() {
   const now = new Date();
   const hr = now.getHours();
   const greetWord = hr < 12 ? "Good morning" : hr < 17 ? "Good afternoon" : "Good evening";
-  setText("dash-date", now.toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "long", year: "numeric" }));
+  setText("dash-date", (state.retailerName ? ("Welcome back to " + state.retailerName + ". ") : "Welcome back. ") + "Keep monitoring your daily business goals below.");
 
   // Prefer last known balance while loading — never flash ₹0 on rate-limit.
   const hasKnownBal = Number(state.wallets.main) > 0 || Number(state.wallets.commission) > 0;
@@ -3658,6 +3697,7 @@ async function loadDashboard() {
     if (!canCallApi()) {
       handleRateLimit({ retry_after: Math.ceil((state.rateLimitUntil - Date.now()) / 1000) });
       setText("dash-greeting", greetWord + (state.retailerName ? ", " + state.retailerName : ""));
+      setText("dash-date", (state.retailerName ? ("Welcome back to " + state.retailerName + ". ") : "Welcome back. ") + "Keep monitoring your daily business goals below.");
       setText("kpi-main", formatDashBalance(state.wallets.main));
       setText("kpi-commission", formatMoney(state.wallets.commission));
       updateLowBalanceAlert();
@@ -3684,6 +3724,7 @@ async function loadDashboard() {
     }
     renderIdentityAndBalance();
     setText("dash-greeting", greetWord + (state.retailerName ? ", " + state.retailerName : ""));
+    setText("dash-date", (state.retailerName ? ("Welcome back to " + state.retailerName + ". ") : "Welcome back. ") + "Keep monitoring your daily business goals below.");
     setText("kpi-main", formatDashBalance(state.wallets.main));
     setText("kpi-commission", formatMoney(state.wallets.commission));
     updateLowBalanceAlert();
@@ -3701,12 +3742,11 @@ async function loadDashboard() {
 
       setText("kpi-today", formatMoney(sumToday));
       setText("kpi-success-count", String(successToday.length));
-      setText("kpi-today-count", successToday.length + " successful transaction" + (successToday.length === 1 ? "" : "s"));
+      setText("kpi-today-count", "Compared to yesterday");
       setText("kpi-pending-count", String(pendingOpen));
-      setText("kpi-pending-sub",
-        pendingToday.length + " pending · " + processingToday.length + " processing");
+      setText("kpi-pending-sub", "Compared to yesterday");
       setText("kpi-commission-today-val", formatMoney(commissionToday));
-      setText("kpi-commission-today", "From successful recharges");
+      setText("kpi-commission-today", "Compared to yesterday");
       // Failed is shown only in Transaction Status Today — not on the Pending KPI.
 
       // Legacy perf nodes + new status legend
@@ -3757,8 +3797,8 @@ function renderRecentTransactions(list) {
   }
 
   let table = '<table class="mini-table"><thead><tr>'
-    + "<th>Time</th><th>Reference</th><th>Service</th><th>Mobile</th>"
-    + '<th class="num">Amount</th><th class="num">Commission</th><th>Status</th>'
+    + "<th>Date Time</th><th>Reference ID</th><th>Service</th><th>Mobile Number</th>"
+    + "<th>Amount</th><th>Commission</th><th>Status</th>"
     + "</tr></thead><tbody>";
 
   let cards = '<div class="dash-tx-cards">';
