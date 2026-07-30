@@ -14,7 +14,7 @@
    Phase 1: tokens + app shell. Legacy aliases keep existing selectors working.
    ========================================================================= */
 :root{
-  /* —— Figma Color / Light —— */
+  /* —— Figma Color / Light (MCP variables) —— */
   --color-bg-brand:#059669;
   --color-bg-brand-hover:#047857;
   --color-bg-brand-subtle:#ECFDF5;
@@ -60,15 +60,56 @@
   --color-text-sidebar-active:#FFFFFF;
   --color-text-success:#15803D;
   --color-text-warning:#B45309;
+  --color-teal-600:#0D9488;
+  --color-hero-from:#0F766E;
+  --color-hero-to:#134E4A;
 
   /* —— Figma Spacing (8px system) —— */
   --space-0:0px; --space-1:4px; --space-2:8px; --space-3:12px;
   --space-4:16px; --space-5:24px; --space-6:32px; --space-7:40px;
   --space-8:48px; --space-10:64px; --space-12:96px;
+  --spacing-0:var(--space-0); --spacing-1:var(--space-1); --spacing-2:var(--space-2);
+  --spacing-3:var(--space-3); --spacing-4:var(--space-4); --spacing-5:var(--space-5);
+  --spacing-6:var(--space-6); --spacing-7:var(--space-7); --spacing-8:var(--space-8);
+  --spacing-10:var(--space-10); --spacing-12:var(--space-12);
 
   /* —— Figma Radius —— */
   --radius-none:0; --radius-sm:4px; --radius-md:8px; --radius-lg:12px;
   --radius-xl:16px; --radius-2xl:24px; --radius-full:999px;
+
+  /* —— Figma Elevation (MD preferred for dashboard cards) —— */
+  --elevation-none:none;
+  --elevation-sm:0 1px 2px rgba(15,23,41,.06);
+  --elevation-md:0 2px 4px rgba(15,23,41,.04),0 4px 12px -2px rgba(15,23,41,.08);
+  --elevation-lg:0 8px 24px rgba(15,23,41,.12);
+
+  /* —— Figma Typography scale (Plus Jakarta Sans) —— */
+  --font-sans:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,sans-serif;
+  --text-display-lg:700 36px/44px var(--font-sans);
+  --text-display-sm:700 28px/36px var(--font-sans);
+  --text-h1:700 24px/32px var(--font-sans);
+  --text-h2:600 20px/28px var(--font-sans);
+  --text-h3:600 16px/24px var(--font-sans);
+  --text-body-lg:400 16px/24px var(--font-sans);
+  --text-body-md:400 14px/20px var(--font-sans);
+  --text-body-sm:400 12px/16px var(--font-sans);
+  --text-label-lg:500 14px/20px var(--font-sans);
+  --text-label-md:500 12px/16px var(--font-sans);
+  --text-numeric-lg:700 32px/40px var(--font-sans);
+  --text-numeric-md:600 20px/28px var(--font-sans);
+
+  /* —— Layout (Dashboard V2 / 1280 — node 85:208) —— */
+  --sidebar-width:240px;
+  --topbar-height:72px;
+  --content-max:992px;
+  --content-max-wide:1136px;
+  --wallet-hero-w:420px;
+  --wallet-hero-h:185px;
+  --kpi-card-h:160px;
+  --chart-trend-w:616px;
+  --chart-status-w:360px;
+  --search-w:360px;
+  --avatar-size:38px;
 
   /* —— Legacy aliases (existing CSS consumers) —— */
   --primary:var(--color-bg-brand);
@@ -85,12 +126,9 @@
   --text-muted:var(--color-text-muted);
   --sidebar-bg:var(--color-bg-sidebar);
   --sidebar-active:var(--color-bg-brand);
-  --sidebar-width:240px;
-  --topbar-height:72px;
-  --font-sans:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,sans-serif;
 }
 *{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
+html,body{margin:0;padding:0;overflow-x:hidden;max-width:100%;}
 body{
   font-family:var(--font-sans, "Plus Jakarta Sans", sans-serif);
   background:var(--bg);
@@ -143,7 +181,7 @@ a:focus:not(:focus-visible),
   background:var(--card);
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
-  box-shadow:0 2px 4px 0 rgba(15,23,41,.04),0 4px 12px -2px rgba(15,23,41,.08);
+  box-shadow:var(--elevation-md);
   padding:20px;
 }
 
@@ -238,33 +276,33 @@ a:focus:not(:focus-visible),
 /* =========================================================================
    APP SHELL — Desktop Sidebar + Top Bar (Figma Navigation)
    ========================================================================= */
-#app-shell{display:none;min-height:100vh;}
+#app-shell{display:none;min-height:100vh;overflow-x:hidden;max-width:100%;}
 #app-shell.active{display:flex;}
 
-/* --- Sidebar — Figma 16:302 exact: 256px, px-16 py-24, nav h-40 --- */
-#sidebar{
+/* --- Sidebar — Figma 85:209 / 1280: 240px, px-16 py-24, nav h-40 --- */
+#sidebar,.sidebar{
   width:var(--sidebar-width);flex-shrink:0;background:var(--color-bg-sidebar);color:var(--color-text-sidebar-active);
   display:flex;flex-direction:column;justify-content:space-between;gap:var(--space-6);
-  position:sticky;top:0;height:100vh;overflow-y:auto;
+  position:sticky;top:0;height:100vh;overflow-y:auto;overflow-x:hidden;
   padding:var(--space-5) var(--space-4);
   border-right:none;
 }
-.sb-top{display:flex;flex-direction:column;gap:var(--space-5);width:100%;min-height:0;}
-.sb-logo{
-  display:flex;align-items:center;gap:var(--space-3);padding:0;border-bottom:none;height:40px;
+.sb-top,.sidebar-top{display:flex;flex-direction:column;gap:var(--space-5);width:100%;min-height:0;flex:1;}
+.sb-logo,.sidebar-logo{
+  display:flex;align-items:center;gap:var(--space-3);padding:0;border-bottom:none;height:40px;min-height:40px;
 }
-.sb-logo .qp-mark{
+.sb-logo .qp-mark,.sidebar-logo .qp-mark{
   width:36px;height:36px;border-radius:var(--radius-md);background:var(--color-bg-brand);color:var(--color-text-on-brand);
-  display:flex;align-items:center;justify-content:center;font-weight:600;font-size:11px;letter-spacing:.6px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px;letter-spacing:-.1px;flex-shrink:0;
 }
 .sb-brand-text{display:flex;flex-direction:column;gap:2px;min-width:0;}
-.sb-logo .qp-word{font-weight:600;font-size:16px;line-height:24px;letter-spacing:-.1px;white-space:nowrap;color:var(--color-text-sidebar-active);}
-.sb-logo .qp-tag{font-weight:500;font-size:11px;line-height:14px;letter-spacing:.2px;color:var(--color-text-sidebar);white-space:nowrap;}
-.sb-nav{flex:1;display:flex;flex-direction:column;gap:var(--space-4);padding:0;min-height:0;}
-.sb-section{display:flex;flex-direction:column;gap:var(--space-1);width:100%;}
-.sb-section-label{
-  font-size:11px;font-weight:500;line-height:14px;letter-spacing:.6px;color:var(--color-text-sidebar);
-  opacity:.85;padding:0;margin:0 0 0;
+.sb-logo .qp-word,.sidebar-logo .qp-word{font-weight:600;font-size:16px;line-height:24px;letter-spacing:-.1px;white-space:nowrap;color:var(--color-text-sidebar-active);}
+.sb-logo .qp-tag,.sidebar-logo .qp-tag{font-weight:500;font-size:11px;line-height:14px;letter-spacing:.2px;color:var(--color-text-sidebar);white-space:nowrap;}
+.sb-nav,.sidebar-nav{flex:1;display:flex;flex-direction:column;gap:12px;padding:0;min-height:0;}
+.sb-section,.nav-section{display:flex;flex-direction:column;gap:8px;width:100%;}
+.sb-section-label,.nav-section-label{
+  font-size:11px;font-weight:500;line-height:14px;letter-spacing:.2px;color:var(--color-text-sidebar);
+  opacity:1;padding:0;margin:0;text-transform:uppercase;
 }
 .sb-item{
   display:flex;align-items:center;gap:var(--space-3);height:40px;padding:8px 12px;border-radius:var(--radius-md);
@@ -299,10 +337,10 @@ a:focus:not(:focus-visible),
 .sb-sub-item.disabled{opacity:.4;cursor:not-allowed;}
 .sb-sub-item.disabled:hover{background:none;color:var(--color-text-sidebar);}
 .sb-sub-item .soon{font-size:9.5px;background:rgba(255,255,255,.1);padding:1px 5px;border-radius:6px;margin-left:auto;}
-.sb-foot{display:flex;flex-direction:column;gap:var(--space-2);padding:0;border-top:none;width:100%;}
-.sb-profile{
-  background:var(--color-bg-sidebar-hover);border-radius:var(--radius-lg);padding:var(--space-3);
-  display:flex;flex-direction:column;gap:var(--space-1);width:100%;
+.sb-foot,.sidebar-user{display:flex;flex-direction:column;gap:8px;padding:0;border-top:none;width:100%;flex-shrink:0;}
+.sb-profile,.sidebar-user-card{
+  background:var(--color-bg-sidebar-hover);border-radius:var(--radius-lg);padding:16px;
+  display:flex;flex-direction:column;gap:4px;width:100%;min-height:72px;box-sizing:border-box;
 }
 .sb-foot .name,.sb-profile .name{font-size:14px;font-weight:500;line-height:20px;color:var(--color-text-sidebar-active);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0;}
 .sb-foot .id,.sb-profile .id{font-size:12px;font-weight:400;line-height:16px;color:var(--color-text-sidebar);margin:0;}
@@ -316,10 +354,10 @@ a:focus:not(:focus-visible),
 .sb-logout:hover i{color:var(--color-text-sidebar-active);}
 
 /* --- Content area --- */
-#content-area{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--color-bg-canvas);}
-#content-inner{max-width:992px;margin:0 auto;width:100%;padding:0 24px 40px;}
+#content-area{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--color-bg-canvas);overflow-x:hidden;}
+#content-inner{max-width:var(--content-max);margin:0 auto;width:100%;padding:0 24px 40px;box-sizing:border-box;}
 
-/* --- Top bar — Figma 55:2100 exact: h-64, search 360x40, avatar 36 --- */
+/* --- Top bar — Figma 85:211 / 1280: h-72, search 360x40, avatar 38 --- */
 #topbar{
   height:var(--topbar-height);display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);
   padding:0 40px;position:sticky;top:0;z-index:40;
@@ -330,9 +368,9 @@ a:focus:not(:focus-visible),
 .topbar-left{display:flex;align-items:center;gap:16px;min-width:0;flex:1;}
 #topbar .page-title{font-size:20px;font-weight:600;color:var(--color-text-primary);letter-spacing:-.01em;}
 .topbar-search{
-  display:flex;align-items:center;gap:8px;width:360px;max-width:100%;height:40px;
-  padding:0 14px;background:#fff;border:1px solid var(--color-border-default);border-radius:var(--radius-md);
-  color:var(--color-text-secondary);font-size:13px;font-weight:400;
+  display:flex;align-items:center;gap:8px;width:var(--search-w);max-width:100%;height:40px;
+  padding:0 12px;background:var(--color-bg-canvas);border:1px solid var(--color-border-default);border-radius:var(--radius-md);
+  color:var(--color-text-secondary);font-size:13px;font-weight:400;box-sizing:border-box;
 }
 .topbar-search i{font-size:16px;color:var(--color-icon-muted);flex-shrink:0;}
 .topbar-search input{
@@ -375,7 +413,7 @@ a:focus:not(:focus-visible),
 }
 .profile-trigger:hover{background:transparent;opacity:.92;}
 .profile-avatar{
-  width:38px;height:38px;border-radius:19px;background:var(--color-bg-brand);color:var(--color-text-on-brand);
+  width:var(--avatar-size);height:var(--avatar-size);border-radius:calc(var(--avatar-size)/2);background:var(--color-bg-brand);color:var(--color-text-on-brand);
   display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;
 }
 .profile-meta{display:flex;flex-direction:column;align-items:flex-start;gap:0;line-height:1.2;}
@@ -406,7 +444,7 @@ a:focus:not(:focus-visible),
    Sidebar 240 · Topbar 72 · Content 992 · Hero teal 420 · KPI 239x160
    ========================================================================= */
 .dash-hero-row{
-  display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:24px;
+  display:grid;grid-template-columns:minmax(0,1fr) var(--wallet-hero-w);gap:24px;
   margin:24px 0 28px;align-items:stretch;
 }
 .dash-greeting-col{display:flex;flex-direction:column;gap:12px;min-width:0;}
@@ -438,8 +476,8 @@ a:focus:not(:focus-visible),
 
 /* Teal Balance Hero — Figma 85:249 */
 .dash-wallet{
-  width:100%;min-height:185px;padding:24px;box-sizing:border-box;border-radius:16px;
-  background:linear-gradient(90deg,#0F766E 0%,#134E4A 100%);
+  width:100%;min-height:var(--wallet-hero-h);padding:24px;box-sizing:border-box;border-radius:16px;
+  background:linear-gradient(90deg,var(--color-hero-from) 0%,var(--color-hero-to) 100%);
   border:none;box-shadow:0 4px 8px rgba(0,0,0,.04);
   display:flex;flex-direction:column;gap:20px;color:#fff;position:relative;
 }
@@ -517,7 +555,7 @@ a:focus:not(:focus-visible),
   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0;
 }
 .kpi-card{
-  min-height:160px;padding:20px;position:relative;display:flex;flex-direction:column;gap:16px;
+  min-height:var(--kpi-card-h);padding:20px;position:relative;display:flex;flex-direction:column;gap:16px;
   border-radius:12px;box-sizing:border-box;border-color:#F1F5F9;
   box-shadow:0 2px 4px rgba(0,0,0,.04),0 1px 1px rgba(0,0,0,.04);
 }
@@ -665,7 +703,7 @@ a:focus:not(:focus-visible),
 
 /* 1440+ — keep 1280 composition, let content breathe */
 @media (min-width:1440px){
-  #content-inner{max-width:1136px;}
+  #content-inner{max-width:var(--content-max-wide);}
   .dash-hero-row{grid-template-columns:minmax(0,1fr) 420px;}
   .dash-mid-row{grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);}
 }
@@ -1615,7 +1653,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 /* Tablet: sidebar collapses to icon-only */
 @media (min-width:640px) and (max-width:1023px){
   #sidebar{width:52px;padding:16px 8px;}
-  #sidebar .sb-logo .qp-word,#sidebar .sb-logo .qp-tag,#sidebar .sb-section-label,#sidebar .sb-item span:not(.soon),#sidebar .sb-item .chev,
+  #sidebar .sb-logo .qp-word,#sidebar .sb-logo .qp-tag,#sidebar .sb-section-label,#sidebar .nav-section-label,#sidebar .sb-item span:not(.soon),#sidebar .sb-item .chev,
   #sidebar .sb-sub,#sidebar .sb-foot .name,#sidebar .sb-foot .id,#sidebar .sb-logout span,#sidebar .sb-profile{display:none;}
   #sidebar.expanded{width:var(--sidebar-width);padding:var(--space-5) var(--space-4);}
   #sidebar.expanded .sb-logo .qp-word,#sidebar.expanded .sb-logo .qp-tag,#sidebar.expanded .sb-section-label,#sidebar.expanded .sb-item span:not(.soon),
@@ -1706,10 +1744,10 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 <div id="app-shell">
   <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeDrawer()"></div>
 
-  <!-- Sidebar — Figma 16:302 (256px, MAIN / BUSINESS / SUPPORT) -->
-  <aside id="sidebar">
-    <div class="sb-top">
-      <div class="sb-logo">
+  <!-- Sidebar — Figma 85:209 (240px, MAIN / BUSINESS / SUPPORT) -->
+  <aside id="sidebar" class="sidebar" aria-label="Primary">
+    <div class="sb-top sidebar-top">
+      <div class="sb-logo sidebar-logo">
         <button id="hamburger-btn" class="icon-btn" style="border:none;background:none;color:#fff;margin-right:2px;width:28px;height:28px;padding:0;" onclick="toggleSidebar()" aria-label="Toggle sidebar"><i class="ti ti-menu-2"></i></button>
         <div class="qp-mark">Q</div>
         <div class="sb-brand-text">
@@ -1717,9 +1755,9 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           <div class="qp-tag">Retailer Console</div>
         </div>
       </div>
-      <nav class="sb-nav">
-        <div class="sb-section">
-          <div class="sb-section-label">MAIN</div>
+      <nav class="sb-nav sidebar-nav">
+        <div class="sb-section nav-section">
+          <div class="sb-section-label nav-section-label">MAIN</div>
           <div class="sb-item" data-nav="dashboard" onclick="goTo('dashboard')"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></div>
           <div class="sb-item" id="sb-recharge-toggle" onclick="toggleRechargeMenu()"><i class="ti ti-refresh"></i><span>Recharge</span><i class="ti ti-chevron-down chev"></i></div>
           <div class="sb-sub" id="sb-recharge-sub">
@@ -1729,20 +1767,20 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           <div class="sb-item" data-nav="ledger" onclick="goTo('ledger')"><i class="ti ti-book"></i><span>Ledger</span></div>
           <div class="sb-item" data-nav="wallet" onclick="goTo('wallet')"><i class="ti ti-wallet"></i><span>Wallet</span></div>
         </div>
-        <div class="sb-section">
-          <div class="sb-section-label">BUSINESS</div>
+        <div class="sb-section nav-section">
+          <div class="sb-section-label nav-section-label">BUSINESS</div>
           <div class="sb-item" data-nav="reports" onclick="goTo('reports')"><i class="ti ti-chart-bar"></i><span>Reports</span></div>
           <div class="sb-item" data-nav="commission" onclick="goTo('commission')"><i class="ti ti-percentage"></i><span>Commission</span></div>
         </div>
-        <div class="sb-section">
-          <div class="sb-section-label">SUPPORT</div>
+        <div class="sb-section nav-section">
+          <div class="sb-section-label nav-section-label">SUPPORT</div>
           <div class="sb-item" data-nav="support" onclick="goTo('support')"><i class="ti ti-headset"></i><span>Support</span></div>
           <div class="sb-item" data-nav="settings" onclick="goTo('settings')"><i class="ti ti-settings"></i><span>Settings</span></div>
         </div>
       </nav>
     </div>
-    <div class="sb-foot">
-      <div class="sb-profile">
+    <div class="sb-foot sidebar-user">
+      <div class="sb-profile sidebar-user-card">
         <div class="name" id="sb-retailer-name">—</div>
         <div class="id" id="sb-retailer-id">—</div>
       </div>
@@ -1752,7 +1790,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 
   <!-- Content -->
   <div id="content-area">
-    <div id="topbar">
+    <div id="topbar" class="topbar">
       <div class="topbar-left">
         <button type="button" id="hamburger-btn-mobile" class="icon-btn hidden" onclick="toggleSidebar()" aria-label="Open menu"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
         <div class="page-title" id="page-title">Dashboard</div>
@@ -1760,7 +1798,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           <i class="ti ti-search" aria-hidden="true"></i>
           <input type="search" placeholder="Search transactions, services, retailers..." aria-label="Search transactions, services, retailers" autocomplete="off">
         </div>
-        <div class="topbar-date"><i class="ti ti-calendar-event" aria-hidden="true"></i><span id="topbar-date-label">Today</span></div>
+        <div class="topbar-date"><i class="ti ti-calendar-event" aria-hidden="true"></i><span id="topbar-date-label">Today, 30 Jul 2026</span></div>
       </div>
       <div class="topbar-right">
         <div class="wallet-pill"><i class="ti ti-wallet"></i><span id="topbar-balance">₹0.00</span></div>
@@ -3675,6 +3713,10 @@ async function loadDashboard() {
   const hr = now.getHours();
   const greetWord = hr < 12 ? "Good morning" : hr < 17 ? "Good afternoon" : "Good evening";
   setText("dash-date", (state.retailerName ? ("Welcome back to " + state.retailerName + ". ") : "Welcome back. ") + "Keep monitoring your daily business goals below.");
+  const tbDate = document.getElementById("topbar-date-label");
+  if (tbDate) {
+    tbDate.textContent = "Today, " + now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  }
 
   // Prefer last known balance while loading — never flash ₹0 on rate-limit.
   const hasKnownBal = Number(state.wallets.main) > 0 || Number(state.wallets.commission) > 0;
