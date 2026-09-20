@@ -3406,7 +3406,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             <div class="settings-row">
               <div>
                 <div class="t">Password</div>
-                <div class="s" id="settings-password-sub">Change password requires a dedicated API.</div>
+                <div class="s" id="settings-password-sub">Update your account password.</div>
               </div>
               <button type="button" class="btn" id="settings-change-password-btn" onclick="toggleSettingsPasswordForm()" style="min-height:44px;">Change Password</button>
             </div>
@@ -3426,10 +3426,10 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
                 </div>
               </div>
               <div class="settings-actions">
-                <button type="button" class="btn primary" id="settings-pw-submit" onclick="submitSettingsPassword()" disabled style="min-height:44px;">Update Password</button>
+                <button type="button" class="btn primary" id="settings-pw-submit" onclick="submitSettingsPassword()" style="min-height:44px;">Update Password</button>
                 <button type="button" class="btn" onclick="toggleSettingsPasswordForm(false)" style="min-height:44px;">Cancel</button>
               </div>
-              <div class="settings-note" id="settings-pw-note">Password change is unavailable — no change-password API is exposed by the backend.</div>
+              <div class="settings-note" id="settings-pw-note">Minimum 8 characters. Must be different from your current password.</div>
             </div>
             <div class="settings-warn">Never share password, OTP or authentication codes.</div>
           </div>
@@ -3656,6 +3656,15 @@ async function apiPostRecharge(payload) {
   });
   const data = await res.json();
   return { httpStatus: res.status, body: data };
+}
+async function apiChangePassword(oldPassword, newPassword) {
+  const res = await fetch(API_BASE + "/api/change-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ jsonrpc: "2.0", method: "call", params: { old_password: oldPassword, new_password: newPassword } }),
+  });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data.result || data };
 }
 async function apiPostFundRequest(payload) {
   const res = await fetch(API_BASE + "/api/fund-request", {
@@ -8352,9 +8361,61 @@ function toggleSettingsPasswordForm(force) {
   const on = force === true ? true : force === false ? false : form.classList.contains("settings-hidden");
   form.classList.toggle("settings-hidden", !on);
 }
-function submitSettingsPassword() {
-  // No change-password API exists — never invent one.
-  showToast("Password change is not available");
+const SETTINGS_PW_MIN_LENGTH = 8;
+async function submitSettingsPassword() {
+  const btn = document.getElementById("settings-pw-submit");
+  const note = document.getElementById("settings-pw-note");
+  const currentEl = document.getElementById("settings-pw-current");
+  const newEl = document.getElementById("settings-pw-new");
+  const confirmEl = document.getElementById("settings-pw-confirm");
+  if (!btn || !note || !currentEl || !newEl || !confirmEl) return;
+
+  const current = currentEl.value || "";
+  const next = newEl.value || "";
+  const confirm = confirmEl.value || "";
+
+  const setNote = (text, isError) => {
+    note.textContent = text;
+    note.style.color = isError ? "var(--danger, #d92d20)" : "var(--text-secondary)";
+  };
+
+  if (!current || !next || !confirm) {
+    setNote("Please fill in all three fields.", true);
+    return;
+  }
+  if (next.length < SETTINGS_PW_MIN_LENGTH) {
+    setNote("New password must be at least " + SETTINGS_PW_MIN_LENGTH + " characters.", true);
+    return;
+  }
+  if (next !== confirm) {
+    setNote("New password and confirmation do not match.", true);
+    return;
+  }
+  if (next === current) {
+    setNote("New password must be different from the current password.", true);
+    return;
+  }
+
+  btn.disabled = true;
+  setNote("Updating password…", false);
+  try {
+    const { httpStatus, body } = await apiChangePassword(current, next);
+    if (httpStatus === 401) { handleAuthFailure(); return; }
+    if (body && body.status === "success") {
+      currentEl.value = "";
+      newEl.value = "";
+      confirmEl.value = "";
+      setNote("Password updated.", false);
+      showToast("Password updated successfully", "success");
+      toggleSettingsPasswordForm(false);
+    } else {
+      setNote((body && body.message) || "Could not update password. Please try again.", true);
+    }
+  } catch (e) {
+    setNote("Could not update password. Please try again.", true);
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 function renderSettingsProfile() {
@@ -8425,11 +8486,6 @@ async function loadSettingsScreen(opts) {
   loadSettingsAppearance();
   setSettingsTab(opts.tab || state.settings.tab || "profile");
   renderSettingsProfile();
-  // Password API unavailable — keep submit disabled
-  const pwBtn = document.getElementById("settings-pw-submit");
-  if (pwBtn) pwBtn.disabled = true;
-  const pwSub = document.getElementById("settings-password-sub");
-  if (pwSub) pwSub.textContent = "No change-password API is available from the backend.";
   await refreshSettingsProfileName();
   renderSettingsProfile();
 }
