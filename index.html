@@ -2338,6 +2338,138 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
   .bnr-slide{flex-basis:calc(50% - 6px);}
 }
 @media (prefers-reduced-motion:reduce){.bnr-track{scroll-behavior:auto;}}
+
+/* ===== Phase 1: confirm / pending / receipt / frequent ===== */
+.rc-confirm-box{max-width:420px;}
+.rc-confirm-hero{text-align:center;padding:16px 12px 14px;margin:4px 0 12px;border-radius:14px;
+  background:var(--color-bg-brand-subtle);border:1px solid #FED7AA;}
+.rc-confirm-label{font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--color-text-secondary);}
+.rc-confirm-number{font-size:30px;font-weight:800;letter-spacing:.06em;color:var(--color-text-primary);
+  font-variant-numeric:tabular-nums;margin:4px 0 6px;word-break:break-all;}
+.rc-confirm-op{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--color-text-primary);}
+.rc-confirm-amount{font-size:22px;font-weight:800;color:var(--color-text-brand);margin-top:8px;}
+.rc-confirm-note{font-size:11.5px;color:var(--color-text-secondary);margin:-4px 0 10px;}
+.rc-autopoll{display:flex;align-items:center;gap:8px;justify-content:center;font-size:12.5px;font-weight:600;
+  color:var(--color-text-warning);margin-top:4px;}
+.rc-autopoll-dot{width:8px;height:8px;border-radius:50%;background:#F59E0B;animation:balPulse 1.2s ease-in-out infinite;flex-shrink:0;}
+@media (prefers-reduced-motion:reduce){.rc-autopoll-dot{animation:none}}
+.rc-share-row{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap;}
+.rc-share-row .btn{display:inline-flex;align-items:center;gap:6px;min-height:40px;}
+.rc-share-wa{background:#16A34A;border-color:#16A34A;color:#fff;}
+.rc-share-wa:hover{background:#15803D;border-color:#15803D;color:#fff;}
+#tx-drawer .rc-share-row{justify-content:flex-start;margin:14px 0 4px;}
+.dash-freq{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:-4px;}
+.dash-freq-label{font-size:12px;font-weight:600;color:var(--color-text-secondary);}
+.dash-freq-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--color-border-default);
+  background:#fff;border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:600;
+  color:var(--color-text-primary);cursor:pointer;min-height:36px;}
+.dash-freq-chip:hover{border-color:var(--color-border-brand);background:var(--color-bg-brand-subtle);}
+@media (max-width:639px){.dash-freq{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px;}
+  .dash-freq::-webkit-scrollbar{display:none;}.dash-freq-chip,.dash-freq-label{flex-shrink:0;white-space:nowrap;}}
+
+/* ===== Compact operator picker ===== */
+.op-pill.active .op-dot{box-shadow:0 0 0 2px #fff,0 0 0 3px currentColor;}
+.op-selected{width:100%;display:flex;align-items:center;gap:10px;margin-top:4px;padding:10px 10px 10px 14px;border-radius:12px;
+  border:1.5px solid var(--color-border-brand);background:var(--color-bg-brand-subtle);min-height:48px;box-sizing:border-box;}
+.op-selected .op-pill-logo{height:24px;width:24px;}
+.op-selected-name{font-size:15px;font-weight:700;color:var(--color-text-primary);}
+.op-selected-check{color:var(--color-text-success);font-size:18px;margin-right:auto;}
+.op-selected-src{font-size:11.5px;color:var(--color-text-secondary);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.op-change-btn{margin-left:auto;border:1px solid var(--color-border-default);background:#fff;border-radius:8px;
+  padding:7px 14px;font:inherit;font-size:13px;font-weight:700;color:var(--color-text-brand);cursor:pointer;flex-shrink:0;min-height:36px;}
+.op-change-btn:hover{border-color:var(--color-border-brand);}
+#rc-field-operator.op-compact .hint{display:none;}
+@media (max-width:639px){
+  #rc-field-operator:not(.op-compact) .op-pills{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px;padding-bottom:2px;}
+  .op-pills::-webkit-scrollbar{display:none;}
+  .op-pill{flex-shrink:0;white-space:nowrap;}
+}
+
+/* ===== Operator picker v2: dropdown field + sheet ===== */
+.op-avatar{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0;
+  color:#fff;font-weight:800;letter-spacing:-.02em;line-height:1;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);}
+.op-avatar.logo{background:#fff;box-shadow:inset 0 0 0 1px var(--color-border-default);overflow:hidden;}
+.op-avatar.logo img{width:78%;height:78%;object-fit:contain;}
+.op-field{width:100%;display:flex;align-items:center;gap:12px;margin-top:4px;padding:8px 12px;min-height:52px;
+  border-radius:12px;border:1.5px solid var(--color-border-brand);background:var(--color-bg-brand-subtle);
+  font:inherit;text-align:left;cursor:pointer;box-sizing:border-box;}
+.op-field:focus-visible{outline:none;box-shadow:0 0 0 3px var(--color-bg-focus-ring);}
+.op-field.empty{background:#fff;border:1.5px dashed var(--color-border-strong);}
+.op-field.empty:hover{border-color:var(--color-border-brand);}
+.op-field-icon{width:32px;height:32px;border-radius:50%;background:var(--color-bg-muted);display:flex;align-items:center;
+  justify-content:center;color:var(--color-icon-default);font-size:18px;flex-shrink:0;}
+.op-field-name{font-size:15px;font-weight:700;color:var(--color-text-primary);}
+.op-field.empty .op-field-name{font-weight:600;color:var(--color-text-secondary);flex:1;}
+.op-field .op-selected-check{margin-right:auto;}
+.op-field-change{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:700;color:var(--color-text-brand);
+  background:#fff;border:1px solid var(--color-border-default);border-radius:8px;padding:6px 10px;flex-shrink:0;}
+.op-field-caret{font-size:18px;color:var(--color-icon-default);}
+.op-sheet-backdrop{position:fixed;inset:0;z-index:400;background:rgba(15,23,42,0);display:flex;align-items:flex-end;
+  justify-content:center;transition:background .18s;}
+.op-sheet-backdrop[hidden]{display:none;}
+.op-sheet-backdrop.show{background:rgba(15,23,42,.48);}
+.op-sheet{width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;background:#fff;
+  border-radius:20px 20px 0 0;box-shadow:0 -12px 40px rgba(15,23,42,.25);transform:translateY(100%);
+  transition:transform .2s ease-out;padding-bottom:env(safe-area-inset-bottom,0px);}
+.op-sheet-backdrop.show .op-sheet{transform:none;}
+.op-sheet-grip{width:40px;height:4px;border-radius:2px;background:#CBD5E1;margin:8px auto 0;}
+.op-sheet-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 8px 20px;}
+.op-sheet-head h3{margin:0;font-size:17px;font-weight:700;color:var(--color-text-primary);}
+.op-sheet-close{border:none;background:var(--color-bg-muted);width:36px;height:36px;border-radius:50%;cursor:pointer;
+  font-size:18px;color:var(--color-icon-default);display:flex;align-items:center;justify-content:center;}
+.op-sheet-list{overflow-y:auto;padding:4px 12px 16px;}
+.op-row{width:100%;display:flex;align-items:center;gap:14px;padding:12px 10px;min-height:64px;border:none;
+  border-bottom:1px solid #F1F5F9;background:#fff;font:inherit;text-align:left;cursor:pointer;border-radius:12px;}
+.op-row:hover,.op-row:focus-visible{background:var(--color-bg-muted);outline:none;}
+.op-row.active{background:var(--color-bg-brand-subtle);}
+.op-row-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.op-row-name{font-size:16px;font-weight:600;color:var(--color-text-primary);}
+.op-row-tag{font-size:11.5px;font-weight:600;color:var(--color-text-success);}
+.op-row-check{font-size:22px;color:var(--color-text-brand);}
+.op-row-go{font-size:18px;color:var(--color-icon-muted);}
+@media (min-width:640px){
+  .op-sheet-backdrop{align-items:center;padding:16px;}
+  .op-sheet{border-radius:20px;transform:translateY(16px);opacity:0;transition:transform .18s,opacity .18s;}
+  .op-sheet-backdrop.show .op-sheet{opacity:1;}
+  .op-sheet-grip{display:none;}
+}
+@media (prefers-reduced-motion:reduce){.op-sheet,.op-sheet-backdrop{transition:none;}}
+.rc-confirm-op .op-avatar{margin-right:2px;}
+
+/* ===== Retailer complaints ===== */
+.cmp-chip{display:inline-flex;align-items:center;margin-left:6px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap;}
+.cmp-chip.pending{background:#FEF3C7;color:#92400E;}
+.cmp-chip.success{background:#DCFCE7;color:#166534;}
+.cmp-chip.failed{background:#F1F5F9;color:#475569;}
+.cmp-block{border-radius:12px;padding:12px 14px;margin:8px 0 12px;border:1px solid transparent;}
+.cmp-block.pending{background:#FFFBEB;border-color:#FDE68A;}
+.cmp-block.success{background:#F0FDF4;border-color:#BBF7D0;}
+.cmp-block.failed{background:#F8FAFC;border-color:var(--color-border-default);}
+.cmp-block-title{font-size:13.5px;font-weight:700;color:var(--color-text-primary);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.cmp-id{font-weight:600;font-size:11.5px;color:var(--color-text-secondary);}
+.cmp-block-text{font-size:12.5px;color:var(--color-text-secondary);margin-top:4px;line-height:1.45;}
+.cmp-sheet-body{padding:4px 20px 20px;overflow-y:auto;}
+.cmp-summary{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:var(--color-bg-muted);margin-bottom:14px;}
+.cmp-summary-main{font-size:15px;font-weight:700;color:var(--color-text-primary);}
+.cmp-summary-sub{font-size:12px;color:var(--color-text-secondary);margin-top:2px;}
+.cmp-reasons{border:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:8px;}
+.cmp-reasons legend{font-size:13px;font-weight:700;color:var(--color-text-primary);margin-bottom:8px;padding:0;}
+.cmp-reason{display:flex;align-items:center;gap:10px;padding:12px;border:1.5px solid var(--color-border-default);border-radius:12px;
+  font-size:14px;cursor:pointer;min-height:48px;box-sizing:border-box;}
+.cmp-reason:has(input:checked){border-color:var(--color-border-brand);background:var(--color-bg-brand-subtle);}
+.cmp-reason input{width:18px;height:18px;accent-color:var(--color-bg-brand);flex-shrink:0;}
+.cmp-note-label{display:block;font-size:12.5px;font-weight:600;color:var(--color-text-secondary);margin:4px 0 6px;}
+.cmp-note{width:100%;box-sizing:border-box;border:1px solid var(--color-border-default);border-radius:10px;padding:10px 12px;
+  font:inherit;font-size:14px;resize:vertical;}
+.cmp-note:focus{outline:none;border-color:var(--color-border-focus);box-shadow:0 0 0 3px var(--color-bg-focus-ring);}
+.cmp-info{display:flex;gap:8px;font-size:12.5px;line-height:1.45;color:var(--color-text-secondary);background:#EFF6FF;
+  border-radius:10px;padding:10px 12px;margin-top:12px;}
+.cmp-info i{color:#2563EB;font-size:16px;flex-shrink:0;margin-top:1px;}
+.cmp-done{text-align:center;padding:8px 0 4px;}
+.cmp-done-icon i{font-size:52px;color:var(--color-text-success);}
+.cmp-done-id{font-size:15px;font-weight:800;color:var(--color-text-primary);margin:6px 0;}
+.cmp-done-text{font-size:13px;color:var(--color-text-secondary);line-height:1.45;margin-top:4px;}
+.drawer-actions .btn i{margin-right:4px;}
 </style>
 </head>
 <body>
@@ -2471,6 +2603,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
               <input type="tel" id="dash-qr-mobile" inputmode="numeric" maxlength="10" placeholder="Enter mobile number" aria-label="Mobile number to recharge" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
               <button type="submit" class="btn primary">Recharge</button>
             </form>
+            <div class="dash-freq hidden" id="dash-freq" aria-label="Frequent customers"></div>
             <div class="dash-info-banner pending hidden" id="dash-pending-strip" role="status">
               <div class="info-icon"><i class="ti ti-clock-hour-4" aria-hidden="true"></i></div>
               <div class="info-body">
@@ -3673,7 +3806,11 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
    ========================================================================= */
 const API_BASE = "https://quickpay.qpaytest.fun";
 
-const OPERATOR_COLORS = { AIRTEL: "#E4002B", JIO: "#0F1E5C", VI: "#EE5A24", BSNL: "#15803D" };
+const OPERATOR_COLORS = { AIRTEL: "#E4002B", JIO: "#0F3CC9", JIOBK: "#0F3CC9", VI: "#E5262B", BSNL: "#0E7C3A", MTNL: "#1E3A8A",
+  AIRTEL_DTH: "#E4002B", TATASKY: "#0B5394", DISH: "#E05206", VIDEOCON: "#B91C1C", SUN: "#D97706" };
+/* Short label for the monogram avatar when no logo has been uploaded. */
+const OPERATOR_MONOGRAM = { AIRTEL: "A", JIO: "Jio", JIOBK: "Jio", VI: "Vi", BSNL: "B", MTNL: "M",
+  AIRTEL_DTH: "A", TATASKY: "TS", DISH: "D", VIDEOCON: "d2h", SUN: "S" };
 function operatorColor(code) { return OPERATOR_COLORS[(code || "").toUpperCase()] || "#64748B"; }
 
 let state = {
@@ -4875,6 +5012,306 @@ function restartBannerAutoplay() {
   window.addEventListener("resize", () => { if (bnr.list.length) renderDashBanners(); });
 })();
 
+
+/* ===== Phase 1: confirm / status / receipt / frequent customers ===== */
+function formatMobileSpaced(m) {
+  const d = String(m || "").replace(/\D/g, "");
+  return d.length === 10 ? d.slice(0, 5) + " " + d.slice(5) : d;
+}
+
+/* Estimated commission from this retailer's own recent successful recharges
+   on the same operator. Returns null when there is nothing to base it on. */
+function estimateCommission(operatorCode, amount) {
+  if (!operatorCode || !(amount > 0)) return null;
+  let amt = 0, com = 0, n = 0;
+  (state.historyCache || []).forEach((r) => {
+    if (r.operator_code !== operatorCode || classifyTodayStatus(r) !== "success") return;
+    const a = Number(r.amount) || 0, c = Number(r.commission_amount) || 0;
+    if (a <= 0 || c <= 0 || n >= 10) return;
+    amt += a; com += c; n += 1;
+  });
+  if (!n) return null;
+  return { amount: Math.round((com / amt) * amount * 100) / 100, basedOn: n };
+}
+
+/* --- A3: pending auto-check --- */
+const pendingPoll = { timer: null, tick: null, started: 0, tries: 0, id: null };
+const PENDING_POLL_MS = 10000, PENDING_POLL_MAX = 18; // 3 minutes
+function stopPendingAutoCheck() {
+  if (pendingPoll.timer) clearTimeout(pendingPoll.timer);
+  if (pendingPoll.tick) clearInterval(pendingPoll.tick);
+  pendingPoll.timer = pendingPoll.tick = null;
+}
+function startPendingAutoCheck(rechargeId) {
+  stopPendingAutoCheck();
+  if (pendingPoll.id !== rechargeId) { pendingPoll.id = rechargeId; pendingPoll.started = Date.now(); pendingPoll.tries = 0; }
+  const label = () => {
+    const el = document.getElementById("rc-autopoll-text");
+    if (!el) return;
+    const sec = Math.floor((Date.now() - pendingPoll.started) / 1000);
+    el.textContent = "Waiting for operator reply · " + Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0")
+      + " · checking automatically";
+  };
+  label();
+  pendingPoll.tick = setInterval(label, 1000);
+  const next = () => {
+    if (pendingPoll.tries >= PENDING_POLL_MAX) {
+      stopPendingAutoCheck();
+      const el = document.getElementById("rc-autopoll-text");
+      if (el) el.textContent = "Still waiting. Tap Check Status later, or see Transactions. Do not repeat this recharge.";
+      return;
+    }
+    pendingPoll.timer = setTimeout(async () => {
+      pendingPoll.tries += 1;
+      try {
+        const { httpStatus, body } = await apiStatusCheck(rechargeId);
+        if (httpStatus === 401) { stopPendingAutoCheck(); return; }
+        const st = body && (body.state || "").toLowerCase();
+        if (st === "success" || st === "failed") {
+          let ok = false;
+          try { const b = await refreshWalletBalance(); ok = !!(b && b.status === "success"); } catch (e) {}
+          updateRcSummary();
+          renderRechargeResult(st, body, { postTxnBalanceOk: ok });
+          return;
+        }
+      } catch (e) { /* network blip: keep waiting */ }
+      next();
+    }, PENDING_POLL_MS);
+  };
+  next();
+}
+
+/* --- A4: receipt --- */
+function receiptButtonsHtml(where) {
+  const src = where === "drawer" ? "drawer" : "last";
+  return '<div class="rc-share-row">'
+    + '<button type="button" class="btn rc-share-wa" onclick="shareReceiptWhatsApp(\'' + src + '\')"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> Send receipt</button>'
+    + '<button type="button" class="btn" onclick="printReceipt(\'' + src + '\')"><i class="ti ti-printer" aria-hidden="true"></i> Print</button>'
+    + "</div>";
+}
+function receiptData(src) { return src === "drawer" ? state.drawerReceipt : state.lastReceipt; }
+function receiptDateText(d) {
+  return (d instanceof Date ? d : new Date()).toLocaleString("en-IN", {
+    day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+  });
+}
+function receiptText(r) {
+  const lines = [
+    "*QuickPay Recharge Receipt*",
+    "✅ Recharge " + r.status,
+    "",
+    (r.isDth ? "Account: " : "Mobile: ") + (r.isDth ? r.mobile : formatMobileSpaced(r.mobile)),
+    "Operator: " + r.operator,
+    "Amount: " + formatMoney(r.amount),
+    "Transaction ID: " + r.txnRef,
+  ];
+  if (r.operatorRef) lines.push("Operator Ref: " + r.operatorRef);
+  lines.push("Date: " + receiptDateText(r.date));
+  if (state.retailerName) lines.push("", "Recharged at: " + state.retailerName);
+  lines.push("Thank you!");
+  return lines.join("\n");
+}
+function shareReceiptWhatsApp(src) {
+  const r = receiptData(src);
+  if (!r) return;
+  const digits = String(r.mobile || "").replace(/\D/g, "");
+  // Mobile recharge: open the chat with the customer's own number. DTH: let the retailer pick the contact.
+  const to = !r.isDth && digits.length === 10 ? "91" + digits : "";
+  window.open("https://wa.me/" + to + "?text=" + encodeURIComponent(receiptText(r)), "_blank", "noopener");
+}
+function printReceipt(src) {
+  const r = receiptData(src);
+  if (!r) return;
+  const row = (k, v) => "<tr><td>" + escapeHtml(k) + "</td><td>" + escapeHtml(v) + "</td></tr>";
+  const html = '<!doctype html><html><head><meta charset="utf-8"><title>Receipt ' + escapeHtml(r.txnRef) + "</title>"
+    + "<style>body{font-family:system-ui,sans-serif;margin:0;padding:16px;color:#0F172A}"
+    + ".r{max-width:300px;margin:0 auto}h1{font-size:18px;margin:0 0 2px;text-align:center}"
+    + ".s{text-align:center;color:#15803D;font-weight:700;margin:4px 0 12px}.a{text-align:center;font-size:28px;font-weight:800;margin:8px 0 12px}"
+    + "table{width:100%;border-collapse:collapse;font-size:13px}td{padding:6px 0;border-bottom:1px dashed #CBD5E1;vertical-align:top}"
+    + "td:last-child{text-align:right;font-weight:600}.f{text-align:center;font-size:12px;color:#475569;margin-top:14px}"
+    + "@media print{@page{margin:8mm}}</style></head><body><div class=\"r\">"
+    + "<h1>QuickPay</h1><div class=\"s\">✓ Recharge " + escapeHtml(r.status) + "</div>"
+    + '<div class="a">' + escapeHtml(formatMoney(r.amount)) + "</div><table>"
+    + row(r.isDth ? "Account" : "Mobile", r.isDth ? r.mobile : formatMobileSpaced(r.mobile))
+    + row("Operator", r.operator)
+    + row("Transaction ID", r.txnRef)
+    + (r.operatorRef ? row("Operator Ref", r.operatorRef) : "")
+    + row("Date", receiptDateText(r.date))
+    + "</table>"
+    + '<div class="f">' + (state.retailerName ? "Recharged at " + escapeHtml(state.retailerName) + "<br>" : "") + "Thank you!</div>"
+    + "</div><script>window.onload=function(){window.print();}<\/script></body></html>";
+  const w = window.open("", "_blank");
+  if (!w) { showToast("Please allow pop-ups to print the receipt."); return; }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
+
+/* --- A6 on dashboard: one-tap chips --- */
+function renderDashFrequent() {
+  const el = document.getElementById("dash-freq");
+  if (!el) return;
+  const list = frequentCustomers(3).filter((c) => c.lastOk);
+  if (!list.length) { el.classList.add("hidden"); el.innerHTML = ""; return; }
+  el.innerHTML = '<span class="dash-freq-label">Repeat:</span>' + list.map((c) => {
+    const r = c.lastOk;
+    return '<button type="button" class="dash-freq-chip" onclick="dashRepeat(\'' + escapeHtml(c.mobile) + '\',\''
+      + escapeHtml(r.operator_code || "") + '\',' + (Number(r.amount) || 0) + ')">'
+      + '<span class="op-dot" style="background:' + operatorColor(r.operator_code) + ';"></span>'
+      + escapeHtml(maskMobile(c.mobile)) + " · " + formatMoney(r.amount) + "</button>";
+  }).join("");
+  el.classList.remove("hidden");
+}
+function dashRepeat(mobile, operator, amount) {
+  state.rc.pendingPrefill = { mobile: mobile, operator: operator, amount: Number(amount) || null };
+  goTo("recharge", { serviceType: "mobile" });
+}
+
+
+/* ===== Retailer complaints ===== */
+const COMPLAINT_REASONS = [
+  ["not_received", "Recharge not received by customer"],
+  ["benefit_missing", "Recharge done, but plan benefits not given"],
+  ["other", "Other problem"],
+];
+
+function complaintChip(r) {
+  const c = r && r.complaint;
+  if (!c || !c.id) return "";
+  const label = c.status === "success" ? "Complaint: refunded" : c.status === "failed" ? "Complaint closed" : "Complaint open";
+  return ' <span class="cmp-chip ' + escapeHtml(c.status || "pending") + '">' + label + "</span>";
+}
+
+function complaintDrawerBlock(r) {
+  const c = r && r.complaint;
+  if (!c || !c.id) return "";
+  let title, text, cls;
+  if (c.status === "success") {
+    cls = "success"; title = "Complaint accepted";
+    text = (c.refund_amount != null ? formatMoney(c.refund_amount) : "The amount") + " was refunded to your Main Wallet.";
+  } else if (c.status === "failed") {
+    cls = "failed"; title = "Complaint closed";
+    text = "The operator confirmed this recharge was delivered, so no refund.";
+  } else {
+    cls = "pending"; title = "Complaint under review";
+    text = "QuickPay is checking with the operator. If the recharge was not delivered, the amount comes back to your wallet.";
+  }
+  return '<div class="cmp-block ' + cls + '"><div class="cmp-block-title"><i class="ti ti-message-report" aria-hidden="true"></i> '
+    + title + ' <span class="cmp-id">' + escapeHtml(c.id) + "</span></div>"
+    + '<div class="cmp-block-text">' + escapeHtml(text) + "</div></div>";
+}
+
+function complaintDrawerButton(r) {
+  const c = r && r.complaint;
+  if (classifyTodayStatus(r) !== "success" || (c && c.id)) return "";
+  if (c && c.can_complain) {
+    return '<button type="button" class="btn" onclick="openComplaintSheet(' + r.id + ')"><i class="ti ti-message-report" aria-hidden="true"></i> Raise Complaint</button>';
+  }
+  return '<button type="button" class="btn" disabled title="Complaints are accepted within 72 hours of a successful recharge">Complaint time over (72 h)</button>';
+}
+
+function findRechargeById(id) {
+  return (state.tx.all || []).find((x) => x.id === id)
+    || (state.tx.raw || []).find((x) => x.id === id)
+    || (state.historyCache || []).find((x) => x.id === id);
+}
+
+function complaintSheetEl() {
+  let el = document.getElementById("cmp-sheet");
+  if (el) return el;
+  el = document.createElement("div");
+  el.id = "cmp-sheet";
+  el.className = "op-sheet-backdrop";
+  el.setAttribute("hidden", "");
+  el.innerHTML = '<div class="op-sheet cmp-sheet" role="dialog" aria-modal="true" aria-labelledby="cmp-sheet-title">'
+    + '<div class="op-sheet-grip" aria-hidden="true"></div>'
+    + '<div class="op-sheet-head"><h3 id="cmp-sheet-title">Raise a complaint</h3>'
+    + '<button type="button" class="op-sheet-close" onclick="closeComplaintSheet()" aria-label="Close"><i class="ti ti-x"></i></button></div>'
+    + '<div class="cmp-sheet-body" id="cmp-sheet-body"></div></div>';
+  el.addEventListener("click", (e) => { if (e.target === el) closeComplaintSheet(); });
+  el.addEventListener("keydown", (e) => { if (e.key === "Escape") closeComplaintSheet(); });
+  document.body.appendChild(el);
+  return el;
+}
+
+function openComplaintSheet(id) {
+  const r = findRechargeById(id);
+  if (!r) return;
+  const el = complaintSheetEl();
+  document.getElementById("cmp-sheet-title").textContent = "Raise a complaint";
+  document.getElementById("cmp-sheet-body").innerHTML =
+    '<div class="cmp-summary">'
+    + operatorAvatar(null, r.operator_code, 36)
+    + '<div><div class="cmp-summary-main">' + escapeHtml(formatMobileSpaced(r.mobile_number || "")) + " · " + formatMoney(r.amount) + "</div>"
+    + '<div class="cmp-summary-sub">' + escapeHtml(r.operator_name || r.operator_code || "") + " · " + escapeHtml(txDisplayId(r)) + " · " + escapeHtml(formatDateTime(r.date)) + "</div></div></div>"
+    + '<fieldset class="cmp-reasons"><legend>What went wrong?</legend>'
+    + COMPLAINT_REASONS.map((x, i) =>
+      '<label class="cmp-reason"><input type="radio" name="cmp-reason" value="' + x[0] + '"' + (i === 0 ? " checked" : "") + "> <span>" + escapeHtml(x[1]) + "</span></label>").join("")
+    + "</fieldset>"
+    + '<label class="cmp-note-label" for="cmp-note">Note for QuickPay (optional)</label>'
+    + '<textarea id="cmp-note" class="cmp-note" maxlength="300" rows="2" placeholder="e.g. Customer says balance did not change"></textarea>'
+    + '<div class="cmp-info"><i class="ti ti-info-circle" aria-hidden="true"></i> QuickPay checks with the operator. If the recharge was not delivered, '
+    + formatMoney(r.amount) + " comes back to your Main Wallet. Usually decided within 48 hours.</div>"
+    + '<div class="modal-actions"><button type="button" class="btn" onclick="closeComplaintSheet()">Cancel</button>'
+    + '<button type="button" class="btn primary" id="cmp-submit" onclick="submitComplaint(' + r.id + ')">Submit complaint</button></div>';
+  el.removeAttribute("hidden");
+  requestAnimationFrame(() => el.classList.add("show"));
+  const first = el.querySelector('input[name="cmp-reason"]');
+  if (first) first.focus();
+}
+
+function closeComplaintSheet() {
+  const el = document.getElementById("cmp-sheet");
+  if (!el) return;
+  el.classList.remove("show");
+  setTimeout(() => el.setAttribute("hidden", ""), prefersReducedMotion() ? 0 : 180);
+}
+
+async function apiPostComplaint(payload) {
+  const res = await fetch(API_BASE + "/api/recharge/complaint", {
+    method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() }, body: JSON.stringify(payload),
+  });
+  let data = null;
+  try { data = await res.json(); } catch (e) { data = null; }
+  return { httpStatus: res.status, body: data };
+}
+
+async function submitComplaint(id) {
+  const btn = document.getElementById("cmp-submit");
+  if (btn) { btn.disabled = true; btn.textContent = "Submitting…"; }
+  const reasonEl = document.querySelector('input[name="cmp-reason"]:checked');
+  const payload = {
+    recharge_id: id,
+    reason: reasonEl ? reasonEl.value : "not_received",
+    remark: (document.getElementById("cmp-note").value || "").trim(),
+  };
+  try {
+    const { httpStatus, body } = await apiPostComplaint(payload);
+    if (httpStatus === 401) { closeComplaintSheet(); return handleAuthFailure(); }
+    if (!body || body.status !== "success" || !body.complaint) {
+      showToast((body && body.message) || "Could not submit the complaint. Please try again.");
+      if (btn) { btn.disabled = false; btn.textContent = "Submit complaint"; }
+      return;
+    }
+    // Update every cached copy so the list, drawer and dashboard agree.
+    [state.tx.all, state.tx.raw, state.historyCache].forEach((list) => {
+      (list || []).forEach((x) => { if (x.id === id) x.complaint = body.complaint; });
+    });
+    document.getElementById("cmp-sheet-title").textContent = "Complaint registered";
+    document.getElementById("cmp-sheet-body").innerHTML =
+      '<div class="cmp-done"><div class="cmp-done-icon"><i class="ti ti-circle-check-filled" aria-hidden="true"></i></div>'
+      + '<div class="cmp-done-id">' + escapeHtml(body.complaint.id) + "</div>"
+      + '<div class="cmp-done-text">' + escapeHtml(body.message || "") + "</div>"
+      + "<div class=\"cmp-done-text\">You can see the result on this transaction in Transactions.</div></div>"
+      + '<div class="modal-actions"><button type="button" class="btn primary block" onclick="closeComplaintSheet()">Done</button></div>';
+    if (state.tx.raw && state.tx.raw.length) { try { applyTxFiltersAndRender(state.tx.raw); } catch (e) {} }
+    if (document.getElementById("tx-drawer") && !document.getElementById("tx-drawer").hasAttribute("hidden")) openTxDrawer(id);
+  } catch (e) {
+    showToast("Unable to connect. Please try again.");
+    if (btn) { btn.disabled = false; btn.textContent = "Submit complaint"; }
+  }
+}
+
 /* ===== Dashboard phase 1 helpers ===== */
 /* History API returns at most 100 rows. Anything older than the oldest row we
    have is unknown, so every comparison below checks it is fully covered and
@@ -5146,6 +5583,7 @@ async function loadDashboard() {
 
       renderBusinessTrend(state.historyCache);
       renderRecentTransactions(state.historyCache.slice(0, 5));
+      renderDashFrequent();
       markDashUpdated();
     } else {
       if (recentWrap) {
@@ -5438,38 +5876,51 @@ function updateRcSummary() {
 }
 
 /* FEATURE B5: last 5 unique mobile numbers, from shared history cache. */
+/* A6: customers ranked by how often they recharge here (successful ones), newest first on ties. */
+function frequentCustomers(limit) {
+  const map = new Map();
+  (state.historyCache || []).forEach((r, idx) => {
+    if (!r.mobile_number) return;
+    const ok = classifyTodayStatus(r) === "success";
+    let c = map.get(r.mobile_number);
+    if (!c) {
+      c = { mobile: r.mobile_number, count: 0, idx: idx, last: r, lastOk: null };
+      map.set(r.mobile_number, c);
+    }
+    if (ok) {
+      c.count += 1;
+      if (!c.lastOk) c.lastOk = r; // history is newest first
+    }
+  });
+  return Array.from(map.values())
+    .sort((a, b) => (b.count - a.count) || (a.idx - b.idx))
+    .slice(0, limit);
+}
+
 function renderRecentCustomers() {
   const wrap = document.getElementById("rc-recent-list");
   if (!wrap) return;
-  if (!state.historyCache.length) {
+  const list = frequentCustomers(6);
+  if (!list.length) {
     wrap.innerHTML = '<div style="font-size:12.5px;color:var(--text-muted);">No recent recharges yet.</div>';
     return;
   }
-  const seen = new Set();
-  const recent = [];
-  for (const r of state.historyCache) {
-    if (!r.mobile_number || seen.has(r.mobile_number)) continue;
-    seen.add(r.mobile_number);
-    recent.push(r);
-    if (recent.length === 5) break;
-  }
-  if (!recent.length) {
-    wrap.innerHTML = '<div style="font-size:12.5px;color:var(--text-muted);">No recent recharges yet.</div>';
-    return;
-  }
-  wrap.innerHTML = recent.map((r) =>
-    '<div class="rc-recent-row">'
-    + '<div><div class="main"><span class="op-dot" style="background:' + operatorColor(r.operator_code) + ';"></span>'
-    + escapeHtml(maskMobile(r.mobile_number)) + " · " + escapeHtml(r.operator_name || r.operator_code || "")
-    + " · " + formatMoney(r.amount) + "</div>"
-    + '<div class="meta">' + formatDateTime(r.date) + "</div></div>"
-    + '<button type="button" class="btn-link" onclick="repeatRecharge(\''
-    + escapeHtml(r.mobile_number) + '\',\'' + escapeHtml(r.operator_code || "") + '\')">Recharge Again</button>'
-    + "</div>"
-  ).join("");
+  wrap.innerHTML = list.map((c) => {
+    const r = c.lastOk || c.last;
+    const amt = c.lastOk ? Number(c.lastOk.amount) || 0 : 0;
+    return '<div class="rc-recent-row">'
+      + '<div><div class="main"><span class="op-dot" style="background:' + operatorColor(r.operator_code) + ';"></span>'
+      + escapeHtml(maskMobile(c.mobile)) + " · " + escapeHtml(r.operator_name || r.operator_code || "")
+      + (amt ? " · " + formatMoney(amt) : "") + "</div>"
+      + '<div class="meta">' + (c.count ? c.count + " successful recharge" + (c.count === 1 ? "" : "s") + " · " : "")
+      + "last " + formatDateTime(c.last.date) + "</div></div>"
+      + '<button type="button" class="btn-link" onclick="repeatRecharge(\''
+      + escapeHtml(c.mobile) + '\',\'' + escapeHtml(r.operator_code || "") + '\',' + amt + ')">Recharge Again</button>'
+      + "</div>";
+  }).join("");
 }
 
-function repeatRecharge(mobile, operatorCode) {
+function repeatRecharge(mobile, operatorCode, amount) {
   // Populate only — never auto-submit.
   document.getElementById("rc-mobile").value = mobile;
   onRcMobileInput();
@@ -5477,13 +5928,16 @@ function repeatRecharge(mobile, operatorCode) {
     selectOperator(operatorCode);
   }
   const amountInput = document.getElementById("rc-amount");
-  amountInput.value = "";
-  state.rc.amount = 0;
+  const amt = Number(amount) > 0 ? Number(amount) : 0;
+  amountInput.value = amt ? String(amt) : "";
+  state.rc.amount = amt;
   state.rc.idempotencyKey = genIdempotencyKey();
   updateRcSubmitState();
   updateRcSummary();
   amountInput.focus();
-  showToast("Form populated. Review amount, then Proceed — nothing was submitted.");
+  showToast(amt
+    ? "Filled with last amount " + formatMoney(amt) + ". Check, then Proceed — nothing was submitted."
+    : "Form populated. Review amount, then Proceed — nothing was submitted.");
 }
 
 function renderOperatorPills() {
@@ -5494,21 +5948,123 @@ function renderOperatorPills() {
     wrap.innerHTML = '<div style="font-size:12.5px;color:var(--text-muted);">No operators available for this service.</div>';
     return;
   }
-  wrap.innerHTML = ops.map((op) => {
-    const code = op.code || op.operator_code || op.name;
-    const color = operatorColor(code);
-    const active = state.rc.operator === code;
-    const icon = op.logo_url
-      ? '<img class="op-pill-logo" src="' + escapeHtml(API_BASE + op.logo_url) + '" alt="">'
-      : '<span class="op-dot" style="background:' + (active ? "#fff" : color) + ';"></span>';
-    return '<button type="button" class="op-pill' + (active ? " active" : "") + '" style="'
-      + (active ? "background:" + color + ";" : "") + '" onclick="selectOperator(\''
-      + escapeHtml(code) + '\')">' + icon + escapeHtml(op.name || code) + "</button>";
-  }).join("");
+  const field = document.getElementById("rc-field-operator");
+  if (field) field.classList.add("op-compact");
+  if (state.rc.operator) {
+    const op = state.rc.operatorObj;
+    const code = state.rc.operator;
+    wrap.innerHTML = '<button type="button" class="op-field" onclick="openOperatorSheet()" aria-haspopup="dialog">'
+      + operatorAvatar(op, code, 32)
+      + '<span class="op-field-name">' + escapeHtml((op && op.name) || code) + "</span>"
+      + '<i class="ti ti-circle-check-filled op-selected-check" aria-hidden="true"></i>'
+      + '<span class="op-field-change">Change <i class="ti ti-chevron-down" aria-hidden="true"></i></span>'
+      + "</button>";
+  } else {
+    wrap.innerHTML = '<button type="button" class="op-field empty" onclick="openOperatorSheet()" aria-haspopup="dialog">'
+      + '<span class="op-field-icon"><i class="ti ti-antenna-bars-5" aria-hidden="true"></i></span>'
+      + '<span class="op-field-name">Select operator</span>'
+      + '<i class="ti ti-chevron-down op-field-caret" aria-hidden="true"></i>'
+      + "</button>";
+  }
 }
 
-function selectOperator(code) {
+/* Round avatar: uploaded logo on white, otherwise a monogram in the operator colour. */
+function operatorAvatar(op, code, size) {
+  const px = size || 32;
+  if (op && op.logo_url) {
+    return '<span class="op-avatar logo" style="width:' + px + "px;height:" + px + 'px;">'
+      + '<img src="' + escapeHtml(API_BASE + op.logo_url) + '" alt=""></span>';
+  }
+  const key = String(code || "").toUpperCase();
+  let label = OPERATOR_MONOGRAM[key];
+  if (!label) {
+    const words = String((op && op.name) || code || "?").split(/\s+/).filter(Boolean);
+    label = words.length > 1 ? (words[0][0] + words[1][0]) : words[0].slice(0, 2);
+    label = label.toUpperCase();
+  }
+  const fs = Math.round(px * (label.length >= 3 ? 0.34 : label.length === 2 ? 0.4 : 0.5));
+  return '<span class="op-avatar" style="width:' + px + "px;height:" + px + "px;background:" + operatorColor(code)
+    + ";font-size:" + fs + 'px;" aria-hidden="true">' + escapeHtml(label) + "</span>";
+}
+
+function operatorSheetEl() {
+  let el = document.getElementById("op-sheet");
+  if (el) return el;
+  el = document.createElement("div");
+  el.id = "op-sheet";
+  el.className = "op-sheet-backdrop";
+  el.setAttribute("hidden", "");
+  el.innerHTML = '<div class="op-sheet" role="dialog" aria-modal="true" aria-labelledby="op-sheet-title">'
+    + '<div class="op-sheet-grip" aria-hidden="true"></div>'
+    + '<div class="op-sheet-head"><h3 id="op-sheet-title">Select operator</h3>'
+    + '<button type="button" class="op-sheet-close" onclick="closeOperatorSheet()" aria-label="Close"><i class="ti ti-x"></i></button></div>'
+    + '<div class="op-sheet-list" id="op-sheet-list"></div></div>';
+  el.addEventListener("click", (e) => { if (e.target === el) closeOperatorSheet(); });
+  el.addEventListener("keydown", (e) => { if (e.key === "Escape") closeOperatorSheet(); });
+  document.body.appendChild(el);
+  return el;
+}
+
+function openOperatorSheet() {
+  const ops = state.operators || [];
+  if (!ops.length) return;
+  const el = operatorSheetEl();
+  const v = state.rc.mobile || "";
+  const last = v ? (state.historyCache || []).find((r) => r.mobile_number === v && r.operator_code) : null;
+  const svc = (state.rc.serviceType || "mobile") === "dth" ? "DTH operator" : "mobile operator";
+  document.getElementById("op-sheet-title").textContent = "Select " + svc;
+  document.getElementById("op-sheet-list").innerHTML = ops.map((op) => {
+    const code = op.code || op.operator_code || op.name;
+    const active = state.rc.operator === code;
+    const tag = last && last.operator_code === code ? '<span class="op-row-tag">Last used for this number</span>' : "";
+    return '<button type="button" class="op-row' + (active ? " active" : "") + '" aria-pressed="' + (active ? "true" : "false")
+      + '" onclick="pickOperatorFromSheet(\'' + escapeHtml(code) + '\')">'
+      + operatorAvatar(op, code, 40)
+      + '<span class="op-row-text"><span class="op-row-name">' + escapeHtml(op.name || code) + "</span>" + tag + "</span>"
+      + (active ? '<i class="ti ti-circle-check-filled op-row-check" aria-hidden="true"></i>' : '<i class="ti ti-chevron-right op-row-go" aria-hidden="true"></i>')
+      + "</button>";
+  }).join("");
+  el.removeAttribute("hidden");
+  requestAnimationFrame(() => el.classList.add("show"));
+  const first = el.querySelector(".op-row.active") || el.querySelector(".op-row");
+  if (first) first.focus();
+}
+
+function closeOperatorSheet() {
+  const el = document.getElementById("op-sheet");
+  if (!el) return;
+  el.classList.remove("show");
+  setTimeout(() => el.setAttribute("hidden", ""), prefersReducedMotion() ? 0 : 180);
+  const f = document.querySelector("#rc-op-pills .op-field");
+  if (f) f.focus();
+}
+
+function pickOperatorFromSheet(code) {
+  selectOperator(code, true);
+  closeOperatorSheet();
+}
+
+/* Pick the operator this retailer last used for this exact number (from their own
+   recent history). Only when nothing was chosen by hand. */
+function autoSelectOperatorFromHistory() {
+  if (state.rc.operatorManual) return;
+  const svc = state.rc.serviceType || "mobile";
+  const v = state.rc.mobile || "";
+  if (svc === "mobile" && v.length !== 10) return;
+  if (svc !== "mobile" && v.length < 4) return;
+  const last = (state.historyCache || []).find((r) => r.mobile_number === v && r.operator_code
+    && state.operators.some((o) => (o.code || o.operator_code) === r.operator_code));
+  if (!last || last.operator_code === state.rc.operator) return;
+  selectOperator(last.operator_code);
+  state.rc.operatorAuto = true;
+  renderOperatorPills();
+  setOpDetect("Operator selected from your last recharge to this number. Tap Change if it has switched.", "");
+}
+
+function selectOperator(code, manual) {
   state.rc.operator = code;
+  state.rc.operatorAuto = false;
+  if (manual) state.rc.operatorManual = true;
   state.rc.operatorObj = state.operators.find((o) => (o.code || o.operator_code) === code) || null;
   const name = (state.rc.operatorObj && state.rc.operatorObj.name) || code;
   setOpDetect("Selected: " + name + " · Confirm before recharge.", "");
@@ -5590,6 +6146,7 @@ function onRcMobileInput() {
   document.getElementById("rc-mobile").value = v;
   state.rc.mobile = v;
   hideFieldError("rc-mobile-error");
+  autoSelectOperatorFromHistory();
   updateRcSubmitState();
   renderPlansPanel();
   updateRcSummary();
@@ -5708,22 +6265,32 @@ function renderRechargeConfirmModal() {
   const available = Number(state.wallets.main) || 0;
   const after = available - state.rc.amount;
   const box = document.getElementById("rc-modal-box");
-  const accountLabel = (state.rc.serviceType || "mobile") === "dth" ? "Account" : "Mobile";
-  box.className = "modal-box";
+  const isDth = (state.rc.serviceType || "mobile") === "dth";
+  const est = estimateCommission(state.rc.operator, state.rc.amount);
+  box.className = "modal-box rc-confirm-box";
+  // Full number, big: the whole point of this screen is to catch a wrong digit.
   box.innerHTML =
-    '<h3 class="rc-confirm-title" id="rc-modal-title">Confirm Recharge</h3>'
-    + '<div class="rc-confirm-details">'
-    + modalRow(accountLabel, maskMobile(state.rc.mobile))
-    + modalRow("Operator", operatorDisplayName())
-    + modalRow("Amount", formatMoney(state.rc.amount))
-    + modalRow("Available", formatMoney(available))
-    + modalRow("After Recharge", formatMoney(after))
+    '<h3 class="rc-confirm-title" id="rc-modal-title">Check before you recharge</h3>'
+    + '<div class="rc-confirm-hero">'
+    + '<div class="rc-confirm-label">' + (isDth ? "Customer / Account number" : "Mobile number") + "</div>"
+    + '<div class="rc-confirm-number">' + escapeHtml(isDth ? state.rc.mobile : formatMobileSpaced(state.rc.mobile)) + "</div>"
+    + '<div class="rc-confirm-op">' + operatorAvatar(state.rc.operatorObj, state.rc.operator, 26)
+    + escapeHtml(operatorDisplayName()) + "</div>"
+    + '<div class="rc-confirm-amount">' + formatMoney(state.rc.amount) + "</div>"
     + "</div>"
-    + '<div class="modal-warn">Please verify the mobile number and recharge details. Successful recharges may not be reversible.</div>'
+    + '<div class="rc-confirm-details">'
+    + modalRow("Wallet balance now", formatMoney(available))
+    + modalRow("After this recharge", formatMoney(after))
+    + (est ? '<div class="modal-row"><span class="k">Estimated commission</span><span class="v" style="color:var(--color-text-success);">≈ ' + escapeHtml(formatMoney(est.amount)) + "</span></div>" : "")
+    + "</div>"
+    + (est ? '<div class="rc-confirm-note">Estimate from your last ' + est.basedOn + " " + escapeHtml(operatorDisplayName()) + " recharge" + (est.basedOn === 1 ? "" : "s") + ". Final commission is shown after success.</div>" : "")
+    + '<div class="modal-warn">A successful recharge cannot be reversed. Please match the number with the customer.</div>'
     + '<div class="modal-actions">'
-    + '<button type="button" class="btn" id="rc-cancel-btn" onclick="closeRcModal()">Cancel</button>'
+    + '<button type="button" class="btn" id="rc-cancel-btn" onclick="closeRcModal()">Edit</button>'
     + '<button type="button" class="btn primary lg-confirm" id="rc-confirm-btn" onclick="submitRecharge()">Confirm ' + formatMoney(state.rc.amount) + "</button></div>";
   openRcModalBackdrop();
+  const btn = document.getElementById("rc-confirm-btn");
+  if (btn) btn.focus();
 }
 
 
@@ -5775,6 +6342,7 @@ function modalRow(k, v) {
 }
 function closeRcModal() {
   if (rcSubmitting) return;
+  stopPendingAutoCheck();
   const bd = document.getElementById("rc-modal-backdrop");
   if (!bd) return;
   stopProcessingAnimation();
@@ -5853,6 +6421,7 @@ async function submitRecharge() {
 }
 
 function renderRechargeResult(kind, body, opts) {
+  stopPendingAutoCheck();
   const box = document.getElementById("rc-modal-box");
   const mobile = maskMobile(state.rc.mobile);
   const amount = formatMoney(state.rc.amount);
@@ -5897,9 +6466,20 @@ function renderRechargeResult(kind, body, opts) {
       + '<div class="rc-result-ref txn-id">Transaction ID: ' + escapeHtml(txnRef) + "</div>"
       + (commission ? '<div class="rc-result-sub">Commission earned ' + commission + "</div>" : "")
       + '<div class="rc-result-sub">' + escapeHtml(walletLine) + "</div>"
+      + receiptButtonsHtml()
       + '<div class="modal-actions">'
       + '<button type="button" class="btn primary result-action-btn" onclick="closeRcModal();resetRechargeForm();">New Recharge</button>'
       + '<button type="button" class="btn result-action-btn" onclick="closeRcModal();goTo(\'transactions\');">View in Transactions</button></div>';
+    state.lastReceipt = {
+      status: "Successful",
+      mobile: state.rc.mobile,
+      isDth: (state.rc.serviceType || "mobile") === "dth",
+      operator: operatorDisplayName(),
+      amount: state.rc.amount,
+      txnRef: txnRef,
+      operatorRef: body.transaction_id || body.operator_ref || body.provider_txn_id || "",
+      date: new Date(),
+    };
     animateRechargeSuccess(box);
     return;
   }
@@ -5955,12 +6535,14 @@ function renderRechargeResult(kind, body, opts) {
     + '<div class="rc-result-meta">' + opMeta + "</div>"
     + '<div class="rc-result-ref txn-id">Transaction ID: ' + escapeHtml(txnRef) + "</div>"
     + '<div class="rc-result-note warning">Do not retry this recharge until the final status is confirmed.</div>'
+    + (body.recharge_id != null ? '<div class="rc-autopoll" id="rc-autopoll" role="status" aria-live="polite"><span class="rc-autopoll-dot"></span><span id="rc-autopoll-text">Waiting for operator reply…</span></div>' : "")
     + '<div class="modal-actions">'
     + (body.recharge_id != null
       ? '<button type="button" class="btn primary block result-action-btn" onclick="checkRechargeStatus(' + body.recharge_id + ')">Check Status</button>'
       : '<button type="button" class="btn primary block result-action-btn" onclick="closeRcModal();goTo(\'transactions\');">View Transactions</button>')
     + "</div>";
   animateRechargePending(box);
+  if (body.recharge_id != null) startPendingAutoCheck(body.recharge_id);
 }
 
 
@@ -6265,7 +6847,7 @@ function renderTransactionsTable(list) {
       + '<td class="col-operator"><span class="op-dot" style="background:' + operatorColor(r.operator_code) + ';"></span>' + escapeHtml(opName) + '</td>'
       + '<td class="num amt-debit">' + (r.amount != null && r.amount !== "" ? formatMoney(r.amount) : "—") + '</td>'
       + '<td class="num">' + commissionCell(r.commission_amount) + '</td>'
-      + '<td>' + statusBadge(r.state, r.refund_status) + '</td>'
+      + '<td>' + statusBadge(r.state, r.refund_status) + complaintChip(r) + '</td>'
       + '<td><a class="tx-view-link" onclick="event.stopPropagation();openTxDrawer(' + r.id + ')">View</a></td>'
       + '</tr>';
   }).join("");
@@ -6281,7 +6863,7 @@ function renderTransactionsTable(list) {
       + '<div class="tx-card-amt">' + (r.amount != null && r.amount !== "" ? formatMoney(r.amount) : "—") + '</div>'
       + '</div>'
       + '<div class="tx-card-meta">' + escapeHtml(formatDateTime(r.date)) + ' · ' + escapeHtml(txDisplayId(r)) + '</div>'
-      + '<div class="tx-card-row2">' + comm + statusBadge(r.state, r.refund_status) + '</div>'
+      + '<div class="tx-card-row2">' + comm + statusBadge(r.state, r.refund_status) + complaintChip(r) + '</div>'
       + '</div>';
   }).join("");
 }
@@ -6305,6 +6887,7 @@ function openTxDrawer(id) {
   const isPendingLike = cls === "pending" || cls === "processing";
 
   let html = '<div class="drawer-badge-wrap">' + statusBadge(r.state, r.refund_status) + '</div>';
+  html += complaintDrawerBlock(r);
   html += drawerRow("Transaction ID", txDisplayId(r));
   html += drawerRow("Mobile", maskMobile(r.mobile_number));
   html += drawerRow("Service", txServiceLabel(r));
@@ -6345,13 +6928,26 @@ function openTxDrawer(id) {
   }
   html += "</div>";
 
+  if (cls === "success") {
+    state.drawerReceipt = {
+      status: "Successful",
+      mobile: r.mobile_number || "",
+      isDth: /dth/i.test(r.service_type || r.operator_type || ""),
+      operator: r.operator_name || r.operator_code || "",
+      amount: Number(r.amount) || 0,
+      txnRef: txDisplayId(r),
+      operatorRef: r.transaction_id || "",
+      date: parseApiDate(r.date) || null,
+    };
+    html += receiptButtonsHtml("drawer");
+  }
   html += '<div class="drawer-actions">';
   if (isPendingLike) {
     html += '<button type="button" class="btn primary" onclick="checkTxStatus(' + r.id + ')">Check Status</button>';
   } else {
     html += '<button type="button" class="btn primary" onclick="rechargeAgainFromTx(' + r.id + ')">Recharge Again</button>';
   }
-  html += '<button type="button" class="btn" disabled title="Coming soon">Raise Complaint</button>';
+  html += complaintDrawerButton(r);
   html += '<button type="button" class="btn" onclick="closeDrawer()">Close</button>';
   html += "</div>";
 
