@@ -2471,6 +2471,26 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 .cmp-done-id{font-size:15px;font-weight:800;color:var(--color-text-primary);margin:6px 0;}
 .cmp-done-text{font-size:13px;color:var(--color-text-secondary);line-height:1.45;margin-top:4px;}
 .drawer-actions .btn i{margin-right:4px;}
+
+/* ===== Wallet card: commission + DMR beside the main balance ===== */
+.dash-wallet .wallet-val-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.dash-wallet .wallet-sub{display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
+.dash-wallet .wallet-sub-item{display:flex;align-items:baseline;justify-content:space-between;gap:10px;min-width:150px;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:6px 10px;
+  color:#fff;font:inherit;cursor:pointer;text-align:left;}
+.dash-wallet .wallet-sub-item:hover{background:rgba(255,255,255,.22);}
+.dash-wallet .wallet-sub-item:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+.dash-wallet .wallet-sub-label{font-size:11px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:rgba(255,255,255,.8);}
+.dash-wallet .wallet-sub-val{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;}
+.dash-wallet .wallet-sub-val.neg{color:#FECACA;}
+@media (max-width:639px){
+  .dash-wallet .wallet-sub-item{min-width:128px;padding:5px 9px;}
+  .dash-wallet .wallet-sub-val{font-size:13px;}
+}
+@media (max-width:379px){
+  .dash-wallet .wallet-sub{flex-direction:row;width:100%;}
+  .dash-wallet .wallet-sub-item{flex:1;min-width:0;}
+}
 </style>
 </head>
 <body>
@@ -2634,7 +2654,13 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
               </div>
               <button type="button" class="dash-wallet-ledger" onclick="goTo('ledger')">Ledger <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
             </div>
-            <div class="wallet-val" id="kpi-main">—</div>
+            <div class="wallet-val-row">
+              <div class="wallet-val" id="kpi-main">—</div>
+              <div class="wallet-sub" aria-label="Other wallets">
+                <button type="button" class="wallet-sub-item" onclick="openDashWalletTab('commission')"><span class="wallet-sub-label">Commission</span><span class="wallet-sub-val" id="kpi-comm-small">—</span></button>
+                <button type="button" class="wallet-sub-item" onclick="openDashWalletTab('dmr')"><span class="wallet-sub-label">DMR</span><span class="wallet-sub-val" id="kpi-dmr-small">—</span></button>
+              </div>
+            </div>
             <div id="kpi-commission" style="display:none;" aria-hidden="true">—</div>
             <div class="wallet-status" id="dash-wallet-status"><span class="dot"></span> Checking balance…</div>
             <div class="wallet-runway" id="dash-wallet-runway"></div>
@@ -4641,12 +4667,26 @@ function formatDashBalance(n) {
   return formatMoney(n);
 }
 
+/* Commission + DMR balances, small, inside the wallet card. Hidden with the eye toggle. */
+function renderDashSubWallets(known) {
+  const fmt = (v) => (!known ? "…" : state.dashBalanceHidden ? "••••" : formatMoney(Number(v) || 0));
+  setText("kpi-comm-small", fmt(state.wallets.commission));
+  setText("kpi-dmr-small", fmt(state.wallets.dmr));
+  const c = document.getElementById("kpi-comm-small");
+  if (c) c.classList.toggle("neg", !!known && Number(state.wallets.commission) < 0 && !state.dashBalanceHidden);
+}
+function openDashWalletTab(tab) {
+  goTo("wallet");
+  setTimeout(() => { try { setWalletTab(tab); } catch (e) {} }, 50);
+}
+
 function toggleDashBalanceVisibility() {
   state.dashBalanceHidden = !state.dashBalanceHidden;
   const icon = document.getElementById("dash-balance-eye-icon");
   if (icon) icon.className = state.dashBalanceHidden ? "ti ti-eye-off" : "ti ti-eye";
   const mainEl = document.getElementById("kpi-main");
   if (mainEl) mainEl.textContent = formatDashBalance(state.wallets.main);
+  renderDashSubWallets(true);
 }
 
 function updateLowBalanceAlert() {
@@ -5494,6 +5534,7 @@ async function loadDashboard() {
   // Prefer last known balance while loading — never flash ₹0 on rate-limit.
   const hasKnownBal = Number(state.wallets.main) > 0 || Number(state.wallets.commission) > 0;
   setText("kpi-main", hasKnownBal ? formatDashBalance(state.wallets.main) : "…");
+  renderDashSubWallets(hasKnownBal);
   setText("kpi-commission", hasKnownBal ? formatMoney(state.wallets.commission) : "…");
   setText("kpi-today", "…");
   setText("kpi-success-count", "…");
@@ -5513,6 +5554,7 @@ async function loadDashboard() {
       handleRateLimit({ retry_after: Math.ceil((state.rateLimitUntil - Date.now()) / 1000) });
       setText("dash-greeting", greetWord + (state.retailerName ? ", " + state.retailerName : ""));
       setText("kpi-main", formatDashBalance(state.wallets.main));
+      renderDashSubWallets(true);
       setText("kpi-commission", formatMoney(state.wallets.commission));
       updateLowBalanceAlert();
       return;
@@ -5541,6 +5583,7 @@ async function loadDashboard() {
     renderIdentityAndBalance();
     setText("dash-greeting", greetWord + (state.retailerName ? ", " + state.retailerName : ""));
     setText("kpi-main", formatDashBalance(state.wallets.main));
+    renderDashSubWallets(balRes.body && balRes.body.status === "success" || Number(state.wallets.main) > 0);
     setText("kpi-commission", formatMoney(state.wallets.commission));
     updateLowBalanceAlert();
 
