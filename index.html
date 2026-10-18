@@ -489,6 +489,7 @@ a:focus:not(:focus-visible),
   padding:12px var(--space-4);border-radius:12px;margin-bottom:16px;border:1px solid transparent;
 }
 .dash-alert.warning{background:var(--color-bg-warning);border-color:#FDE68A;color:var(--color-text-warning);}
+.dash-alert.danger{background:#FEE2E2;border-color:#FECACA;color:#B91C1C;}
 .dash-alert .dash-alert-body{flex:1;min-width:0;}
 .dash-alert .dash-alert-title{font-weight:700;font-size:13px;margin-bottom:2px;}
 .dash-alert .dash-alert-msg{font-size:12.5px;opacity:.95;}
@@ -2263,6 +2264,61 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
   }
 }
 
+
+/* ===== Dashboard phase 1 (staging): real data, balance levels, quick recharge ===== */
+.dash-updated{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--color-text-secondary);}
+.dash-refresh-btn{display:inline-flex;align-items:center;gap:4px;border:none;background:none;padding:2px 4px;
+  font:inherit;font-size:12px;font-weight:600;color:var(--color-text-brand);cursor:pointer;border-radius:6px;}
+.dash-refresh-btn:hover{background:var(--color-bg-brand-subtle);}
+.dash-refresh-btn.spinning i{animation:spin .7s linear infinite;}
+.dash-quick-rc{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--color-border-default);
+  border-radius:12px;padding:6px 6px 6px 14px;box-shadow:0 1px 2px rgba(15,23,42,.04);}
+.dash-quick-rc:focus-within{border-color:var(--color-border-focus);box-shadow:0 0 0 3px var(--color-bg-focus-ring);}
+.dash-quick-rc > i{font-size:20px;color:var(--color-icon-brand);flex-shrink:0;}
+.dash-quick-rc input{flex:1;min-width:0;border:none;outline:none;background:transparent;font:inherit;
+  font-size:16px;font-weight:600;letter-spacing:.04em;color:var(--color-text-primary);padding:8px 0;}
+.dash-quick-rc input::placeholder{font-weight:400;letter-spacing:0;color:var(--color-text-muted);}
+.dash-quick-rc .btn{height:40px;padding:0 18px;border-radius:9px;flex-shrink:0;}
+.dash-info-banner .info-body{flex:1;min-width:0;}
+.dash-info-banner.pending{background:var(--color-bg-warning);border-color:#FDE68A;}
+.dash-info-banner.pending .info-icon{background:#D97706;}
+.dash-info-banner.fund{background:#EFF6FF;border-color:#DBEAFE;}
+.dash-strip-link{border:none;background:#fff;border-radius:8px;padding:7px 12px;font:inherit;font-size:12.5px;
+  font-weight:700;color:var(--color-text-primary);cursor:pointer;flex-shrink:0;box-shadow:0 1px 2px rgba(15,23,42,.08);}
+/* wallet card balance levels */
+.dash-wallet .wallet-status{display:inline-flex;align-self:flex-start;background:rgba(255,255,255,.16);
+  padding:4px 10px;border-radius:999px;font-weight:600;margin-top:-8px;}
+.dash-wallet .wallet-status .dot{width:8px;height:8px;background:#fff;}
+.dash-wallet.bal-ok .wallet-status .dot{background:#4ADE80;box-shadow:0 0 0 2px rgba(74,222,128,.3);}
+.dash-wallet.bal-warn .wallet-status{background:#FEF3C7;color:#92400E;}
+.dash-wallet.bal-warn .wallet-status .dot{background:#F59E0B;}
+.dash-wallet.bal-low{background:linear-gradient(90deg,#DC2626 0%,#991B1B 100%);}
+.dash-wallet.bal-low .wallet-status{background:#fff;color:#B91C1C;}
+.dash-wallet.bal-low .wallet-status .dot{background:#DC2626;animation:balPulse 1.4s ease-in-out infinite;}
+.dash-wallet.bal-low .btn-hero-primary{color:#B91C1C;}
+@keyframes balPulse{0%,100%{opacity:1}50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.dash-wallet.bal-low .wallet-status .dot{animation:none}}
+.dash-wallet .wallet-runway{font-size:12.5px;color:rgba(255,255,255,.9);margin-top:-12px;min-height:16px;}
+.dash-wallet .wallet-runway:empty{display:none;}
+.kpi-badge.down{background:#FEE2E2;color:#B91C1C;}
+.kpi-badge.flat{background:#F1F5F9;color:#475569;}
+.chart-empty-state .btn{margin-top:12px;}
+.bal-input{display:flex;align-items:center;gap:4px;border:1px solid var(--color-border-default);border-radius:8px;
+  padding:0 10px;background:#fff;width:130px;flex-shrink:0;}
+.bal-input:focus-within{border-color:var(--color-border-focus);box-shadow:0 0 0 3px var(--color-bg-focus-ring);}
+.bal-input span{color:var(--color-text-secondary);font-weight:600;}
+.bal-input input{border:none;outline:none;width:100%;padding:8px 0;font:inherit;font-weight:600;background:transparent;}
+@media (max-width:639px){
+  .dash-quick-rc{padding-left:12px;}
+  .dash-quick-rc .btn{padding:0 14px;}
+  /* D2: four quick services in one row, icon above label */
+  #screen-dashboard .qa-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
+  #screen-dashboard .qa-service-card{flex-direction:column;justify-content:flex-start;gap:6px;padding:12px 4px 10px;
+    text-align:center;min-height:0;}
+  #screen-dashboard .qa-service-card .qa-sub,#screen-dashboard .qa-service-card .ti-chevron-right{display:none;}
+  #screen-dashboard .qa-service-card .qa-icon{width:44px;height:44px;border-radius:14px;font-size:20px;}
+  #screen-dashboard .qa-info .qa-label{font-size:11.5px;line-height:14px;}
+}
 </style>
 </head>
 <body>
@@ -2352,7 +2408,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
       <div class="topbar-right">
         <div class="wallet-pill"><i class="ti ti-wallet"></i><span id="topbar-balance">₹0.00</span></div>
         <button type="button" class="icon-btn" aria-label="Help" title="Help" onclick="goTo('support')"><i class="ti ti-help" aria-hidden="true"></i></button>
-        <button type="button" class="icon-btn" aria-label="Notifications" title="Notifications"><i class="ti ti-bell" aria-hidden="true"></i><span class="notif-badge" aria-hidden="true">3</span></button>
+        <button type="button" class="icon-btn hidden" aria-label="Notifications" title="Notifications"><i class="ti ti-bell" aria-hidden="true"></i></button>
         <div class="profile-dd">
           <button type="button" class="profile-trigger" onclick="toggleProfileMenu()" aria-label="Account menu" aria-haspopup="true" aria-expanded="false" id="profile-trigger-btn">
             <div class="profile-avatar" id="profile-avatar" aria-hidden="true">R</div>
@@ -2375,7 +2431,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 
       <!-- ============ DASHBOARD V2 — Figma 85:208 (1280px) ============ -->
       <div class="screen" id="screen-dashboard">
-        <div class="dash-alert warning" id="dash-low-balance" style="display:none;" role="status">
+        <div class="dash-alert danger" id="dash-low-balance" style="display:none;" role="status">
           <div class="dash-alert-body">
             <div class="dash-alert-title">Low wallet balance</div>
             <div class="dash-alert-msg" id="dash-low-balance-msg">Your available balance is below the alert threshold. Add money to continue recharges smoothly.</div>
@@ -2386,13 +2442,31 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
         <div class="dash-hero-row">
           <div class="dash-greeting-col">
             <h2 id="dash-greeting">Good morning</h2>
-            <div class="sub" id="dash-date">Welcome back. Keep monitoring your daily business goals below.</div>
-            <div class="dash-info-banner" role="status">
-              <div class="info-icon"><i class="ti ti-alert-circle" aria-hidden="true"></i></div>
-              <div>
-                <div class="info-title">Recharge Alert</div>
-                <div class="info-msg">You have pending transactions that need immediate attention.</div>
+            <div class="sub" id="dash-date">Loading today's summary…</div>
+            <div class="dash-updated">
+              <span id="dash-updated-at">Updating…</span>
+              <button type="button" class="dash-refresh-btn" id="dash-refresh-btn" onclick="refreshDashboard()" aria-label="Refresh dashboard"><i class="ti ti-refresh" aria-hidden="true"></i> Refresh</button>
+            </div>
+            <form class="dash-quick-rc" onsubmit="dashQuickRecharge(event)" autocomplete="off">
+              <i class="ti ti-device-mobile" aria-hidden="true"></i>
+              <input type="tel" id="dash-qr-mobile" inputmode="numeric" maxlength="10" placeholder="Enter mobile number" aria-label="Mobile number to recharge" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
+              <button type="submit" class="btn primary">Recharge</button>
+            </form>
+            <div class="dash-info-banner pending hidden" id="dash-pending-strip" role="status">
+              <div class="info-icon"><i class="ti ti-clock-hour-4" aria-hidden="true"></i></div>
+              <div class="info-body">
+                <div class="info-title" id="dash-pending-title"></div>
+                <div class="info-msg">We are waiting for the operator's reply. Please do not repeat these recharges.</div>
               </div>
+              <button type="button" class="dash-strip-link" onclick="goTo('transactions')">View</button>
+            </div>
+            <div class="dash-info-banner fund hidden" id="dash-fund-strip" role="status">
+              <div class="info-icon"><i class="ti ti-building-bank" aria-hidden="true"></i></div>
+              <div class="info-body">
+                <div class="info-title" id="dash-fund-title"></div>
+                <div class="info-msg">Waiting for approval. Money will be added to your wallet once approved.</div>
+              </div>
+              <button type="button" class="dash-strip-link" onclick="goTo('wallet')">View</button>
             </div>
           </div>
 
@@ -2409,10 +2483,11 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             </div>
             <div class="wallet-val" id="kpi-main">—</div>
             <div id="kpi-commission" style="display:none;" aria-hidden="true">—</div>
-            <div class="wallet-status" id="dash-wallet-status"><span class="dot"></span> Ready for recharges</div>
+            <div class="wallet-status" id="dash-wallet-status"><span class="dot"></span> Checking balance…</div>
+            <div class="wallet-runway" id="dash-wallet-runway"></div>
             <div class="dash-wallet-actions">
               <button type="button" class="btn-hero-primary" onclick="openFundRequest()"><i class="ti ti-plus"></i> Add Money</button>
-              <button type="button" class="btn-hero-ghost" onclick="goTo('recharge')"><i class="ti ti-refresh"></i> Instant Transfer</button>
+              <button type="button" class="btn-hero-ghost" onclick="goTo('recharge')"><i class="ti ti-bolt"></i> Recharge</button>
             </div>
           </div>
         </div>
@@ -2430,34 +2505,34 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             <div class="card kpi-card">
               <div class="kpi-card-top">
                 <div class="kpi-label">Today's Business</div>
-                <span class="kpi-badge up">+8.2%</span>
+                <span class="kpi-badge hidden" id="kpi-badge-business"></span>
               </div>
               <div class="kpi-value" id="kpi-today">—</div>
-              <div class="kpi-sub" id="kpi-today-volume-sub">Compared to yesterday</div>
+              <div class="kpi-sub" id="kpi-today-volume-sub">&nbsp;</div>
             </div>
             <div class="card kpi-card">
               <div class="kpi-card-top">
                 <div class="kpi-label">Today's Commission</div>
-                <span class="kpi-badge up">+5.1%</span>
+                <span class="kpi-badge hidden" id="kpi-badge-commission"></span>
               </div>
               <div class="kpi-value" id="kpi-commission-today-val">—</div>
-              <div class="kpi-sub" id="kpi-commission-today">Compared to yesterday</div>
+              <div class="kpi-sub" id="kpi-commission-today">&nbsp;</div>
             </div>
             <div class="card kpi-card tone-success">
               <div class="kpi-card-top">
                 <div class="kpi-label">Successful Txns</div>
-                <span class="kpi-badge up">+3</span>
+                <span class="kpi-badge hidden" id="kpi-badge-success"></span>
               </div>
               <div class="kpi-value" id="kpi-success-count">—</div>
-              <div class="kpi-sub" id="kpi-today-count">Compared to yesterday</div>
+              <div class="kpi-sub" id="kpi-today-count">&nbsp;</div>
             </div>
             <div class="card kpi-card tone-warning">
               <div class="kpi-card-top">
                 <div class="kpi-label">Pending Txns</div>
-                <span class="kpi-badge warn">Needs attention</span>
+                <span class="kpi-badge warn hidden" id="kpi-badge-pending">Needs attention</span>
               </div>
               <div class="kpi-value" id="kpi-pending-count">—</div>
-              <div class="kpi-sub" id="kpi-pending-sub">Compared to yesterday</div>
+              <div class="kpi-sub" id="kpi-pending-sub">&nbsp;</div>
             </div>
           </div>
         </div>
@@ -2488,7 +2563,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             <div class="dash-panel-head">
               <div>
                 <h3>Today's Transactions Status</h3>
-                <div class="panel-sub">28 total · live breakdown</div>
+                <div class="panel-sub" id="status-today-sub">Today</div>
               </div>
             </div>
             <div class="status-today">
@@ -3470,6 +3545,28 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
         </div>
 
         <div class="settings-panel" id="settings-panel-appearance" role="tabpanel">
+          <div class="card settings-card" id="settings-balance-alerts">
+            <div class="title">Wallet balance alerts</div>
+            <div class="hint">The dashboard wallet card changes colour at these levels. Stored on this device only.</div>
+            <div class="settings-row">
+              <div>
+                <div class="t">"Getting low" below</div>
+                <div class="s">Wallet card shows an amber warning</div>
+              </div>
+              <div class="bal-input"><span>₹</span><input type="number" id="set-bal-warn" min="0" step="100" inputmode="numeric" aria-label="Getting low below amount"></div>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="t">"Low balance" below</div>
+                <div class="s">Wallet card turns red and asks to add money</div>
+              </div>
+              <div class="bal-input"><span>₹</span><input type="number" id="set-bal-low" min="0" step="100" inputmode="numeric" aria-label="Low balance below amount"></div>
+            </div>
+            <div class="settings-row" style="border-bottom:none;justify-content:flex-end;gap:8px;">
+              <button type="button" class="btn sm" onclick="resetBalanceThresholds()">Reset to default</button>
+              <button type="button" class="btn primary sm" onclick="saveBalanceThresholds()">Save</button>
+            </div>
+          </div>
           <div class="card settings-card">
             <div class="title">Appearance</div>
             <div class="hint">Stored on this device only. These preferences do not call the backend.</div>
@@ -4334,7 +4431,43 @@ async function refreshWalletBalance() {
 /* =========================================================================
    DASHBOARD V2.1
    ========================================================================= */
-const LOW_BALANCE_THRESHOLD = 5000;
+/* Balance levels — per device, editable in Settings > Appearance. */
+const BAL_DEFAULTS = { warn: 1000, low: 500 };
+function getBalanceThresholds() {
+  let t = null;
+  try { t = JSON.parse(localStorage.getItem("qp_bal_thresholds") || "null"); } catch (e) { t = null; }
+  const warn = t && Number.isFinite(Number(t.warn)) ? Number(t.warn) : BAL_DEFAULTS.warn;
+  const low = t && Number.isFinite(Number(t.low)) ? Number(t.low) : BAL_DEFAULTS.low;
+  return { warn: Math.max(warn, low), low: low };
+}
+function fillBalanceThresholdInputs() {
+  const t = getBalanceThresholds();
+  const w = document.getElementById("set-bal-warn");
+  const l = document.getElementById("set-bal-low");
+  if (w) w.value = t.warn;
+  if (l) l.value = t.low;
+}
+function saveBalanceThresholds() {
+  const warn = Math.round(Number(document.getElementById("set-bal-warn").value));
+  const low = Math.round(Number(document.getElementById("set-bal-low").value));
+  if (!Number.isFinite(warn) || !Number.isFinite(low) || warn < 0 || low < 0) {
+    showToast("Please enter valid amounts.");
+    return;
+  }
+  if (low > warn) {
+    showToast("\"Low balance\" amount must be smaller than \"Getting low\" amount.");
+    return;
+  }
+  try { localStorage.setItem("qp_bal_thresholds", JSON.stringify({ warn: warn, low: low })); } catch (e) {}
+  updateLowBalanceAlert();
+  showToast("Balance alert levels saved.");
+}
+function resetBalanceThresholds() {
+  try { localStorage.removeItem("qp_bal_thresholds"); } catch (e) {}
+  fillBalanceThresholdInputs();
+  updateLowBalanceAlert();
+  showToast("Balance alert levels reset to ₹1,000 / ₹500.");
+}
 
 function setText(id, text) {
   const el = document.getElementById(id);
@@ -4356,21 +4489,34 @@ function toggleDashBalanceVisibility() {
 
 function updateLowBalanceAlert() {
   const alert = document.getElementById("dash-low-balance");
-  if (!alert) return;
+  const card = document.querySelector("#screen-dashboard .dash-wallet");
+  const status = document.getElementById("dash-wallet-status");
   const bal = Number(state.wallets.main);
-  // Only show when we have a known numeric balance below threshold.
-  // Never invent a warning when balance is unavailable / still loading.
-  if (Number.isFinite(bal) && bal < LOW_BALANCE_THRESHOLD) {
-    alert.style.display = "flex";
-    setText("dash-low-balance-msg",
-      "Available balance is " + formatMoney(bal) + " (below ₹"
-      + LOW_BALANCE_THRESHOLD.toLocaleString("en-IN") + "). Add money to continue recharges smoothly.");
-    const status = document.getElementById("dash-wallet-status");
-    if (status) status.innerHTML = '<span class="dot" style="background:#F59E0B;"></span> Low balance';
-  } else {
-    alert.style.display = "none";
-    const status = document.getElementById("dash-wallet-status");
-    if (status) status.innerHTML = '<span class="dot"></span> Ready for recharges';
+  if (card) card.classList.remove("bal-ok", "bal-warn", "bal-low");
+  // Never invent a level when balance is unavailable / still loading.
+  if (!Number.isFinite(bal) || state.wallets.main == null) {
+    if (alert) alert.style.display = "none";
+    if (status) status.innerHTML = '<span class="dot"></span> Checking balance…';
+    return;
+  }
+  const t = getBalanceThresholds();
+  const level = bal < t.low ? "low" : bal < t.warn ? "warn" : "ok";
+  if (card) card.classList.add("bal-" + level);
+  if (status) {
+    status.innerHTML = '<span class="dot"></span> ' + (level === "low"
+      ? "Low balance – add money"
+      : level === "warn" ? "Balance getting low" : "Balance OK");
+  }
+  // The top alert strip is reserved for the red level so it never cries wolf.
+  if (alert) {
+    if (level === "low") {
+      alert.style.display = "flex";
+      setText("dash-low-balance-msg",
+        "Available balance is " + formatMoney(bal) + " (below ₹" + t.low.toLocaleString("en-IN")
+        + "). Add money now so recharges do not fail.");
+    } else {
+      alert.style.display = "none";
+    }
   }
 }
 
@@ -4431,20 +4577,20 @@ function renderQuickActions() {
   const mobile = list.find((s) => (s.code || "").toLowerCase() === "mobile");
   const dth = list.find((s) => (s.code || "").toLowerCase() === "dth");
   if (mobile) {
-    tiles.push({ label: mobile.name || "Mobile Recharge", icon: "ti ti-" + (mobile.icon || "device-mobile"), tone: "tone-green", primary: true, onclick: "openService('mobile')" });
+    tiles.push({ label: mobile.name || "Mobile Recharge", sub: "Prepaid mobile", icon: "ti ti-" + (mobile.icon || "device-mobile"), tone: "tone-green", primary: true, onclick: "openService('mobile')" });
   } else {
-    tiles.push({ label: "Mobile Recharge", icon: "ti ti-device-mobile", tone: "tone-green", primary: true, onclick: "goTo('recharge')" });
+    tiles.push({ label: "Mobile Recharge", sub: "Prepaid mobile", icon: "ti ti-device-mobile", tone: "tone-green", primary: true, onclick: "goTo('recharge')" });
   }
   if (dth) {
-    tiles.push({ label: dth.name || "DTH Recharge", icon: "ti ti-" + (dth.icon || "device-tv"), tone: "tone-blue", onclick: "openService('dth')" });
+    tiles.push({ label: dth.name || "DTH Recharge", sub: "TV / set-top box", icon: "ti ti-" + (dth.icon || "device-tv"), tone: "tone-blue", onclick: "openService('dth')" });
   } else {
-    tiles.push({ label: "DTH Recharge", icon: "ti ti-device-tv", tone: "tone-blue", disabled: true });
+    tiles.push({ label: "DTH Recharge", sub: "Coming soon", icon: "ti ti-device-tv", tone: "tone-blue", disabled: true });
   }
-  tiles.push({ label: "Add Money", icon: "ti ti-plus", tone: "tone-pink", onclick: "openFundRequest()" });
-  tiles.push({ label: "View Ledger", icon: "ti ti-database", tone: "tone-purple", onclick: "goTo('ledger')" });
+  tiles.push({ label: "Add Money", sub: "Top up your wallet", icon: "ti ti-plus", tone: "tone-pink", onclick: "openFundRequest()" });
+  tiles.push({ label: "View Ledger", sub: "Wallet statement", icon: "ti ti-database", tone: "tone-purple", onclick: "goTo('ledger')" });
 
   grid.innerHTML = tiles.slice(0, 4).map((t) => {
-    const sub = '<div class="qa-sub">Perform instant action</div>';
+    const sub = '<div class="qa-sub">' + escapeHtml(t.sub || "") + "</div>";
     const info = '<div class="qa-info"><div class="qa-label">' + escapeHtml(t.label) + "</div>" + sub + "</div>";
     const icon = '<div class="qa-icon ' + (t.tone || "") + '"><i class="' + t.icon + '"></i></div>';
     const chev = '<i class="ti ti-chevron-right" aria-hidden="true"></i>';
@@ -4539,8 +4685,9 @@ function renderBusinessTrend(history) {
     <rect x="106" y="38" width="16" height="37" rx="3" fill="#E2E8F0"/>
     <polyline points="18,52 42,37 66,44 90,27 114,40" stroke="#0066FF" stroke-width="2" stroke-dasharray="4 3" opacity="0.4" fill="none"/>
   </svg>
-  <p class="chart-empty-title">No data for this period</p>
-  <p class="chart-empty-sub">Recharge activity will appear here</p>
+  <p class="chart-empty-title">No successful recharges in this period yet</p>
+  <p class="chart-empty-sub">Your daily business will appear here as a chart.</p>
+  <button type="button" class="btn primary sm" onclick="goTo('recharge')"><i class="ti ti-bolt" aria-hidden="true"></i> Make a recharge</button>
 </div>`;
     setText("dash-trend-sub", "Successful recharge volume");
     return;
@@ -4584,11 +4731,180 @@ function renderBusinessTrend(history) {
   setText("dash-trend-sub", rangeLabel + " · from recharge history");
 }
 
+
+/* ===== Dashboard phase 1 helpers ===== */
+/* History API returns at most 100 rows. Anything older than the oldest row we
+   have is unknown, so every comparison below checks it is fully covered and
+   stays silent instead of guessing. */
+function historyCoverageStart(history, total) {
+  if (!history || !history.length) return null;            // nothing at all: "complete but empty"
+  if (Number(total) <= history.length) return null;         // we have every row
+  const oldest = history.reduce((m, r) => {
+    const d = parseApiDate(r.date);
+    return d && (!m || d < m) ? d : m;
+  }, null);
+  return oldest;                                           // rows before this are unknown
+}
+
+function sumSuccessBetween(history, from, to) {
+  let amount = 0, commission = 0, count = 0;
+  (history || []).forEach((r) => {
+    if (classifyTodayStatus(r) !== "success") return;
+    const d = parseApiDate(r.date);
+    if (!d || d < from || d >= to) return;
+    amount += Number(r.amount) || 0;
+    commission += Number(r.commission_amount) || 0;
+    count += 1;
+  });
+  return { amount, commission, count };
+}
+
+function setKpiBadge(id, today, yesterday, kind) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove("up", "down", "flat", "hidden");
+  if (yesterday == null || (!today && !yesterday)) { el.classList.add("hidden"); return; }
+  const diff = today - yesterday;
+  if (kind === "count") {
+    el.textContent = diff > 0 ? "+" + diff : String(diff);
+  } else if (yesterday > 0) {
+    const pct = Math.round((diff / yesterday) * 100);
+    el.textContent = (pct > 0 ? "+" : "") + pct + "%";
+  } else {
+    el.textContent = today > 0 ? "New" : "0%";
+  }
+  el.classList.add(diff > 0 ? "up" : diff < 0 ? "down" : "flat");
+}
+
+/* Compare today with yesterday *up to the same time*, so mornings are not always "down". */
+function renderDashComparisons(history, total, today) {
+  const now = new Date();
+  const t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const y0 = new Date(t0.getTime() - 86400000);
+  const yNow = new Date(y0.getTime() + (now - t0));
+  const cov = historyCoverageStart(history, total);
+  const known = !cov || cov <= y0;
+  const y = known ? sumSuccessBetween(history, y0, yNow) : null;
+  setKpiBadge("kpi-badge-business", today.amount, y ? y.amount : null, "money");
+  setKpiBadge("kpi-badge-commission", today.commission, y ? y.commission : null, "money");
+  setKpiBadge("kpi-badge-success", today.success, y ? y.count : null, "count");
+  const na = "Yesterday's figures not available";
+  setText("kpi-today-volume-sub", y ? "Yesterday by this time: " + formatMoney(y.amount) : na);
+  setText("kpi-commission-today", y ? "Yesterday by this time: " + formatMoney(y.commission) : na);
+  setText("kpi-today-count", y ? "Yesterday by this time: " + y.count : na);
+}
+
+/* D3: today's summary in the greeting line. */
+function renderDashTodaySummary(totalToday, successCount, amount, commission) {
+  if (!totalToday) {
+    setText("dash-date", "No recharges yet today. Enter a mobile number below to start.");
+    return;
+  }
+  if (!successCount) {
+    setText("dash-date", "No successful recharges yet today.");
+    return;
+  }
+  let msg = "Today: " + successCount + " successful recharge" + (successCount === 1 ? "" : "s")
+    + " · " + formatMoney(amount);
+  if (commission > 0) msg += " · you earned " + formatMoney(commission) + " 🎉";
+  setText("dash-date", msg);
+}
+
+/* D6: live pending strip — only when something is actually pending. */
+function renderDashPendingStrip(pendingOpen) {
+  const strip = document.getElementById("dash-pending-strip");
+  if (!strip) return;
+  strip.classList.toggle("hidden", !pendingOpen);
+  if (pendingOpen) {
+    setText("dash-pending-title", pendingOpen + " recharge" + (pendingOpen === 1 ? " is" : "s are") + " pending");
+  }
+}
+
+/* D7: pending fund requests. */
+async function loadDashFundStrip() {
+  const strip = document.getElementById("dash-fund-strip");
+  if (!strip) return;
+  try {
+    const { httpStatus, body } = await apiGetFundRequests({ status: "pending", page: 1, page_size: 100 });
+    if (httpStatus !== 200 || !body || body.status !== "success") { strip.classList.add("hidden"); return; }
+    const list = body.requests || [];
+    if (!list.length) { strip.classList.add("hidden"); return; }
+    const sum = list.reduce((a, r) => a + (Number(r.amount) || 0), 0);
+    setText("dash-fund-title", list.length === 1
+      ? "Fund request of " + formatMoney(sum) + " is pending"
+      : list.length + " fund requests (" + formatMoney(sum) + ") are pending");
+    strip.classList.remove("hidden");
+  } catch (e) {
+    strip.classList.add("hidden");
+  }
+}
+
+/* Wallet runway: how long the balance lasts at the recent daily average. */
+function renderWalletRunway(history, total) {
+  const el = document.getElementById("dash-wallet-runway");
+  if (!el) return;
+  el.textContent = "";
+  const bal = Number(state.wallets.main);
+  if (!Number.isFinite(bal) || bal <= 0) return;
+  const now = new Date();
+  const t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let from = new Date(t0.getTime() - 7 * 86400000);
+  const cov = historyCoverageStart(history, total);
+  if (cov && cov > from) {
+    // only use whole days we fully have
+    from = new Date(cov.getFullYear(), cov.getMonth(), cov.getDate() + 1);
+  }
+  const days = Math.round((t0 - from) / 86400000);
+  if (days < 1) return;
+  const avg = sumSuccessBetween(history, from, t0).amount / days;
+  if (avg <= 0) return;
+  const lasts = bal / avg;
+  const label = lasts < 1 ? "less than a day"
+    : lasts < 1.5 ? "about 1 day"
+    : lasts > 30 ? "more than 30 days"
+    : "about " + Math.round(lasts) + " days";
+  el.textContent = "Lasts " + label + " at your " + days + "-day average (" + formatMoney(avg) + "/day)";
+}
+
+/* D9: last updated + manual refresh. */
+let dashUpdatedAt = null;
+function markDashUpdated() {
+  dashUpdatedAt = Date.now();
+  renderDashUpdated();
+}
+function renderDashUpdated() {
+  if (!dashUpdatedAt) return;
+  const mins = Math.floor((Date.now() - dashUpdatedAt) / 60000);
+  setText("dash-updated-at", mins < 1 ? "Updated just now" : "Updated " + mins + " min ago");
+}
+setInterval(renderDashUpdated, 30000);
+async function refreshDashboard() {
+  const btn = document.getElementById("dash-refresh-btn");
+  if (btn) { btn.classList.add("spinning"); btn.disabled = true; }
+  try { await loadDashboard(); } finally {
+    if (btn) { btn.classList.remove("spinning"); btn.disabled = false; }
+  }
+}
+
+/* D1: type a number on the dashboard -> recharge screen opens with it filled. */
+function dashQuickRecharge(ev) {
+  if (ev) ev.preventDefault();
+  const input = document.getElementById("dash-qr-mobile");
+  const v = (input.value || "").replace(/\D/g, "");
+  if (v.length !== 10) {
+    showToast("Please enter a 10-digit mobile number.");
+    input.focus();
+    return;
+  }
+  state.rc.pendingPrefill = { mobile: v, silent: true };
+  input.value = "";
+  goTo("recharge", { serviceType: "mobile" });
+}
+
 async function loadDashboard() {
   const now = new Date();
   const hr = now.getHours();
   const greetWord = hr < 12 ? "Good morning" : hr < 17 ? "Good afternoon" : "Good evening";
-  setText("dash-date", (state.retailerName ? ("Welcome back to " + state.retailerName + ". ") : "Welcome back. ") + "Keep monitoring your daily business goals below.");
   const tbDate = document.getElementById("topbar-date-label");
   if (tbDate) {
     tbDate.textContent = "Today, " + now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
@@ -4615,7 +4931,6 @@ async function loadDashboard() {
     if (!canCallApi()) {
       handleRateLimit({ retry_after: Math.ceil((state.rateLimitUntil - Date.now()) / 1000) });
       setText("dash-greeting", greetWord + (state.retailerName ? ", " + state.retailerName : ""));
-      setText("dash-date", (state.retailerName ? ("Welcome back to " + state.retailerName + ". ") : "Welcome back. ") + "Keep monitoring your daily business goals below.");
       setText("kpi-main", formatDashBalance(state.wallets.main));
       setText("kpi-commission", formatMoney(state.wallets.commission));
       updateLowBalanceAlert();
@@ -4624,6 +4939,7 @@ async function loadDashboard() {
     const balP = apiGetWalletBalance();
     const ledgerP = apiGetLedger({ wallet_type: "main", page_size: 1 });
     const histP = apiGetHistory(100, 0, "all");
+    loadDashFundStrip(); // independent; never blocks the dashboard
 
     const [balRes, ledgerRes, histRes] = await Promise.all([balP, ledgerP, histP]);
 
@@ -4642,7 +4958,6 @@ async function loadDashboard() {
     }
     renderIdentityAndBalance();
     setText("dash-greeting", greetWord + (state.retailerName ? ", " + state.retailerName : ""));
-    setText("dash-date", (state.retailerName ? ("Welcome back to " + state.retailerName + ". ") : "Welcome back. ") + "Keep monitoring your daily business goals below.");
     setText("kpi-main", formatDashBalance(state.wallets.main));
     setText("kpi-commission", formatMoney(state.wallets.commission));
     updateLowBalanceAlert();
@@ -4660,11 +4975,18 @@ async function loadDashboard() {
 
       setText("kpi-today", formatMoney(sumToday));
       setText("kpi-success-count", String(successToday.length));
-      setText("kpi-today-count", "Compared to yesterday");
       setText("kpi-pending-count", String(pendingOpen));
-      setText("kpi-pending-sub", "Compared to yesterday");
       setText("kpi-commission-today-val", formatMoney(commissionToday));
-      setText("kpi-commission-today", "Compared to yesterday");
+      renderDashComparisons(state.historyCache, histRes.body.total, {
+        amount: sumToday, commission: commissionToday, success: successToday.length,
+      });
+      setText("kpi-pending-sub", pendingOpen ? "Waiting for operator reply" : "Nothing waiting");
+      const pendBadge = document.getElementById("kpi-badge-pending");
+      if (pendBadge) pendBadge.classList.toggle("hidden", !pendingOpen);
+      renderDashTodaySummary(todays.length, successToday.length, sumToday, commissionToday);
+      renderDashPendingStrip(pendingOpen);
+      renderWalletRunway(state.historyCache, histRes.body.total);
+      setText("status-today-sub", todays.length + " total today");
       // Failed is shown only in Transaction Status Today — not on the Pending KPI.
 
       // Legacy perf nodes + new status legend
@@ -4680,6 +5002,7 @@ async function loadDashboard() {
 
       renderBusinessTrend(state.historyCache);
       renderRecentTransactions(state.historyCache.slice(0, 5));
+      markDashUpdated();
     } else {
       if (recentWrap) {
         recentWrap.innerHTML = '<div class="state-block"><div class="state-title">Could not load transactions</div></div>';
@@ -5991,7 +6314,7 @@ async function applyRcPendingPrefill() {
   state.rc.idempotencyKey = genIdempotencyKey();
   updateRcSubmitState();
   updateRcSummary();
-  showToast("Form populated. Review and confirm — nothing was submitted.");
+  if (!p.silent) showToast("Form populated. Review and confirm — nothing was submitted.");
 }
 
 /* =========================================================================
@@ -8362,6 +8685,7 @@ function setSettingsTab(tab) {
     el.classList.toggle("active", el.id === "settings-panel-" + t);
   });
 }
+document.addEventListener("DOMContentLoaded", fillBalanceThresholdInputs);
 function goToSettingsTab(tab) {
   goTo("settings");
   setSettingsTab(tab || "profile");
