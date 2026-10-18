@@ -2546,6 +2546,40 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
   .dash-wallet .wallet-val{font-size:30px !important;line-height:36px !important;}
   .dash-wallet .dash-wallet-foot .btn-hero-primary{height:36px;padding:0 14px;}
 }
+
+/* ===== Compact Quick Services + insights on phones (owner, 18 Oct) ===== */
+.qa-icon.tone-amber{background:#FFFBEB;color:#D97706;}
+.qa-l-short{display:none;}
+@media (max-width:639px){
+  .qa-l-full{display:none;}
+  .qa-l-short{display:inline;}
+  #screen-dashboard .qa-service-card{flex-direction:row !important;justify-content:center;gap:8px !important;padding:8px 6px !important;min-height:48px;}
+  #screen-dashboard .qa-service-card .qa-icon{width:30px !important;height:30px !important;border-radius:9px !important;font-size:16px !important;}
+  #screen-dashboard .qa-info .qa-label{font-size:12.5px !important;line-height:16px;}
+  .dash-hero-row{gap:10px !important;margin-bottom:12px !important;}
+  .dash-hero-row > .dash-qs .dash-section-title{margin:2px 0 8px !important;font-size:14px;}
+  #screen-dashboard .dash-section{margin-bottom:14px;}
+  #screen-dashboard .dash-section-title{margin-bottom:8px;font-size:14px;}
+  #screen-dashboard .kpi-grid{gap:8px;}
+  #screen-dashboard .kpi-card{padding:12px 12px 10px;gap:6px;min-height:0;}
+  #screen-dashboard .kpi-value{font-size:22px;line-height:28px;}
+  #screen-dashboard .kpi-sub{font-size:11px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .dash-quick-rc{padding:4px 4px 4px 12px;}
+  .dash-quick-rc input{padding:6px 0;}
+  .dash-quick-rc .btn{height:38px;}
+  /* icon glyph itself must not be the old 40px circle */
+  #screen-dashboard .qa-service-card .qa-icon i{width:auto !important;height:auto !important;background:none !important;border-radius:0 !important;font-size:16px !important;color:inherit !important;}
+  #screen-dashboard .qa-service-card .qa-info{flex:0 1 auto;min-width:0;}
+  #screen-dashboard .qa-service-card{padding:8px 4px !important;gap:6px !important;}
+  #screen-dashboard .qa-service-card .qa-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #screen-dashboard .qa-service-card.soon{opacity:.6;}
+  #screen-dashboard .qa-service-card .qa-icon{width:26px !important;height:26px !important;border-radius:8px !important;}
+  #screen-dashboard .qa-service-card .qa-icon i{font-size:15px !important;}
+  #screen-dashboard .qa-service-card{gap:5px !important;padding:8px 2px !important;}
+  #screen-dashboard .qa-info .qa-label{font-size:12px !important;}
+  #screen-dashboard .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
+  #screen-dashboard .kpi-card{min-width:0;}
+}
 </style>
 </head>
 <body>
@@ -4835,30 +4869,37 @@ function renderQuickActions() {
   const list = (state.services || []).filter((s) => s.available);
   const tiles = [];
 
-  // Figma 1280 Quick Services: Mobile, DTH, Add Money, View Ledger
+  // Quick Services (owner, 18 Oct): Mobile, DTH, Electricity
   const mobile = list.find((s) => (s.code || "").toLowerCase() === "mobile");
   const dth = list.find((s) => (s.code || "").toLowerCase() === "dth");
   if (mobile) {
-    tiles.push({ label: mobile.name || "Mobile Recharge", sub: "Prepaid mobile", icon: "ti ti-" + (mobile.icon || "device-mobile"), tone: "tone-green", primary: true, onclick: "openService('mobile')" });
+    tiles.push({ label: mobile.name || "Mobile Recharge", sub: "Prepaid mobile", icon: "ti ti-" + (mobile.icon || "device-mobile"), tone: "tone-green", primary: true, short: "Mobile", onclick: "openService('mobile')" });
   } else {
-    tiles.push({ label: "Mobile Recharge", sub: "Prepaid mobile", icon: "ti ti-device-mobile", tone: "tone-green", primary: true, onclick: "goTo('recharge')" });
+    tiles.push({ label: "Mobile Recharge", sub: "Prepaid mobile", icon: "ti ti-device-mobile", tone: "tone-green", primary: true, short: "Mobile", onclick: "goTo('recharge')" });
   }
   if (dth) {
-    tiles.push({ label: dth.name || "DTH Recharge", sub: "TV / set-top box", icon: "ti ti-" + (dth.icon || "device-tv"), tone: "tone-blue", onclick: "openService('dth')" });
+    tiles.push({ label: dth.name || "DTH Recharge", sub: "TV / set-top box", icon: "ti ti-" + (dth.icon || "device-tv"), tone: "tone-blue", short: "DTH", onclick: "openService('dth')" });
   } else {
-    tiles.push({ label: "DTH Recharge", sub: "Coming soon", icon: "ti ti-device-tv", tone: "tone-blue", disabled: true });
+    tiles.push({ label: "DTH Recharge", sub: "Coming soon", icon: "ti ti-device-tv", tone: "tone-blue", short: "DTH", disabled: true });
   }
-  tiles.push({ label: "View Ledger", sub: "Wallet statement", icon: "ti ti-database", tone: "tone-purple", onclick: "goTo('ledger')" });
+  // Electricity: shown even before a vendor route exists; openService() then says it is coming soon.
+  const elec = list.find((s) => (s.code || "").toLowerCase() === "electricity");
+  const elecLive = !!(elec && elec.route_available !== false);
+  tiles.push({ label: (elec && elec.name) || "Electricity", short: "Electricity",
+    sub: elecLive ? "Pay electricity bill" : "Coming soon", soon: !elecLive,
+    icon: "ti ti-bolt", tone: "tone-amber",
+    onclick: elec ? "openService('electricity')" : "showToast('Electricity bill payment is coming soon.')" });
 
   grid.innerHTML = tiles.slice(0, 4).map((t) => {
     const sub = '<div class="qa-sub">' + escapeHtml(t.sub || "") + "</div>";
-    const info = '<div class="qa-info"><div class="qa-label">' + escapeHtml(t.label) + "</div>" + sub + "</div>";
+    const info = '<div class="qa-info"><div class="qa-label"><span class="qa-l-full">' + escapeHtml(t.label)
+      + '</span><span class="qa-l-short">' + escapeHtml(t.short || t.label) + "</span></div>" + sub + "</div>";
     const icon = '<div class="qa-icon ' + (t.tone || "") + '"><i class="' + t.icon + '"></i></div>';
     const chev = '<i class="ti ti-chevron-right" aria-hidden="true"></i>';
     if (t.disabled) {
       return '<div class="qa-tile qa-service-card disabled" aria-disabled="true">' + icon + info + chev + "</div>";
     }
-    const cls = "qa-tile qa-service-card quick-action-card" + (t.primary ? " primary" : "");
+    const cls = "qa-tile qa-service-card quick-action-card" + (t.primary ? " primary" : "") + (t.soon ? " soon" : "");
     return '<div class="' + cls + '" onclick="' + t.onclick + '">' + icon + info + chev + "</div>";
   }).join("");
 }
@@ -5469,9 +5510,10 @@ function renderDashComparisons(history, total, today) {
   setKpiBadge("kpi-badge-commission", today.commission, y ? y.commission : null, "money");
   setKpiBadge("kpi-badge-success", today.success, y ? y.count : null, "count");
   const na = "Yesterday's figures not available";
-  setText("kpi-today-volume-sub", y ? "Yesterday by this time: " + formatMoney(y.amount) : na);
-  setText("kpi-commission-today", y ? "Yesterday by this time: " + formatMoney(y.commission) : na);
-  setText("kpi-today-count", y ? "Yesterday by this time: " + y.count : na);
+  // Figure first, so a narrow phone that cuts the line still shows the number.
+  setText("kpi-today-volume-sub", y ? "Yesterday: " + formatMoney(y.amount) + " by this time" : na);
+  setText("kpi-commission-today", y ? "Yesterday: " + formatMoney(y.commission) + " by this time" : na);
+  setText("kpi-today-count", y ? "Yesterday: " + y.count + " by this time" : na);
 }
 
 /* D3: today's summary in the greeting line. */
