@@ -2367,6 +2367,24 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 .dash-freq-chip:hover{border-color:var(--color-border-brand);background:var(--color-bg-brand-subtle);}
 @media (max-width:639px){.dash-freq{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px;}
   .dash-freq::-webkit-scrollbar{display:none;}.dash-freq-chip,.dash-freq-label{flex-shrink:0;white-space:nowrap;}}
+
+/* ===== Compact operator picker ===== */
+.op-pill.active .op-dot{box-shadow:0 0 0 2px #fff,0 0 0 3px currentColor;}
+.op-selected{width:100%;display:flex;align-items:center;gap:10px;margin-top:4px;padding:10px 10px 10px 14px;border-radius:12px;
+  border:1.5px solid var(--color-border-brand);background:var(--color-bg-brand-subtle);min-height:48px;box-sizing:border-box;}
+.op-selected .op-pill-logo{height:24px;width:24px;}
+.op-selected-name{font-size:15px;font-weight:700;color:var(--color-text-primary);}
+.op-selected-check{color:var(--color-text-success);font-size:18px;margin-right:auto;}
+.op-selected-src{font-size:11.5px;color:var(--color-text-secondary);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.op-change-btn{margin-left:auto;border:1px solid var(--color-border-default);background:#fff;border-radius:8px;
+  padding:7px 14px;font:inherit;font-size:13px;font-weight:700;color:var(--color-text-brand);cursor:pointer;flex-shrink:0;min-height:36px;}
+.op-change-btn:hover{border-color:var(--color-border-brand);}
+#rc-field-operator.op-compact .hint{display:none;}
+@media (max-width:639px){
+  #rc-field-operator:not(.op-compact) .op-pills{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px;padding-bottom:2px;}
+  .op-pills::-webkit-scrollbar{display:none;}
+  .op-pill{flex-shrink:0;white-space:nowrap;}
+}
 </style>
 </head>
 <body>
@@ -5696,21 +5714,63 @@ function renderOperatorPills() {
     wrap.innerHTML = '<div style="font-size:12.5px;color:var(--text-muted);">No operators available for this service.</div>';
     return;
   }
+  const field = document.getElementById("rc-field-operator");
+  const opIcon = (op, code) => op && op.logo_url
+    ? '<img class="op-pill-logo" src="' + escapeHtml(API_BASE + op.logo_url) + '" alt="">'
+    : '<span class="op-dot" style="background:' + operatorColor(code) + ';"></span>';
+
+  // Compact: an operator is chosen and the retailer has not asked to change it.
+  if (state.rc.operator && !state.rc.opExpanded) {
+    const op = state.rc.operatorObj;
+    const code = state.rc.operator;
+    if (field) field.classList.add("op-compact");
+    wrap.innerHTML = '<div class="op-selected">'
+      + opIcon(op, code)
+      + '<span class="op-selected-name">' + escapeHtml((op && op.name) || code) + "</span>"
+      + '<i class="ti ti-circle-check-filled op-selected-check" aria-hidden="true"></i>'
+      + '<button type="button" class="op-change-btn" onclick="expandOperators()">Change</button>'
+      + "</div>";
+    return;
+  }
+  if (field) field.classList.remove("op-compact");
   wrap.innerHTML = ops.map((op) => {
     const code = op.code || op.operator_code || op.name;
-    const color = operatorColor(code);
     const active = state.rc.operator === code;
-    const icon = op.logo_url
-      ? '<img class="op-pill-logo" src="' + escapeHtml(API_BASE + op.logo_url) + '" alt="">'
-      : '<span class="op-dot" style="background:' + (active ? "#fff" : color) + ';"></span>';
-    return '<button type="button" class="op-pill' + (active ? " active" : "") + '" style="'
-      + (active ? "background:" + color + ";" : "") + '" onclick="selectOperator(\''
-      + escapeHtml(code) + '\')">' + icon + escapeHtml(op.name || code) + "</button>";
+    return '<button type="button" class="op-pill' + (active ? " active" : "") + '"'
+      + ' aria-pressed="' + (active ? "true" : "false") + '" onclick="selectOperator(\''
+      + escapeHtml(code) + '\', true)">' + opIcon(op, code) + escapeHtml(op.name || code) + "</button>";
   }).join("");
 }
 
-function selectOperator(code) {
+function expandOperators() {
+  state.rc.opExpanded = true;
+  renderOperatorPills();
+  const active = document.querySelector("#rc-op-pills .op-pill.active");
+  if (active) active.scrollIntoView({ block: "nearest", inline: "center" });
+}
+
+/* Pick the operator this retailer last used for this exact number (from their own
+   recent history). Only when nothing was chosen by hand. */
+function autoSelectOperatorFromHistory() {
+  if (state.rc.operatorManual) return;
+  const svc = state.rc.serviceType || "mobile";
+  const v = state.rc.mobile || "";
+  if (svc === "mobile" && v.length !== 10) return;
+  if (svc !== "mobile" && v.length < 4) return;
+  const last = (state.historyCache || []).find((r) => r.mobile_number === v && r.operator_code
+    && state.operators.some((o) => (o.code || o.operator_code) === r.operator_code));
+  if (!last || last.operator_code === state.rc.operator) return;
+  selectOperator(last.operator_code);
+  state.rc.operatorAuto = true;
+  renderOperatorPills();
+  setOpDetect("Operator selected from your last recharge to this number. Tap Change if it has switched.", "");
+}
+
+function selectOperator(code, manual) {
   state.rc.operator = code;
+  state.rc.opExpanded = false;
+  state.rc.operatorAuto = false;
+  if (manual) state.rc.operatorManual = true;
   state.rc.operatorObj = state.operators.find((o) => (o.code || o.operator_code) === code) || null;
   const name = (state.rc.operatorObj && state.rc.operatorObj.name) || code;
   setOpDetect("Selected: " + name + " · Confirm before recharge.", "");
@@ -5792,6 +5852,7 @@ function onRcMobileInput() {
   document.getElementById("rc-mobile").value = v;
   state.rc.mobile = v;
   hideFieldError("rc-mobile-error");
+  autoSelectOperatorFromHistory();
   updateRcSubmitState();
   renderPlansPanel();
   updateRcSummary();
