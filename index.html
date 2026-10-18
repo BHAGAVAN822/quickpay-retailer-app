@@ -2594,6 +2594,12 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
   #screen-dashboard .kpi-card{padding:10px 12px 8px !important;gap:4px !important;}
   #screen-dashboard .kpi-value{font-size:21px !important;line-height:26px !important;}
 }
+
+/* Spare-height sharing for the phone first screen (see fitDashFoldNow) */
+@media (max-width:639px){
+  #screen-dashboard .dash-hero-row{row-gap:calc(10px + var(--fold-gap, 0px)) !important;
+    margin-bottom:calc(12px + var(--fold-gap, 0px)) !important;}
+}
 </style>
 </head>
 <body>
@@ -5104,6 +5110,8 @@ function renderDashBanners() {
   track.scrollLeft = 0;
   updateBannerDots();
   restartBannerAutoplay();
+  track.querySelectorAll("img").forEach((img) => img.addEventListener("load", scheduleDashFoldFit, { once: true }));
+  scheduleDashFoldFit();
 }
 
 function openBannerLink(b) {
@@ -5607,7 +5615,37 @@ let dashUpdatedAt = null;
 function markDashUpdated() {
   dashUpdatedAt = Date.now();
   renderDashUpdated();
+  scheduleDashFoldFit();
 }
+
+/* Phones: show exactly the first row of Today's Insights above the bottom bar, and
+   start the second row right behind it (owner, 18 Oct). Screen heights differ, so the
+   spare space is measured and shared out between the sections above; nothing is cropped. */
+const FOLD_GAPS = 4;          // wallet / services / banner / insights spacing that grows
+const FOLD_MAX_PER_GAP = 34;  // never stretch the page more than this per gap
+function fitDashFoldNow() {
+  const dash = document.getElementById("screen-dashboard");
+  if (!dash) return;
+  dash.style.setProperty("--fold-gap", "0px");
+  if (dash.classList.contains("hidden") || !window.matchMedia("(max-width:639px)").matches) return;
+  if ((window.scrollY || document.documentElement.scrollTop || 0) > 4) return; // only measure at the top
+  const cards = document.querySelectorAll("#dash-kpi-grid .kpi-card");
+  if (cards.length < 3) return;
+  const nav = document.getElementById("bottom-nav");
+  const navTop = nav && getComputedStyle(nav).display !== "none" ? nav.getBoundingClientRect().top : window.innerHeight;
+  const row1Bottom = cards[0].getBoundingClientRect().bottom;
+  const row2Top = cards[2].getBoundingClientRect().top;
+  const need = navTop - row2Top;               // how much of row 2 peeks above the bar
+  if (need <= 0 || row1Bottom > navTop) return; // nothing peeks, or row 1 itself does not fit
+  const per = Math.min(FOLD_MAX_PER_GAP, Math.ceil(need / FOLD_GAPS));
+  dash.style.setProperty("--fold-gap", per + "px");
+}
+let foldTimer = null;
+function scheduleDashFoldFit() {
+  clearTimeout(foldTimer);
+  foldTimer = setTimeout(() => requestAnimationFrame(fitDashFoldNow), 60);
+}
+window.addEventListener("resize", scheduleDashFoldFit);
 function renderDashUpdated() {
   if (!dashUpdatedAt) return;
   const mins = Math.floor((Date.now() - dashUpdatedAt) / 60000);
