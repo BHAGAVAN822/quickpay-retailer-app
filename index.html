@@ -2339,6 +2339,34 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
   .bnr-slide{flex-basis:calc(50% - 6px);}
 }
 @media (prefers-reduced-motion:reduce){.bnr-track{scroll-behavior:auto;}}
+
+/* ===== Phase 1: confirm / pending / receipt / frequent ===== */
+.rc-confirm-box{max-width:420px;}
+.rc-confirm-hero{text-align:center;padding:16px 12px 14px;margin:4px 0 12px;border-radius:14px;
+  background:var(--color-bg-brand-subtle);border:1px solid #FED7AA;}
+.rc-confirm-label{font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--color-text-secondary);}
+.rc-confirm-number{font-size:30px;font-weight:800;letter-spacing:.06em;color:var(--color-text-primary);
+  font-variant-numeric:tabular-nums;margin:4px 0 6px;word-break:break-all;}
+.rc-confirm-op{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--color-text-primary);}
+.rc-confirm-amount{font-size:22px;font-weight:800;color:var(--color-text-brand);margin-top:8px;}
+.rc-confirm-note{font-size:11.5px;color:var(--color-text-secondary);margin:-4px 0 10px;}
+.rc-autopoll{display:flex;align-items:center;gap:8px;justify-content:center;font-size:12.5px;font-weight:600;
+  color:var(--color-text-warning);margin-top:4px;}
+.rc-autopoll-dot{width:8px;height:8px;border-radius:50%;background:#F59E0B;animation:balPulse 1.2s ease-in-out infinite;flex-shrink:0;}
+@media (prefers-reduced-motion:reduce){.rc-autopoll-dot{animation:none}}
+.rc-share-row{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap;}
+.rc-share-row .btn{display:inline-flex;align-items:center;gap:6px;min-height:40px;}
+.rc-share-wa{background:#16A34A;border-color:#16A34A;color:#fff;}
+.rc-share-wa:hover{background:#15803D;border-color:#15803D;color:#fff;}
+#tx-drawer .rc-share-row{justify-content:flex-start;margin:14px 0 4px;}
+.dash-freq{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:-4px;}
+.dash-freq-label{font-size:12px;font-weight:600;color:var(--color-text-secondary);}
+.dash-freq-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--color-border-default);
+  background:#fff;border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:600;
+  color:var(--color-text-primary);cursor:pointer;min-height:36px;}
+.dash-freq-chip:hover{border-color:var(--color-border-brand);background:var(--color-bg-brand-subtle);}
+@media (max-width:639px){.dash-freq{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px;}
+  .dash-freq::-webkit-scrollbar{display:none;}.dash-freq-chip,.dash-freq-label{flex-shrink:0;white-space:nowrap;}}
 </style>
 </head>
 <body>
@@ -2472,6 +2500,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
               <input type="tel" id="dash-qr-mobile" inputmode="numeric" maxlength="10" placeholder="Enter mobile number" aria-label="Mobile number to recharge" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
               <button type="submit" class="btn primary">Recharge</button>
             </form>
+            <div class="dash-freq hidden" id="dash-freq" aria-label="Frequent customers"></div>
             <div class="dash-info-banner pending hidden" id="dash-pending-strip" role="status">
               <div class="info-icon"><i class="ti ti-clock-hour-4" aria-hidden="true"></i></div>
               <div class="info-body">
@@ -4876,6 +4905,161 @@ function restartBannerAutoplay() {
   window.addEventListener("resize", () => { if (bnr.list.length) renderDashBanners(); });
 })();
 
+
+/* ===== Phase 1: confirm / status / receipt / frequent customers ===== */
+function formatMobileSpaced(m) {
+  const d = String(m || "").replace(/\D/g, "");
+  return d.length === 10 ? d.slice(0, 5) + " " + d.slice(5) : d;
+}
+
+/* Estimated commission from this retailer's own recent successful recharges
+   on the same operator. Returns null when there is nothing to base it on. */
+function estimateCommission(operatorCode, amount) {
+  if (!operatorCode || !(amount > 0)) return null;
+  let amt = 0, com = 0, n = 0;
+  (state.historyCache || []).forEach((r) => {
+    if (r.operator_code !== operatorCode || classifyTodayStatus(r) !== "success") return;
+    const a = Number(r.amount) || 0, c = Number(r.commission_amount) || 0;
+    if (a <= 0 || c <= 0 || n >= 10) return;
+    amt += a; com += c; n += 1;
+  });
+  if (!n) return null;
+  return { amount: Math.round((com / amt) * amount * 100) / 100, basedOn: n };
+}
+
+/* --- A3: pending auto-check --- */
+const pendingPoll = { timer: null, tick: null, started: 0, tries: 0, id: null };
+const PENDING_POLL_MS = 10000, PENDING_POLL_MAX = 18; // 3 minutes
+function stopPendingAutoCheck() {
+  if (pendingPoll.timer) clearTimeout(pendingPoll.timer);
+  if (pendingPoll.tick) clearInterval(pendingPoll.tick);
+  pendingPoll.timer = pendingPoll.tick = null;
+}
+function startPendingAutoCheck(rechargeId) {
+  stopPendingAutoCheck();
+  if (pendingPoll.id !== rechargeId) { pendingPoll.id = rechargeId; pendingPoll.started = Date.now(); pendingPoll.tries = 0; }
+  const label = () => {
+    const el = document.getElementById("rc-autopoll-text");
+    if (!el) return;
+    const sec = Math.floor((Date.now() - pendingPoll.started) / 1000);
+    el.textContent = "Waiting for operator reply · " + Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0")
+      + " · checking automatically";
+  };
+  label();
+  pendingPoll.tick = setInterval(label, 1000);
+  const next = () => {
+    if (pendingPoll.tries >= PENDING_POLL_MAX) {
+      stopPendingAutoCheck();
+      const el = document.getElementById("rc-autopoll-text");
+      if (el) el.textContent = "Still waiting. Tap Check Status later, or see Transactions. Do not repeat this recharge.";
+      return;
+    }
+    pendingPoll.timer = setTimeout(async () => {
+      pendingPoll.tries += 1;
+      try {
+        const { httpStatus, body } = await apiStatusCheck(rechargeId);
+        if (httpStatus === 401) { stopPendingAutoCheck(); return; }
+        const st = body && (body.state || "").toLowerCase();
+        if (st === "success" || st === "failed") {
+          let ok = false;
+          try { const b = await refreshWalletBalance(); ok = !!(b && b.status === "success"); } catch (e) {}
+          updateRcSummary();
+          renderRechargeResult(st, body, { postTxnBalanceOk: ok });
+          return;
+        }
+      } catch (e) { /* network blip: keep waiting */ }
+      next();
+    }, PENDING_POLL_MS);
+  };
+  next();
+}
+
+/* --- A4: receipt --- */
+function receiptButtonsHtml(where) {
+  const src = where === "drawer" ? "drawer" : "last";
+  return '<div class="rc-share-row">'
+    + '<button type="button" class="btn rc-share-wa" onclick="shareReceiptWhatsApp(\'' + src + '\')"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> Send receipt</button>'
+    + '<button type="button" class="btn" onclick="printReceipt(\'' + src + '\')"><i class="ti ti-printer" aria-hidden="true"></i> Print</button>'
+    + "</div>";
+}
+function receiptData(src) { return src === "drawer" ? state.drawerReceipt : state.lastReceipt; }
+function receiptDateText(d) {
+  return (d instanceof Date ? d : new Date()).toLocaleString("en-IN", {
+    day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+  });
+}
+function receiptText(r) {
+  const lines = [
+    "*QuickPay Recharge Receipt*",
+    "✅ Recharge " + r.status,
+    "",
+    (r.isDth ? "Account: " : "Mobile: ") + (r.isDth ? r.mobile : formatMobileSpaced(r.mobile)),
+    "Operator: " + r.operator,
+    "Amount: " + formatMoney(r.amount),
+    "Transaction ID: " + r.txnRef,
+  ];
+  if (r.operatorRef) lines.push("Operator Ref: " + r.operatorRef);
+  lines.push("Date: " + receiptDateText(r.date));
+  if (state.retailerName) lines.push("", "Recharged at: " + state.retailerName);
+  lines.push("Thank you!");
+  return lines.join("\n");
+}
+function shareReceiptWhatsApp(src) {
+  const r = receiptData(src);
+  if (!r) return;
+  const digits = String(r.mobile || "").replace(/\D/g, "");
+  // Mobile recharge: open the chat with the customer's own number. DTH: let the retailer pick the contact.
+  const to = !r.isDth && digits.length === 10 ? "91" + digits : "";
+  window.open("https://wa.me/" + to + "?text=" + encodeURIComponent(receiptText(r)), "_blank", "noopener");
+}
+function printReceipt(src) {
+  const r = receiptData(src);
+  if (!r) return;
+  const row = (k, v) => "<tr><td>" + escapeHtml(k) + "</td><td>" + escapeHtml(v) + "</td></tr>";
+  const html = '<!doctype html><html><head><meta charset="utf-8"><title>Receipt ' + escapeHtml(r.txnRef) + "</title>"
+    + "<style>body{font-family:system-ui,sans-serif;margin:0;padding:16px;color:#0F172A}"
+    + ".r{max-width:300px;margin:0 auto}h1{font-size:18px;margin:0 0 2px;text-align:center}"
+    + ".s{text-align:center;color:#15803D;font-weight:700;margin:4px 0 12px}.a{text-align:center;font-size:28px;font-weight:800;margin:8px 0 12px}"
+    + "table{width:100%;border-collapse:collapse;font-size:13px}td{padding:6px 0;border-bottom:1px dashed #CBD5E1;vertical-align:top}"
+    + "td:last-child{text-align:right;font-weight:600}.f{text-align:center;font-size:12px;color:#475569;margin-top:14px}"
+    + "@media print{@page{margin:8mm}}</style></head><body><div class=\"r\">"
+    + "<h1>QuickPay</h1><div class=\"s\">✓ Recharge " + escapeHtml(r.status) + "</div>"
+    + '<div class="a">' + escapeHtml(formatMoney(r.amount)) + "</div><table>"
+    + row(r.isDth ? "Account" : "Mobile", r.isDth ? r.mobile : formatMobileSpaced(r.mobile))
+    + row("Operator", r.operator)
+    + row("Transaction ID", r.txnRef)
+    + (r.operatorRef ? row("Operator Ref", r.operatorRef) : "")
+    + row("Date", receiptDateText(r.date))
+    + "</table>"
+    + '<div class="f">' + (state.retailerName ? "Recharged at " + escapeHtml(state.retailerName) + "<br>" : "") + "Thank you!</div>"
+    + "</div><script>window.onload=function(){window.print();}<\/script></body></html>";
+  const w = window.open("", "_blank");
+  if (!w) { showToast("Please allow pop-ups to print the receipt."); return; }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
+
+/* --- A6 on dashboard: one-tap chips --- */
+function renderDashFrequent() {
+  const el = document.getElementById("dash-freq");
+  if (!el) return;
+  const list = frequentCustomers(3).filter((c) => c.lastOk);
+  if (!list.length) { el.classList.add("hidden"); el.innerHTML = ""; return; }
+  el.innerHTML = '<span class="dash-freq-label">Repeat:</span>' + list.map((c) => {
+    const r = c.lastOk;
+    return '<button type="button" class="dash-freq-chip" onclick="dashRepeat(\'' + escapeHtml(c.mobile) + '\',\''
+      + escapeHtml(r.operator_code || "") + '\',' + (Number(r.amount) || 0) + ')">'
+      + '<span class="op-dot" style="background:' + operatorColor(r.operator_code) + ';"></span>'
+      + escapeHtml(maskMobile(c.mobile)) + " · " + formatMoney(r.amount) + "</button>";
+  }).join("");
+  el.classList.remove("hidden");
+}
+function dashRepeat(mobile, operator, amount) {
+  state.rc.pendingPrefill = { mobile: mobile, operator: operator, amount: Number(amount) || null };
+  goTo("recharge", { serviceType: "mobile" });
+}
+
 /* ===== Dashboard phase 1 helpers ===== */
 /* History API returns at most 100 rows. Anything older than the oldest row we
    have is unknown, so every comparison below checks it is fully covered and
@@ -5147,6 +5331,7 @@ async function loadDashboard() {
 
       renderBusinessTrend(state.historyCache);
       renderRecentTransactions(state.historyCache.slice(0, 5));
+      renderDashFrequent();
       markDashUpdated();
     } else {
       if (recentWrap) {
@@ -5439,38 +5624,51 @@ function updateRcSummary() {
 }
 
 /* FEATURE B5: last 5 unique mobile numbers, from shared history cache. */
+/* A6: customers ranked by how often they recharge here (successful ones), newest first on ties. */
+function frequentCustomers(limit) {
+  const map = new Map();
+  (state.historyCache || []).forEach((r, idx) => {
+    if (!r.mobile_number) return;
+    const ok = classifyTodayStatus(r) === "success";
+    let c = map.get(r.mobile_number);
+    if (!c) {
+      c = { mobile: r.mobile_number, count: 0, idx: idx, last: r, lastOk: null };
+      map.set(r.mobile_number, c);
+    }
+    if (ok) {
+      c.count += 1;
+      if (!c.lastOk) c.lastOk = r; // history is newest first
+    }
+  });
+  return Array.from(map.values())
+    .sort((a, b) => (b.count - a.count) || (a.idx - b.idx))
+    .slice(0, limit);
+}
+
 function renderRecentCustomers() {
   const wrap = document.getElementById("rc-recent-list");
   if (!wrap) return;
-  if (!state.historyCache.length) {
+  const list = frequentCustomers(6);
+  if (!list.length) {
     wrap.innerHTML = '<div style="font-size:12.5px;color:var(--text-muted);">No recent recharges yet.</div>';
     return;
   }
-  const seen = new Set();
-  const recent = [];
-  for (const r of state.historyCache) {
-    if (!r.mobile_number || seen.has(r.mobile_number)) continue;
-    seen.add(r.mobile_number);
-    recent.push(r);
-    if (recent.length === 5) break;
-  }
-  if (!recent.length) {
-    wrap.innerHTML = '<div style="font-size:12.5px;color:var(--text-muted);">No recent recharges yet.</div>';
-    return;
-  }
-  wrap.innerHTML = recent.map((r) =>
-    '<div class="rc-recent-row">'
-    + '<div><div class="main"><span class="op-dot" style="background:' + operatorColor(r.operator_code) + ';"></span>'
-    + escapeHtml(maskMobile(r.mobile_number)) + " · " + escapeHtml(r.operator_name || r.operator_code || "")
-    + " · " + formatMoney(r.amount) + "</div>"
-    + '<div class="meta">' + formatDateTime(r.date) + "</div></div>"
-    + '<button type="button" class="btn-link" onclick="repeatRecharge(\''
-    + escapeHtml(r.mobile_number) + '\',\'' + escapeHtml(r.operator_code || "") + '\')">Recharge Again</button>'
-    + "</div>"
-  ).join("");
+  wrap.innerHTML = list.map((c) => {
+    const r = c.lastOk || c.last;
+    const amt = c.lastOk ? Number(c.lastOk.amount) || 0 : 0;
+    return '<div class="rc-recent-row">'
+      + '<div><div class="main"><span class="op-dot" style="background:' + operatorColor(r.operator_code) + ';"></span>'
+      + escapeHtml(maskMobile(c.mobile)) + " · " + escapeHtml(r.operator_name || r.operator_code || "")
+      + (amt ? " · " + formatMoney(amt) : "") + "</div>"
+      + '<div class="meta">' + (c.count ? c.count + " successful recharge" + (c.count === 1 ? "" : "s") + " · " : "")
+      + "last " + formatDateTime(c.last.date) + "</div></div>"
+      + '<button type="button" class="btn-link" onclick="repeatRecharge(\''
+      + escapeHtml(c.mobile) + '\',\'' + escapeHtml(r.operator_code || "") + '\',' + amt + ')">Recharge Again</button>'
+      + "</div>";
+  }).join("");
 }
 
-function repeatRecharge(mobile, operatorCode) {
+function repeatRecharge(mobile, operatorCode, amount) {
   // Populate only — never auto-submit.
   document.getElementById("rc-mobile").value = mobile;
   onRcMobileInput();
@@ -5478,13 +5676,16 @@ function repeatRecharge(mobile, operatorCode) {
     selectOperator(operatorCode);
   }
   const amountInput = document.getElementById("rc-amount");
-  amountInput.value = "";
-  state.rc.amount = 0;
+  const amt = Number(amount) > 0 ? Number(amount) : 0;
+  amountInput.value = amt ? String(amt) : "";
+  state.rc.amount = amt;
   state.rc.idempotencyKey = genIdempotencyKey();
   updateRcSubmitState();
   updateRcSummary();
   amountInput.focus();
-  showToast("Form populated. Review amount, then Proceed — nothing was submitted.");
+  showToast(amt
+    ? "Filled with last amount " + formatMoney(amt) + ". Check, then Proceed — nothing was submitted."
+    : "Form populated. Review amount, then Proceed — nothing was submitted.");
 }
 
 function renderOperatorPills() {
@@ -5709,22 +5910,32 @@ function renderRechargeConfirmModal() {
   const available = Number(state.wallets.main) || 0;
   const after = available - state.rc.amount;
   const box = document.getElementById("rc-modal-box");
-  const accountLabel = (state.rc.serviceType || "mobile") === "dth" ? "Account" : "Mobile";
-  box.className = "modal-box";
+  const isDth = (state.rc.serviceType || "mobile") === "dth";
+  const est = estimateCommission(state.rc.operator, state.rc.amount);
+  box.className = "modal-box rc-confirm-box";
+  // Full number, big: the whole point of this screen is to catch a wrong digit.
   box.innerHTML =
-    '<h3 class="rc-confirm-title" id="rc-modal-title">Confirm Recharge</h3>'
-    + '<div class="rc-confirm-details">'
-    + modalRow(accountLabel, maskMobile(state.rc.mobile))
-    + modalRow("Operator", operatorDisplayName())
-    + modalRow("Amount", formatMoney(state.rc.amount))
-    + modalRow("Available", formatMoney(available))
-    + modalRow("After Recharge", formatMoney(after))
+    '<h3 class="rc-confirm-title" id="rc-modal-title">Check before you recharge</h3>'
+    + '<div class="rc-confirm-hero">'
+    + '<div class="rc-confirm-label">' + (isDth ? "Customer / Account number" : "Mobile number") + "</div>"
+    + '<div class="rc-confirm-number">' + escapeHtml(isDth ? state.rc.mobile : formatMobileSpaced(state.rc.mobile)) + "</div>"
+    + '<div class="rc-confirm-op"><span class="op-dot" style="background:' + operatorColor(state.rc.operator) + ';"></span>'
+    + escapeHtml(operatorDisplayName()) + "</div>"
+    + '<div class="rc-confirm-amount">' + formatMoney(state.rc.amount) + "</div>"
     + "</div>"
-    + '<div class="modal-warn">Please verify the mobile number and recharge details. Successful recharges may not be reversible.</div>'
+    + '<div class="rc-confirm-details">'
+    + modalRow("Wallet balance now", formatMoney(available))
+    + modalRow("After this recharge", formatMoney(after))
+    + (est ? '<div class="modal-row"><span class="k">Estimated commission</span><span class="v" style="color:var(--color-text-success);">≈ ' + escapeHtml(formatMoney(est.amount)) + "</span></div>" : "")
+    + "</div>"
+    + (est ? '<div class="rc-confirm-note">Estimate from your last ' + est.basedOn + " " + escapeHtml(operatorDisplayName()) + " recharge" + (est.basedOn === 1 ? "" : "s") + ". Final commission is shown after success.</div>" : "")
+    + '<div class="modal-warn">A successful recharge cannot be reversed. Please match the number with the customer.</div>'
     + '<div class="modal-actions">'
-    + '<button type="button" class="btn" id="rc-cancel-btn" onclick="closeRcModal()">Cancel</button>'
+    + '<button type="button" class="btn" id="rc-cancel-btn" onclick="closeRcModal()">Edit</button>'
     + '<button type="button" class="btn primary lg-confirm" id="rc-confirm-btn" onclick="submitRecharge()">Confirm ' + formatMoney(state.rc.amount) + "</button></div>";
   openRcModalBackdrop();
+  const btn = document.getElementById("rc-confirm-btn");
+  if (btn) btn.focus();
 }
 
 
@@ -5776,6 +5987,7 @@ function modalRow(k, v) {
 }
 function closeRcModal() {
   if (rcSubmitting) return;
+  stopPendingAutoCheck();
   const bd = document.getElementById("rc-modal-backdrop");
   if (!bd) return;
   stopProcessingAnimation();
@@ -5854,6 +6066,7 @@ async function submitRecharge() {
 }
 
 function renderRechargeResult(kind, body, opts) {
+  stopPendingAutoCheck();
   const box = document.getElementById("rc-modal-box");
   const mobile = maskMobile(state.rc.mobile);
   const amount = formatMoney(state.rc.amount);
@@ -5898,9 +6111,20 @@ function renderRechargeResult(kind, body, opts) {
       + '<div class="rc-result-ref txn-id">Transaction ID: ' + escapeHtml(txnRef) + "</div>"
       + (commission ? '<div class="rc-result-sub">Commission earned ' + commission + "</div>" : "")
       + '<div class="rc-result-sub">' + escapeHtml(walletLine) + "</div>"
+      + receiptButtonsHtml()
       + '<div class="modal-actions">'
       + '<button type="button" class="btn primary result-action-btn" onclick="closeRcModal();resetRechargeForm();">New Recharge</button>'
       + '<button type="button" class="btn result-action-btn" onclick="closeRcModal();goTo(\'transactions\');">View in Transactions</button></div>';
+    state.lastReceipt = {
+      status: "Successful",
+      mobile: state.rc.mobile,
+      isDth: (state.rc.serviceType || "mobile") === "dth",
+      operator: operatorDisplayName(),
+      amount: state.rc.amount,
+      txnRef: txnRef,
+      operatorRef: body.transaction_id || body.operator_ref || body.provider_txn_id || "",
+      date: new Date(),
+    };
     animateRechargeSuccess(box);
     return;
   }
@@ -5956,12 +6180,14 @@ function renderRechargeResult(kind, body, opts) {
     + '<div class="rc-result-meta">' + opMeta + "</div>"
     + '<div class="rc-result-ref txn-id">Transaction ID: ' + escapeHtml(txnRef) + "</div>"
     + '<div class="rc-result-note warning">Do not retry this recharge until the final status is confirmed.</div>'
+    + (body.recharge_id != null ? '<div class="rc-autopoll" id="rc-autopoll" role="status" aria-live="polite"><span class="rc-autopoll-dot"></span><span id="rc-autopoll-text">Waiting for operator reply…</span></div>' : "")
     + '<div class="modal-actions">'
     + (body.recharge_id != null
       ? '<button type="button" class="btn primary block result-action-btn" onclick="checkRechargeStatus(' + body.recharge_id + ')">Check Status</button>'
       : '<button type="button" class="btn primary block result-action-btn" onclick="closeRcModal();goTo(\'transactions\');">View Transactions</button>')
     + "</div>";
   animateRechargePending(box);
+  if (body.recharge_id != null) startPendingAutoCheck(body.recharge_id);
 }
 
 
@@ -6346,6 +6572,19 @@ function openTxDrawer(id) {
   }
   html += "</div>";
 
+  if (cls === "success") {
+    state.drawerReceipt = {
+      status: "Successful",
+      mobile: r.mobile_number || "",
+      isDth: /dth/i.test(r.service_type || r.operator_type || ""),
+      operator: r.operator_name || r.operator_code || "",
+      amount: Number(r.amount) || 0,
+      txnRef: txDisplayId(r),
+      operatorRef: r.transaction_id || "",
+      date: parseApiDate(r.date) || null,
+    };
+    html += receiptButtonsHtml("drawer");
+  }
   html += '<div class="drawer-actions">';
   if (isPendingLike) {
     html += '<button type="button" class="btn primary" onclick="checkTxStatus(' + r.id + ')">Check Status</button>';
