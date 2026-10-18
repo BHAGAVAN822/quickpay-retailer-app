@@ -2600,6 +2600,13 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
   #screen-dashboard .dash-hero-row{row-gap:calc(10px + var(--fold-gap, 0px)) !important;
     margin-bottom:calc(12px + var(--fold-gap, 0px)) !important;}
 }
+
+/* Recharge form: no helper line / grey operator box between number and operator (owner, 18 Oct).
+   Field errors still show; the auto-select note sits under the operator button. */
+#rc-mobile-hint{display:none !important;}
+#rc-op-detect{display:none !important;}
+#rc-field-operator .op-auto-hint{display:none !important;}
+#rc-field-operator .op-auto-hint.show{display:block !important;color:var(--color-text-secondary);font-size:12px;margin-top:6px;}
 </style>
 </head>
 <body>
@@ -2920,7 +2927,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
               <div class="rc-field" id="rc-field-operator">
                 <label>Operator</label>
                 <div class="op-pills" id="rc-op-pills"></div>
-                <div class="hint">Change if detection is incorrect</div>
+                <div class="hint op-auto-hint" id="rc-op-auto-hint">Selected from your last recharge to this number. Tap Change if it has switched.</div>
               </div>
 
               <div class="rc-field" id="rc-field-amount">
@@ -6147,6 +6154,8 @@ function renderOperatorPills() {
   }
   const field = document.getElementById("rc-field-operator");
   if (field) field.classList.add("op-compact");
+  const autoHint = document.getElementById("rc-op-auto-hint");
+  if (autoHint) autoHint.classList.toggle("show", !!(state.rc.operator && state.rc.operatorAuto));
   if (state.rc.operator) {
     const op = state.rc.operatorObj;
     const code = state.rc.operator;
