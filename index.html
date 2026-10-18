@@ -2319,6 +2319,26 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
   #screen-dashboard .qa-service-card .qa-icon{width:44px;height:44px;border-radius:14px;font-size:20px;}
   #screen-dashboard .qa-info .qa-label{font-size:11.5px;line-height:14px;}
 }
+
+/* ===== Dashboard banners (admin-managed, GET /api/banners) ===== */
+.dash-banners{margin-top:-8px;}
+.bnr-track{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;
+  scrollbar-width:none;border-radius:16px;outline:none;}
+.bnr-track::-webkit-scrollbar{display:none;}
+.bnr-track:focus-visible{box-shadow:0 0 0 3px var(--color-bg-focus-ring);}
+.bnr-slide{flex:0 0 100%;scroll-snap-align:start;border:none;padding:0;margin:0;background:var(--color-bg-muted);
+  border-radius:16px;overflow:hidden;aspect-ratio:3/1;cursor:default;display:block;}
+.bnr-slide.linked{cursor:pointer;}
+.bnr-slide img{width:100%;height:100%;object-fit:cover;display:block;}
+.bnr-dots{display:flex;justify-content:center;gap:6px;margin-top:10px;}
+.bnr-dots:empty{display:none;}
+.bnr-dot{width:8px;height:8px;border-radius:999px;border:none;padding:0;background:#CBD5E1;cursor:pointer;
+  transition:width .2s,background .2s;}
+.bnr-dot.active{width:22px;background:var(--color-bg-brand);}
+@media (min-width:1024px){
+  .bnr-slide{flex-basis:calc(50% - 6px);}
+}
+@media (prefers-reduced-motion:reduce){.bnr-track{scroll-behavior:auto;}}
 </style>
 </head>
 <body>
@@ -2497,6 +2517,11 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           <div class="qa-grid" id="dash-qa-grid">
             <!-- rendered by renderQuickActions() -->
           </div>
+        </div>
+
+        <div class="dash-section dash-banners hidden" id="dash-banners" role="region" aria-roledescription="carousel" aria-label="Offers and announcements">
+          <div class="bnr-track" id="bnr-track" tabindex="0"></div>
+          <div class="bnr-dots" id="bnr-dots" role="group" aria-label="Choose banner"></div>
         </div>
 
         <div class="dash-section">
@@ -4732,6 +4757,125 @@ function renderBusinessTrend(history) {
 }
 
 
+
+/* ===== Dashboard banners ===== */
+const bnr = { list: [], index: 0, timer: null, paused: false };
+
+async function apiGetBanners() {
+  const res = await fetch(API_BASE + "/api/banners", { headers: authHeaders() });
+  if (res.status === 404) return { httpStatus: 404, body: null }; // backend without banners yet
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+
+async function loadDashBanners() {
+  const wrap = document.getElementById("dash-banners");
+  if (!wrap) return;
+  try {
+    const { httpStatus, body } = await apiGetBanners();
+    if (httpStatus !== 200 || !body || body.status !== "success") { wrap.classList.add("hidden"); return; }
+    bnr.list = (body.banners || []).filter((b) => b && b.image_url);
+  } catch (e) {
+    bnr.list = [];
+  }
+  renderDashBanners();
+}
+
+function bnrPerView() {
+  return window.matchMedia("(min-width:1024px)").matches ? 2 : 1;
+}
+
+function renderDashBanners() {
+  const wrap = document.getElementById("dash-banners");
+  const track = document.getElementById("bnr-track");
+  const dots = document.getElementById("bnr-dots");
+  if (!wrap || !track || !dots) return;
+  if (!bnr.list.length) { wrap.classList.add("hidden"); stopBannerAutoplay(); return; }
+  track.innerHTML = bnr.list.map((b, i) => {
+    const linked = b.link_type === "screen" || b.link_type === "url";
+    return '<button type="button" class="bnr-slide' + (linked ? " linked" : "") + '" data-i="' + i + '"'
+      + ' aria-label="' + escapeHtml(b.title || "Banner") + '"' + (linked ? "" : ' tabindex="-1"') + ">"
+      + '<img src="' + escapeHtml(API_BASE + b.image_url) + '" alt="' + escapeHtml(b.title || "") + '"'
+      + (i < 2 ? "" : ' loading="lazy"') + ' draggable="false"></button>';
+  }).join("");
+  track.querySelectorAll(".bnr-slide").forEach((el) => {
+    el.addEventListener("click", () => openBannerLink(bnr.list[Number(el.dataset.i)]));
+  });
+  const pages = Math.max(1, bnr.list.length - bnrPerView() + 1);
+  dots.innerHTML = pages > 1 ? Array.from({ length: pages }, (_, i) =>
+    '<button type="button" class="bnr-dot" data-i="' + i + '" aria-label="Banner ' + (i + 1) + '"></button>').join("") : "";
+  dots.querySelectorAll(".bnr-dot").forEach((d) => d.addEventListener("click", () => {
+    goToBanner(Number(d.dataset.i));
+    restartBannerAutoplay();
+  }));
+  wrap.classList.remove("hidden");
+  bnr.index = 0;
+  track.scrollLeft = 0;
+  updateBannerDots();
+  restartBannerAutoplay();
+}
+
+function openBannerLink(b) {
+  if (!b) return;
+  if (b.link_type === "screen" && b.link_screen) {
+    if (b.link_screen === "wallet") goTo("wallet");
+    else goTo(b.link_screen);
+  } else if (b.link_type === "url" && /^https:\/\//.test(b.link_url || "")) {
+    window.open(b.link_url, "_blank", "noopener");
+  }
+}
+
+function goToBanner(i) {
+  const track = document.getElementById("bnr-track");
+  const slide = track && track.children[i];
+  if (!slide) return;
+  bnr.index = i;
+  track.scrollTo({ left: slide.offsetLeft - track.offsetLeft, behavior: "smooth" });
+  updateBannerDots();
+}
+
+function updateBannerDots() {
+  document.querySelectorAll("#bnr-dots .bnr-dot").forEach((d, i) => {
+    d.classList.toggle("active", i === bnr.index);
+    d.setAttribute("aria-current", i === bnr.index ? "true" : "false");
+  });
+}
+
+function stopBannerAutoplay() {
+  if (bnr.timer) { clearInterval(bnr.timer); bnr.timer = null; }
+}
+
+function restartBannerAutoplay() {
+  stopBannerAutoplay();
+  const pages = Math.max(1, bnr.list.length - bnrPerView() + 1);
+  if (pages < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  bnr.timer = setInterval(() => {
+    const dash = document.getElementById("screen-dashboard");
+    if (bnr.paused || document.hidden || !dash || dash.classList.contains("hidden")) return;
+    goToBanner((bnr.index + 1) % pages);
+  }, 5000);
+}
+
+(function wireBannerTrack() {
+  const track = document.getElementById("bnr-track");
+  if (!track) return;
+  // pause while the retailer is touching / hovering the banner
+  ["mouseenter", "touchstart", "focusin"].forEach((ev) => track.addEventListener(ev, () => { bnr.paused = true; }, { passive: true }));
+  ["mouseleave", "touchend", "focusout"].forEach((ev) => track.addEventListener(ev, () => { bnr.paused = false; }, { passive: true }));
+  // keep dots in sync when swiped by hand
+  let t = null;
+  track.addEventListener("scroll", () => {
+    clearTimeout(t);
+    t = setTimeout(() => {
+      const w = track.children[0] ? track.children[0].offsetWidth + 12 : 1;
+      const pages = Math.max(1, bnr.list.length - bnrPerView() + 1);
+      bnr.index = Math.min(pages - 1, Math.round(track.scrollLeft / w));
+      updateBannerDots();
+    }, 80);
+  }, { passive: true });
+  window.addEventListener("resize", () => { if (bnr.list.length) renderDashBanners(); });
+})();
+
 /* ===== Dashboard phase 1 helpers ===== */
 /* History API returns at most 100 rows. Anything older than the oldest row we
    have is unknown, so every comparison below checks it is fully covered and
@@ -4940,6 +5084,7 @@ async function loadDashboard() {
     const ledgerP = apiGetLedger({ wallet_type: "main", page_size: 1 });
     const histP = apiGetHistory(100, 0, "all");
     loadDashFundStrip(); // independent; never blocks the dashboard
+    if (!bnr.loadedAt || Date.now() - bnr.loadedAt > 600000) { bnr.loadedAt = Date.now(); loadDashBanners(); }
 
     const [balRes, ledgerRes, histRes] = await Promise.all([balP, ledgerP, histP]);
 
