@@ -2491,6 +2491,37 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
   .dash-wallet .wallet-sub{flex-direction:row;width:100%;gap:20px;}
   .dash-wallet .wallet-sub-item{min-width:0;justify-content:flex-start;gap:8px;}
 }
+
+/* ===== Dashboard compact layout (phones): banner visible without scrolling ===== */
+.dash-subline{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;}
+.dash-subline .sub{flex:1 1 220px;}
+.dash-banners{margin-top:0;}
+@media (max-width:639px){
+  .dash-hero-row{margin:8px 0 16px !important;gap:12px !important;}
+  .dash-greeting-col{gap:10px !important;}
+  .dash-greeting-col h2{font-size:22px !important;line-height:28px !important;}
+  .dash-greeting-col .sub{font-size:13.5px;line-height:19px;}
+  #dash-updated-at{display:none;}
+  .dash-wallet{padding:16px 16px 14px !important;gap:12px !important;min-height:0 !important;}
+  .dash-wallet .wallet-val{font-size:32px !important;line-height:38px !important;}
+  .dash-wallet .wallet-status{margin-top:-4px;}
+  .dash-wallet .wallet-runway{margin-top:-8px;}
+  .dash-wallet-actions .btn-hero-primary,.dash-wallet-actions .btn-hero-ghost{height:38px;}
+  .dash-section{margin-bottom:20px;}
+  .dash-section-title{margin-bottom:12px;}
+}
+
+/* Banner lives in the hero grid: desktop = under the greeting, beside the wallet card;
+   phones/tablets = wallet card, then banner. One banner per view inside this column. */
+.dash-hero-row{grid-template-areas:"greet wallet" "banner wallet";}
+.dash-hero-row > .dash-greeting-col{grid-area:greet;}
+.dash-hero-row > .dash-wallet{grid-area:wallet;align-self:start;}
+.dash-hero-row > .dash-banners{grid-area:banner;min-width:0;align-self:end;}
+.dash-hero-row > .dash-banners .bnr-slide{flex-basis:100%;}
+.dash-hero-row > .dash-banners .bnr-dots{margin-top:8px;}
+@media (max-width:1023px){
+  .dash-hero-row{grid-template-areas:"greet" "wallet" "banner";}
+}
 </style>
 </head>
 <body>
@@ -2614,10 +2645,12 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
         <div class="dash-hero-row">
           <div class="dash-greeting-col">
             <h2 id="dash-greeting">Good morning</h2>
+            <div class="dash-subline">
             <div class="sub" id="dash-date">Loading today's summary…</div>
             <div class="dash-updated">
               <span id="dash-updated-at">Updating…</span>
               <button type="button" class="dash-refresh-btn" id="dash-refresh-btn" onclick="refreshDashboard()" aria-label="Refresh dashboard"><i class="ti ti-refresh" aria-hidden="true"></i> Refresh</button>
+            </div>
             </div>
             <form class="dash-quick-rc" onsubmit="dashQuickRecharge(event)" autocomplete="off">
               <i class="ti ti-device-mobile" aria-hidden="true"></i>
@@ -2669,6 +2702,11 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
               <button type="button" class="btn-hero-ghost" onclick="goTo('recharge')"><i class="ti ti-bolt"></i> Recharge</button>
             </div>
           </div>
+
+          <div class="dash-banners hidden" id="dash-banners" role="region" aria-roledescription="carousel" aria-label="Offers and announcements">
+            <div class="bnr-track" id="bnr-track" tabindex="0"></div>
+            <div class="bnr-dots" id="bnr-dots" role="group" aria-label="Choose banner"></div>
+          </div>
         </div>
 
         <div class="dash-section">
@@ -2678,10 +2716,6 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           </div>
         </div>
 
-        <div class="dash-section dash-banners hidden" id="dash-banners" role="region" aria-roledescription="carousel" aria-label="Offers and announcements">
-          <div class="bnr-track" id="bnr-track" tabindex="0"></div>
-          <div class="bnr-dots" id="bnr-dots" role="group" aria-label="Choose banner"></div>
-        </div>
 
         <div class="dash-section">
           <h3 class="dash-section-title">Today's Insights</h3>
@@ -4959,7 +4993,7 @@ async function loadDashBanners() {
 }
 
 function bnrPerView() {
-  return window.matchMedia("(min-width:1024px)").matches ? 2 : 1;
+  return 1; // one banner per view in the hero column (all screen sizes)
 }
 
 function renderDashBanners() {
