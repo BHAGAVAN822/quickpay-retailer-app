@@ -2534,6 +2534,18 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
   #screen-dashboard .qa-service-card{padding:10px 4px 8px;gap:4px;}
   #screen-dashboard .qa-service-card .qa-icon{width:40px;height:40px;border-radius:12px;font-size:19px;}
 }
+
+/* Wallet card v2: status + Add Money on one row; Quick Services = 3 tiles (owner, 18 Oct) */
+.dash-wallet .dash-wallet-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:auto;flex-wrap:wrap;}
+.dash-wallet .dash-wallet-foot .wallet-status{margin-top:0 !important;}
+.dash-wallet .dash-wallet-foot .dash-wallet-actions{margin-top:0;}
+.dash-wallet .wallet-runway{margin-top:-8px;}
+#screen-dashboard .qa-grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important;}
+@media (max-width:639px){
+  .dash-wallet{gap:10px !important;padding:14px 16px !important;}
+  .dash-wallet .wallet-val{font-size:30px !important;line-height:36px !important;}
+  .dash-wallet .dash-wallet-foot .btn-hero-primary{height:36px;padding:0 14px;}
+}
 </style>
 </head>
 <body>
@@ -2707,11 +2719,12 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
               </div>
             </div>
             <div id="kpi-commission" style="display:none;" aria-hidden="true">—</div>
-            <div class="wallet-status" id="dash-wallet-status"><span class="dot"></span> Checking balance…</div>
             <div class="wallet-runway" id="dash-wallet-runway"></div>
-            <div class="dash-wallet-actions">
-              <button type="button" class="btn-hero-primary" onclick="openFundRequest()"><i class="ti ti-plus"></i> Add Money</button>
-              <button type="button" class="btn-hero-ghost" onclick="goTo('recharge')"><i class="ti ti-bolt"></i> Recharge</button>
+            <div class="dash-wallet-foot">
+              <div class="wallet-status" id="dash-wallet-status"><span class="dot"></span> Checking balance…</div>
+              <div class="dash-wallet-actions">
+                <button type="button" class="btn-hero-primary" onclick="openFundRequest()"><i class="ti ti-plus"></i> Add Money</button>
+              </div>
             </div>
           </div>
 
@@ -4835,7 +4848,6 @@ function renderQuickActions() {
   } else {
     tiles.push({ label: "DTH Recharge", sub: "Coming soon", icon: "ti ti-device-tv", tone: "tone-blue", disabled: true });
   }
-  tiles.push({ label: "Add Money", sub: "Top up your wallet", icon: "ti ti-plus", tone: "tone-pink", onclick: "openFundRequest()" });
   tiles.push({ label: "View Ledger", sub: "Wallet statement", icon: "ti ti-database", tone: "tone-purple", onclick: "goTo('ledger')" });
 
   grid.innerHTML = tiles.slice(0, 4).map((t) => {
