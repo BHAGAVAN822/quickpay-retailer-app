@@ -5,6 +5,15 @@
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>QuickPay Retailer Portal</title>
+<!-- Installable app (PWA): home-screen icon, opens full-screen without the URL bar -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0A1929">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="QuickPay">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -8513,6 +8522,88 @@ async function loadSettingsScreen(opts) {
     loadServices().finally(routeAfterAuth);
   } else {
     goTo("login");
+  }
+})();
+</script>
+<!-- Install-app prompt (PWA). Android: one-tap install. iPhone: Share -> Add to Home Screen hint. -->
+<style>
+#qp-install{position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:300;
+  max-width:420px;margin:0 auto;background:#fff;border:1px solid var(--color-border-default);border-radius:16px;
+  box-shadow:0 12px 32px -8px rgba(15,23,42,.28);padding:14px;display:flex;gap:12px;align-items:center;
+  animation:qpInstallIn .25s ease-out;}
+#qp-install[hidden]{display:none;}
+@keyframes qpInstallIn{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){#qp-install{animation:none}}
+@media (max-width:639px){#qp-install.above-nav{bottom:calc(84px + env(safe-area-inset-bottom,0px));}}
+#qp-install img{width:44px;height:44px;border-radius:11px;flex-shrink:0;}
+#qp-install .qi-text{flex:1;min-width:0;}
+#qp-install .qi-title{font-size:14px;font-weight:700;color:var(--color-text-primary);}
+#qp-install .qi-sub{font-size:12.5px;color:var(--color-text-secondary);line-height:1.4;margin-top:2px;}
+#qp-install .qi-sub i{font-size:15px;vertical-align:-2px;color:var(--color-icon-brand);}
+#qp-install .qi-btn{background:var(--color-bg-brand);color:#fff;border:0;border-radius:10px;padding:10px 14px;
+  font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;min-height:40px;}
+#qp-install .qi-close{background:none;border:0;color:var(--color-icon-muted);font-size:20px;cursor:pointer;
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+</style>
+<div id="qp-install" role="dialog" aria-label="Install QuickPay app" hidden>
+  <img src="icons/icon-192.png" alt="">
+  <div class="qi-text">
+    <div class="qi-title">Install QuickPay app</div>
+    <div class="qi-sub" id="qi-sub">Open it from your home screen, full-screen and faster.</div>
+  </div>
+  <button type="button" class="qi-btn" id="qi-btn">Install</button>
+  <button type="button" class="qi-close" id="qi-close" aria-label="Not now"><i class="ti ti-x" aria-hidden="true"></i></button>
+</div>
+<script>
+(function () {
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    });
+  }
+  var KEY = "qp_install_dismissed_at";
+  var SNOOZE_MS = 3 * 24 * 60 * 60 * 1000; // ask again after 3 days
+  var standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  if (standalone) return;
+  function dismissedRecently() {
+    try { return Date.now() - Number(localStorage.getItem(KEY) || 0) < SNOOZE_MS; } catch (e) { return false; }
+  }
+  var box = document.getElementById("qp-install");
+  var btn = document.getElementById("qi-btn");
+  var nav = document.getElementById("bottom-nav");
+  function show() {
+    if (dismissedRecently()) return;
+    box.classList.toggle("above-nav", !!(nav && nav.style.display !== "none" && getComputedStyle(nav).display !== "none"));
+    box.hidden = false;
+  }
+  function hide(remember) {
+    box.hidden = true;
+    if (remember) { try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {} }
+  }
+  document.getElementById("qi-close").addEventListener("click", function () { hide(true); });
+
+  // Android / Chrome / Edge: real one-tap install
+  var deferred = null;
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault();
+    deferred = e;
+    show();
+  });
+  btn.addEventListener("click", function () {
+    if (!deferred) { hide(true); return; }
+    deferred.prompt();
+    deferred.userChoice.then(function (r) { hide(r.outcome !== "accepted"); deferred = null; });
+  });
+  window.addEventListener("appinstalled", function () { hide(false); });
+
+  // iPhone / iPad Safari: no install button exists, so show the Share -> Add to Home Screen steps
+  var ua = navigator.userAgent;
+  var isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (isIOS) {
+    document.getElementById("qi-sub").innerHTML =
+      'Tap <i class="ti ti-share-2" aria-hidden="true"></i> <b>Share</b>, then <b>Add to Home Screen</b>.';
+    btn.textContent = "Got it";
+    setTimeout(show, 1500);
   }
 })();
 </script>
