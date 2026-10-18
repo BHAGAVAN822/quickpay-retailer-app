@@ -2488,8 +2488,12 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
   .dash-wallet .wallet-sub-val{font-size:13px;}
 }
 @media (max-width:379px){
-  .dash-wallet .wallet-sub{flex-direction:row;width:100%;gap:20px;}
-  .dash-wallet .wallet-sub-item{min-width:0;justify-content:flex-start;gap:8px;}
+  .dash-wallet .wallet-val-row{flex-wrap:wrap;gap:4px 8px;}
+  .dash-wallet .wallet-val{font-size:26px !important;line-height:32px !important;white-space:nowrap;}
+  .dash-wallet .wallet-sub{gap:2px;}
+  .dash-wallet .wallet-sub-item{min-width:104px;gap:8px;padding:1px 0;}
+  .dash-wallet .wallet-sub-label{font-size:10px;}
+  .dash-wallet .wallet-sub-val{font-size:12.5px;}
 }
 
 /* ===== Dashboard compact layout (phones): banner visible without scrolling ===== */
@@ -2515,7 +2519,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
    phones/tablets = wallet card, then banner. One banner per view inside this column. */
 .dash-hero-row{grid-template-areas:"greet wallet" "banner wallet";}
 .dash-hero-row > .dash-greeting-col{grid-area:greet;}
-.dash-hero-row > .dash-wallet{grid-area:wallet;align-self:start;}
+.dash-hero-row > .dash-wallet{grid-area:wallet;align-self:start;min-width:0;}
 .dash-hero-row > .dash-banners{grid-area:banner;min-width:0;align-self:end;}
 .dash-hero-row > .dash-banners .bnr-slide{flex-basis:100%;}
 .dash-hero-row > .dash-banners .bnr-dots{margin-top:8px;}
@@ -2579,6 +2583,16 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
   #screen-dashboard .qa-info .qa-label{font-size:12px !important;}
   #screen-dashboard .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
   #screen-dashboard .kpi-card{min-width:0;}
+}
+
+/* Fit the first insight row above the bottom bar on a 360x733 installed-app screen */
+@media (max-width:639px){
+  .dash-greeting-col h2{font-size:20px !important;line-height:26px !important;}
+  .dash-greeting-col{gap:8px !important;}
+  .dash-wallet{gap:8px !important;padding:12px 14px !important;}
+  #screen-dashboard .dash-section-title{margin-bottom:6px;}
+  #screen-dashboard .kpi-card{padding:10px 12px 8px !important;gap:4px !important;}
+  #screen-dashboard .kpi-value{font-size:21px !important;line-height:26px !important;}
 }
 </style>
 </head>
