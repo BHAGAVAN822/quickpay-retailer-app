@@ -2522,6 +2522,18 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 @media (max-width:1023px){
   .dash-hero-row{grid-template-areas:"greet" "wallet" "banner";}
 }
+
+/* Order: wallet card -> Quick Services -> banner (owner, 18 Oct) */
+.dash-hero-row{grid-template-areas:"greet wallet" "banner wallet" "services services";}
+.dash-hero-row > .dash-qs{grid-area:services;min-width:0;}
+@media (max-width:1023px){
+  .dash-hero-row{grid-template-areas:"greet" "wallet" "services" "banner";}
+}
+@media (max-width:639px){
+  .dash-hero-row > .dash-qs .dash-section-title{margin:0 0 10px;}
+  #screen-dashboard .qa-service-card{padding:10px 4px 8px;gap:4px;}
+  #screen-dashboard .qa-service-card .qa-icon{width:40px;height:40px;border-radius:12px;font-size:19px;}
+}
 </style>
 </head>
 <body>
@@ -2703,18 +2715,19 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             </div>
           </div>
 
+          <div class="dash-qs" id="dash-qs">
+            <h3 class="dash-section-title">Quick Services</h3>
+            <div class="qa-grid" id="dash-qa-grid">
+              <!-- rendered by renderQuickActions() -->
+            </div>
+          </div>
+
           <div class="dash-banners hidden" id="dash-banners" role="region" aria-roledescription="carousel" aria-label="Offers and announcements">
             <div class="bnr-track" id="bnr-track" tabindex="0"></div>
             <div class="bnr-dots" id="bnr-dots" role="group" aria-label="Choose banner"></div>
           </div>
         </div>
 
-        <div class="dash-section">
-          <h3 class="dash-section-title">Quick Services</h3>
-          <div class="qa-grid" id="dash-qa-grid">
-            <!-- rendered by renderQuickActions() -->
-          </div>
-        </div>
 
 
         <div class="dash-section">
