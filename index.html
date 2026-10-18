@@ -2385,6 +2385,57 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
   .op-pills::-webkit-scrollbar{display:none;}
   .op-pill{flex-shrink:0;white-space:nowrap;}
 }
+
+/* ===== Operator picker v2: dropdown field + sheet ===== */
+.op-avatar{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0;
+  color:#fff;font-weight:800;letter-spacing:-.02em;line-height:1;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);}
+.op-avatar.logo{background:#fff;box-shadow:inset 0 0 0 1px var(--color-border-default);overflow:hidden;}
+.op-avatar.logo img{width:78%;height:78%;object-fit:contain;}
+.op-field{width:100%;display:flex;align-items:center;gap:12px;margin-top:4px;padding:8px 12px;min-height:52px;
+  border-radius:12px;border:1.5px solid var(--color-border-brand);background:var(--color-bg-brand-subtle);
+  font:inherit;text-align:left;cursor:pointer;box-sizing:border-box;}
+.op-field:focus-visible{outline:none;box-shadow:0 0 0 3px var(--color-bg-focus-ring);}
+.op-field.empty{background:#fff;border:1.5px dashed var(--color-border-strong);}
+.op-field.empty:hover{border-color:var(--color-border-brand);}
+.op-field-icon{width:32px;height:32px;border-radius:50%;background:var(--color-bg-muted);display:flex;align-items:center;
+  justify-content:center;color:var(--color-icon-default);font-size:18px;flex-shrink:0;}
+.op-field-name{font-size:15px;font-weight:700;color:var(--color-text-primary);}
+.op-field.empty .op-field-name{font-weight:600;color:var(--color-text-secondary);flex:1;}
+.op-field .op-selected-check{margin-right:auto;}
+.op-field-change{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:700;color:var(--color-text-brand);
+  background:#fff;border:1px solid var(--color-border-default);border-radius:8px;padding:6px 10px;flex-shrink:0;}
+.op-field-caret{font-size:18px;color:var(--color-icon-default);}
+.op-sheet-backdrop{position:fixed;inset:0;z-index:400;background:rgba(15,23,42,0);display:flex;align-items:flex-end;
+  justify-content:center;transition:background .18s;}
+.op-sheet-backdrop[hidden]{display:none;}
+.op-sheet-backdrop.show{background:rgba(15,23,42,.48);}
+.op-sheet{width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;background:#fff;
+  border-radius:20px 20px 0 0;box-shadow:0 -12px 40px rgba(15,23,42,.25);transform:translateY(100%);
+  transition:transform .2s ease-out;padding-bottom:env(safe-area-inset-bottom,0px);}
+.op-sheet-backdrop.show .op-sheet{transform:none;}
+.op-sheet-grip{width:40px;height:4px;border-radius:2px;background:#CBD5E1;margin:8px auto 0;}
+.op-sheet-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 8px 20px;}
+.op-sheet-head h3{margin:0;font-size:17px;font-weight:700;color:var(--color-text-primary);}
+.op-sheet-close{border:none;background:var(--color-bg-muted);width:36px;height:36px;border-radius:50%;cursor:pointer;
+  font-size:18px;color:var(--color-icon-default);display:flex;align-items:center;justify-content:center;}
+.op-sheet-list{overflow-y:auto;padding:4px 12px 16px;}
+.op-row{width:100%;display:flex;align-items:center;gap:14px;padding:12px 10px;min-height:64px;border:none;
+  border-bottom:1px solid #F1F5F9;background:#fff;font:inherit;text-align:left;cursor:pointer;border-radius:12px;}
+.op-row:hover,.op-row:focus-visible{background:var(--color-bg-muted);outline:none;}
+.op-row.active{background:var(--color-bg-brand-subtle);}
+.op-row-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.op-row-name{font-size:16px;font-weight:600;color:var(--color-text-primary);}
+.op-row-tag{font-size:11.5px;font-weight:600;color:var(--color-text-success);}
+.op-row-check{font-size:22px;color:var(--color-text-brand);}
+.op-row-go{font-size:18px;color:var(--color-icon-muted);}
+@media (min-width:640px){
+  .op-sheet-backdrop{align-items:center;padding:16px;}
+  .op-sheet{border-radius:20px;transform:translateY(16px);opacity:0;transition:transform .18s,opacity .18s;}
+  .op-sheet-backdrop.show .op-sheet{opacity:1;}
+  .op-sheet-grip{display:none;}
+}
+@media (prefers-reduced-motion:reduce){.op-sheet,.op-sheet-backdrop{transition:none;}}
+.rc-confirm-op .op-avatar{margin-right:2px;}
 </style>
 </head>
 <body>
@@ -3721,7 +3772,11 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
    ========================================================================= */
 const API_BASE = "https://quickpay.qpaytest.fun";
 
-const OPERATOR_COLORS = { AIRTEL: "#E4002B", JIO: "#0F1E5C", VI: "#EE5A24", BSNL: "#15803D" };
+const OPERATOR_COLORS = { AIRTEL: "#E4002B", JIO: "#0F3CC9", JIOBK: "#0F3CC9", VI: "#E5262B", BSNL: "#0E7C3A", MTNL: "#1E3A8A",
+  AIRTEL_DTH: "#E4002B", TATASKY: "#0B5394", DISH: "#E05206", VIDEOCON: "#B91C1C", SUN: "#D97706" };
+/* Short label for the monogram avatar when no logo has been uploaded. */
+const OPERATOR_MONOGRAM = { AIRTEL: "A", JIO: "Jio", JIOBK: "Jio", VI: "Vi", BSNL: "B", MTNL: "M",
+  AIRTEL_DTH: "A", TATASKY: "TS", DISH: "D", VIDEOCON: "d2h", SUN: "S" };
 function operatorColor(code) { return OPERATOR_COLORS[(code || "").toUpperCase()] || "#64748B"; }
 
 let state = {
@@ -5715,38 +5770,99 @@ function renderOperatorPills() {
     return;
   }
   const field = document.getElementById("rc-field-operator");
-  const opIcon = (op, code) => op && op.logo_url
-    ? '<img class="op-pill-logo" src="' + escapeHtml(API_BASE + op.logo_url) + '" alt="">'
-    : '<span class="op-dot" style="background:' + operatorColor(code) + ';"></span>';
-
-  // Compact: an operator is chosen and the retailer has not asked to change it.
-  if (state.rc.operator && !state.rc.opExpanded) {
+  if (field) field.classList.add("op-compact");
+  if (state.rc.operator) {
     const op = state.rc.operatorObj;
     const code = state.rc.operator;
-    if (field) field.classList.add("op-compact");
-    wrap.innerHTML = '<div class="op-selected">'
-      + opIcon(op, code)
-      + '<span class="op-selected-name">' + escapeHtml((op && op.name) || code) + "</span>"
+    wrap.innerHTML = '<button type="button" class="op-field" onclick="openOperatorSheet()" aria-haspopup="dialog">'
+      + operatorAvatar(op, code, 32)
+      + '<span class="op-field-name">' + escapeHtml((op && op.name) || code) + "</span>"
       + '<i class="ti ti-circle-check-filled op-selected-check" aria-hidden="true"></i>'
-      + '<button type="button" class="op-change-btn" onclick="expandOperators()">Change</button>'
-      + "</div>";
-    return;
+      + '<span class="op-field-change">Change <i class="ti ti-chevron-down" aria-hidden="true"></i></span>'
+      + "</button>";
+  } else {
+    wrap.innerHTML = '<button type="button" class="op-field empty" onclick="openOperatorSheet()" aria-haspopup="dialog">'
+      + '<span class="op-field-icon"><i class="ti ti-antenna-bars-5" aria-hidden="true"></i></span>'
+      + '<span class="op-field-name">Select operator</span>'
+      + '<i class="ti ti-chevron-down op-field-caret" aria-hidden="true"></i>'
+      + "</button>";
   }
-  if (field) field.classList.remove("op-compact");
-  wrap.innerHTML = ops.map((op) => {
-    const code = op.code || op.operator_code || op.name;
-    const active = state.rc.operator === code;
-    return '<button type="button" class="op-pill' + (active ? " active" : "") + '"'
-      + ' aria-pressed="' + (active ? "true" : "false") + '" onclick="selectOperator(\''
-      + escapeHtml(code) + '\', true)">' + opIcon(op, code) + escapeHtml(op.name || code) + "</button>";
-  }).join("");
 }
 
-function expandOperators() {
-  state.rc.opExpanded = true;
-  renderOperatorPills();
-  const active = document.querySelector("#rc-op-pills .op-pill.active");
-  if (active) active.scrollIntoView({ block: "nearest", inline: "center" });
+/* Round avatar: uploaded logo on white, otherwise a monogram in the operator colour. */
+function operatorAvatar(op, code, size) {
+  const px = size || 32;
+  if (op && op.logo_url) {
+    return '<span class="op-avatar logo" style="width:' + px + "px;height:" + px + 'px;">'
+      + '<img src="' + escapeHtml(API_BASE + op.logo_url) + '" alt=""></span>';
+  }
+  const key = String(code || "").toUpperCase();
+  let label = OPERATOR_MONOGRAM[key];
+  if (!label) {
+    const words = String((op && op.name) || code || "?").split(/\s+/).filter(Boolean);
+    label = words.length > 1 ? (words[0][0] + words[1][0]) : words[0].slice(0, 2);
+    label = label.toUpperCase();
+  }
+  const fs = Math.round(px * (label.length >= 3 ? 0.34 : label.length === 2 ? 0.4 : 0.5));
+  return '<span class="op-avatar" style="width:' + px + "px;height:" + px + "px;background:" + operatorColor(code)
+    + ";font-size:" + fs + 'px;" aria-hidden="true">' + escapeHtml(label) + "</span>";
+}
+
+function operatorSheetEl() {
+  let el = document.getElementById("op-sheet");
+  if (el) return el;
+  el = document.createElement("div");
+  el.id = "op-sheet";
+  el.className = "op-sheet-backdrop";
+  el.setAttribute("hidden", "");
+  el.innerHTML = '<div class="op-sheet" role="dialog" aria-modal="true" aria-labelledby="op-sheet-title">'
+    + '<div class="op-sheet-grip" aria-hidden="true"></div>'
+    + '<div class="op-sheet-head"><h3 id="op-sheet-title">Select operator</h3>'
+    + '<button type="button" class="op-sheet-close" onclick="closeOperatorSheet()" aria-label="Close"><i class="ti ti-x"></i></button></div>'
+    + '<div class="op-sheet-list" id="op-sheet-list"></div></div>';
+  el.addEventListener("click", (e) => { if (e.target === el) closeOperatorSheet(); });
+  el.addEventListener("keydown", (e) => { if (e.key === "Escape") closeOperatorSheet(); });
+  document.body.appendChild(el);
+  return el;
+}
+
+function openOperatorSheet() {
+  const ops = state.operators || [];
+  if (!ops.length) return;
+  const el = operatorSheetEl();
+  const v = state.rc.mobile || "";
+  const last = v ? (state.historyCache || []).find((r) => r.mobile_number === v && r.operator_code) : null;
+  const svc = (state.rc.serviceType || "mobile") === "dth" ? "DTH operator" : "mobile operator";
+  document.getElementById("op-sheet-title").textContent = "Select " + svc;
+  document.getElementById("op-sheet-list").innerHTML = ops.map((op) => {
+    const code = op.code || op.operator_code || op.name;
+    const active = state.rc.operator === code;
+    const tag = last && last.operator_code === code ? '<span class="op-row-tag">Last used for this number</span>' : "";
+    return '<button type="button" class="op-row' + (active ? " active" : "") + '" aria-pressed="' + (active ? "true" : "false")
+      + '" onclick="pickOperatorFromSheet(\'' + escapeHtml(code) + '\')">'
+      + operatorAvatar(op, code, 40)
+      + '<span class="op-row-text"><span class="op-row-name">' + escapeHtml(op.name || code) + "</span>" + tag + "</span>"
+      + (active ? '<i class="ti ti-circle-check-filled op-row-check" aria-hidden="true"></i>' : '<i class="ti ti-chevron-right op-row-go" aria-hidden="true"></i>')
+      + "</button>";
+  }).join("");
+  el.removeAttribute("hidden");
+  requestAnimationFrame(() => el.classList.add("show"));
+  const first = el.querySelector(".op-row.active") || el.querySelector(".op-row");
+  if (first) first.focus();
+}
+
+function closeOperatorSheet() {
+  const el = document.getElementById("op-sheet");
+  if (!el) return;
+  el.classList.remove("show");
+  setTimeout(() => el.setAttribute("hidden", ""), prefersReducedMotion() ? 0 : 180);
+  const f = document.querySelector("#rc-op-pills .op-field");
+  if (f) f.focus();
+}
+
+function pickOperatorFromSheet(code) {
+  selectOperator(code, true);
+  closeOperatorSheet();
 }
 
 /* Pick the operator this retailer last used for this exact number (from their own
@@ -5768,7 +5884,6 @@ function autoSelectOperatorFromHistory() {
 
 function selectOperator(code, manual) {
   state.rc.operator = code;
-  state.rc.opExpanded = false;
   state.rc.operatorAuto = false;
   if (manual) state.rc.operatorManual = true;
   state.rc.operatorObj = state.operators.find((o) => (o.code || o.operator_code) === code) || null;
@@ -5980,7 +6095,7 @@ function renderRechargeConfirmModal() {
     + '<div class="rc-confirm-hero">'
     + '<div class="rc-confirm-label">' + (isDth ? "Customer / Account number" : "Mobile number") + "</div>"
     + '<div class="rc-confirm-number">' + escapeHtml(isDth ? state.rc.mobile : formatMobileSpaced(state.rc.mobile)) + "</div>"
-    + '<div class="rc-confirm-op"><span class="op-dot" style="background:' + operatorColor(state.rc.operator) + ';"></span>'
+    + '<div class="rc-confirm-op">' + operatorAvatar(state.rc.operatorObj, state.rc.operator, 26)
     + escapeHtml(operatorDisplayName()) + "</div>"
     + '<div class="rc-confirm-amount">' + formatMoney(state.rc.amount) + "</div>"
     + "</div>"
