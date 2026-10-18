@@ -1,0 +1,18 @@
+{
+  "id": "./",
+  "name": "QuickPay Retailer",
+  "short_name": "QuickPay",
+  "description": "QuickPay retailer app for mobile and DTH recharge, wallet and commission.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A1929",
+  "theme_color": "#0A1929",
+  "lang": "en-IN",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
