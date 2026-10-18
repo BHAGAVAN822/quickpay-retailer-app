@@ -2436,6 +2436,41 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 }
 @media (prefers-reduced-motion:reduce){.op-sheet,.op-sheet-backdrop{transition:none;}}
 .rc-confirm-op .op-avatar{margin-right:2px;}
+
+/* ===== Retailer complaints ===== */
+.cmp-chip{display:inline-flex;align-items:center;margin-left:6px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap;}
+.cmp-chip.pending{background:#FEF3C7;color:#92400E;}
+.cmp-chip.success{background:#DCFCE7;color:#166534;}
+.cmp-chip.failed{background:#F1F5F9;color:#475569;}
+.cmp-block{border-radius:12px;padding:12px 14px;margin:8px 0 12px;border:1px solid transparent;}
+.cmp-block.pending{background:#FFFBEB;border-color:#FDE68A;}
+.cmp-block.success{background:#F0FDF4;border-color:#BBF7D0;}
+.cmp-block.failed{background:#F8FAFC;border-color:var(--color-border-default);}
+.cmp-block-title{font-size:13.5px;font-weight:700;color:var(--color-text-primary);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.cmp-id{font-weight:600;font-size:11.5px;color:var(--color-text-secondary);}
+.cmp-block-text{font-size:12.5px;color:var(--color-text-secondary);margin-top:4px;line-height:1.45;}
+.cmp-sheet-body{padding:4px 20px 20px;overflow-y:auto;}
+.cmp-summary{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:var(--color-bg-muted);margin-bottom:14px;}
+.cmp-summary-main{font-size:15px;font-weight:700;color:var(--color-text-primary);}
+.cmp-summary-sub{font-size:12px;color:var(--color-text-secondary);margin-top:2px;}
+.cmp-reasons{border:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:8px;}
+.cmp-reasons legend{font-size:13px;font-weight:700;color:var(--color-text-primary);margin-bottom:8px;padding:0;}
+.cmp-reason{display:flex;align-items:center;gap:10px;padding:12px;border:1.5px solid var(--color-border-default);border-radius:12px;
+  font-size:14px;cursor:pointer;min-height:48px;box-sizing:border-box;}
+.cmp-reason:has(input:checked){border-color:var(--color-border-brand);background:var(--color-bg-brand-subtle);}
+.cmp-reason input{width:18px;height:18px;accent-color:var(--color-bg-brand);flex-shrink:0;}
+.cmp-note-label{display:block;font-size:12.5px;font-weight:600;color:var(--color-text-secondary);margin:4px 0 6px;}
+.cmp-note{width:100%;box-sizing:border-box;border:1px solid var(--color-border-default);border-radius:10px;padding:10px 12px;
+  font:inherit;font-size:14px;resize:vertical;}
+.cmp-note:focus{outline:none;border-color:var(--color-border-focus);box-shadow:0 0 0 3px var(--color-bg-focus-ring);}
+.cmp-info{display:flex;gap:8px;font-size:12.5px;line-height:1.45;color:var(--color-text-secondary);background:#EFF6FF;
+  border-radius:10px;padding:10px 12px;margin-top:12px;}
+.cmp-info i{color:#2563EB;font-size:16px;flex-shrink:0;margin-top:1px;}
+.cmp-done{text-align:center;padding:8px 0 4px;}
+.cmp-done-icon i{font-size:52px;color:var(--color-text-success);}
+.cmp-done-id{font-size:15px;font-weight:800;color:var(--color-text-primary);margin:6px 0;}
+.cmp-done-text{font-size:13px;color:var(--color-text-secondary);line-height:1.45;margin-top:4px;}
+.drawer-actions .btn i{margin-right:4px;}
 </style>
 </head>
 <body>
@@ -5133,6 +5168,151 @@ function dashRepeat(mobile, operator, amount) {
   goTo("recharge", { serviceType: "mobile" });
 }
 
+
+/* ===== Retailer complaints ===== */
+const COMPLAINT_REASONS = [
+  ["not_received", "Recharge not received by customer"],
+  ["benefit_missing", "Recharge done, but plan benefits not given"],
+  ["other", "Other problem"],
+];
+
+function complaintChip(r) {
+  const c = r && r.complaint;
+  if (!c || !c.id) return "";
+  const label = c.status === "success" ? "Complaint: refunded" : c.status === "failed" ? "Complaint closed" : "Complaint open";
+  return ' <span class="cmp-chip ' + escapeHtml(c.status || "pending") + '">' + label + "</span>";
+}
+
+function complaintDrawerBlock(r) {
+  const c = r && r.complaint;
+  if (!c || !c.id) return "";
+  let title, text, cls;
+  if (c.status === "success") {
+    cls = "success"; title = "Complaint accepted";
+    text = (c.refund_amount != null ? formatMoney(c.refund_amount) : "The amount") + " was refunded to your Main Wallet.";
+  } else if (c.status === "failed") {
+    cls = "failed"; title = "Complaint closed";
+    text = "The operator confirmed this recharge was delivered, so no refund.";
+  } else {
+    cls = "pending"; title = "Complaint under review";
+    text = "QuickPay is checking with the operator. If the recharge was not delivered, the amount comes back to your wallet.";
+  }
+  return '<div class="cmp-block ' + cls + '"><div class="cmp-block-title"><i class="ti ti-message-report" aria-hidden="true"></i> '
+    + title + ' <span class="cmp-id">' + escapeHtml(c.id) + "</span></div>"
+    + '<div class="cmp-block-text">' + escapeHtml(text) + "</div></div>";
+}
+
+function complaintDrawerButton(r) {
+  const c = r && r.complaint;
+  if (classifyTodayStatus(r) !== "success" || (c && c.id)) return "";
+  if (c && c.can_complain) {
+    return '<button type="button" class="btn" onclick="openComplaintSheet(' + r.id + ')"><i class="ti ti-message-report" aria-hidden="true"></i> Raise Complaint</button>';
+  }
+  return '<button type="button" class="btn" disabled title="Complaints are accepted within 72 hours of a successful recharge">Complaint time over (72 h)</button>';
+}
+
+function findRechargeById(id) {
+  return (state.tx.all || []).find((x) => x.id === id)
+    || (state.tx.raw || []).find((x) => x.id === id)
+    || (state.historyCache || []).find((x) => x.id === id);
+}
+
+function complaintSheetEl() {
+  let el = document.getElementById("cmp-sheet");
+  if (el) return el;
+  el = document.createElement("div");
+  el.id = "cmp-sheet";
+  el.className = "op-sheet-backdrop";
+  el.setAttribute("hidden", "");
+  el.innerHTML = '<div class="op-sheet cmp-sheet" role="dialog" aria-modal="true" aria-labelledby="cmp-sheet-title">'
+    + '<div class="op-sheet-grip" aria-hidden="true"></div>'
+    + '<div class="op-sheet-head"><h3 id="cmp-sheet-title">Raise a complaint</h3>'
+    + '<button type="button" class="op-sheet-close" onclick="closeComplaintSheet()" aria-label="Close"><i class="ti ti-x"></i></button></div>'
+    + '<div class="cmp-sheet-body" id="cmp-sheet-body"></div></div>';
+  el.addEventListener("click", (e) => { if (e.target === el) closeComplaintSheet(); });
+  el.addEventListener("keydown", (e) => { if (e.key === "Escape") closeComplaintSheet(); });
+  document.body.appendChild(el);
+  return el;
+}
+
+function openComplaintSheet(id) {
+  const r = findRechargeById(id);
+  if (!r) return;
+  const el = complaintSheetEl();
+  document.getElementById("cmp-sheet-title").textContent = "Raise a complaint";
+  document.getElementById("cmp-sheet-body").innerHTML =
+    '<div class="cmp-summary">'
+    + operatorAvatar(null, r.operator_code, 36)
+    + '<div><div class="cmp-summary-main">' + escapeHtml(formatMobileSpaced(r.mobile_number || "")) + " · " + formatMoney(r.amount) + "</div>"
+    + '<div class="cmp-summary-sub">' + escapeHtml(r.operator_name || r.operator_code || "") + " · " + escapeHtml(txDisplayId(r)) + " · " + escapeHtml(formatDateTime(r.date)) + "</div></div></div>"
+    + '<fieldset class="cmp-reasons"><legend>What went wrong?</legend>'
+    + COMPLAINT_REASONS.map((x, i) =>
+      '<label class="cmp-reason"><input type="radio" name="cmp-reason" value="' + x[0] + '"' + (i === 0 ? " checked" : "") + "> <span>" + escapeHtml(x[1]) + "</span></label>").join("")
+    + "</fieldset>"
+    + '<label class="cmp-note-label" for="cmp-note">Note for QuickPay (optional)</label>'
+    + '<textarea id="cmp-note" class="cmp-note" maxlength="300" rows="2" placeholder="e.g. Customer says balance did not change"></textarea>'
+    + '<div class="cmp-info"><i class="ti ti-info-circle" aria-hidden="true"></i> QuickPay checks with the operator. If the recharge was not delivered, '
+    + formatMoney(r.amount) + " comes back to your Main Wallet. Usually decided within 48 hours.</div>"
+    + '<div class="modal-actions"><button type="button" class="btn" onclick="closeComplaintSheet()">Cancel</button>'
+    + '<button type="button" class="btn primary" id="cmp-submit" onclick="submitComplaint(' + r.id + ')">Submit complaint</button></div>';
+  el.removeAttribute("hidden");
+  requestAnimationFrame(() => el.classList.add("show"));
+  const first = el.querySelector('input[name="cmp-reason"]');
+  if (first) first.focus();
+}
+
+function closeComplaintSheet() {
+  const el = document.getElementById("cmp-sheet");
+  if (!el) return;
+  el.classList.remove("show");
+  setTimeout(() => el.setAttribute("hidden", ""), prefersReducedMotion() ? 0 : 180);
+}
+
+async function apiPostComplaint(payload) {
+  const res = await fetch(API_BASE + "/api/recharge/complaint", {
+    method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() }, body: JSON.stringify(payload),
+  });
+  let data = null;
+  try { data = await res.json(); } catch (e) { data = null; }
+  return { httpStatus: res.status, body: data };
+}
+
+async function submitComplaint(id) {
+  const btn = document.getElementById("cmp-submit");
+  if (btn) { btn.disabled = true; btn.textContent = "Submitting…"; }
+  const reasonEl = document.querySelector('input[name="cmp-reason"]:checked');
+  const payload = {
+    recharge_id: id,
+    reason: reasonEl ? reasonEl.value : "not_received",
+    remark: (document.getElementById("cmp-note").value || "").trim(),
+  };
+  try {
+    const { httpStatus, body } = await apiPostComplaint(payload);
+    if (httpStatus === 401) { closeComplaintSheet(); return handleAuthFailure(); }
+    if (!body || body.status !== "success" || !body.complaint) {
+      showToast((body && body.message) || "Could not submit the complaint. Please try again.");
+      if (btn) { btn.disabled = false; btn.textContent = "Submit complaint"; }
+      return;
+    }
+    // Update every cached copy so the list, drawer and dashboard agree.
+    [state.tx.all, state.tx.raw, state.historyCache].forEach((list) => {
+      (list || []).forEach((x) => { if (x.id === id) x.complaint = body.complaint; });
+    });
+    document.getElementById("cmp-sheet-title").textContent = "Complaint registered";
+    document.getElementById("cmp-sheet-body").innerHTML =
+      '<div class="cmp-done"><div class="cmp-done-icon"><i class="ti ti-circle-check-filled" aria-hidden="true"></i></div>'
+      + '<div class="cmp-done-id">' + escapeHtml(body.complaint.id) + "</div>"
+      + '<div class="cmp-done-text">' + escapeHtml(body.message || "") + "</div>"
+      + "<div class=\"cmp-done-text\">You can see the result on this transaction in Transactions.</div></div>"
+      + '<div class="modal-actions"><button type="button" class="btn primary block" onclick="closeComplaintSheet()">Done</button></div>';
+    if (state.tx.raw && state.tx.raw.length) { try { applyTxFiltersAndRender(state.tx.raw); } catch (e) {} }
+    if (document.getElementById("tx-drawer") && !document.getElementById("tx-drawer").hasAttribute("hidden")) openTxDrawer(id);
+  } catch (e) {
+    showToast("Unable to connect. Please try again.");
+    if (btn) { btn.disabled = false; btn.textContent = "Submit complaint"; }
+  }
+}
+
 /* ===== Dashboard phase 1 helpers ===== */
 /* History API returns at most 100 rows. Anything older than the oldest row we
    have is unknown, so every comparison below checks it is fully covered and
@@ -6668,7 +6848,7 @@ function renderTransactionsTable(list) {
       + '<td class="col-operator"><span class="op-dot" style="background:' + operatorColor(r.operator_code) + ';"></span>' + escapeHtml(opName) + '</td>'
       + '<td class="num amt-debit">' + (r.amount != null && r.amount !== "" ? formatMoney(r.amount) : "—") + '</td>'
       + '<td class="num">' + commissionCell(r.commission_amount) + '</td>'
-      + '<td>' + statusBadge(r.state, r.refund_status) + '</td>'
+      + '<td>' + statusBadge(r.state, r.refund_status) + complaintChip(r) + '</td>'
       + '<td><a class="tx-view-link" onclick="event.stopPropagation();openTxDrawer(' + r.id + ')">View</a></td>'
       + '</tr>';
   }).join("");
@@ -6684,7 +6864,7 @@ function renderTransactionsTable(list) {
       + '<div class="tx-card-amt">' + (r.amount != null && r.amount !== "" ? formatMoney(r.amount) : "—") + '</div>'
       + '</div>'
       + '<div class="tx-card-meta">' + escapeHtml(formatDateTime(r.date)) + ' · ' + escapeHtml(txDisplayId(r)) + '</div>'
-      + '<div class="tx-card-row2">' + comm + statusBadge(r.state, r.refund_status) + '</div>'
+      + '<div class="tx-card-row2">' + comm + statusBadge(r.state, r.refund_status) + complaintChip(r) + '</div>'
       + '</div>';
   }).join("");
 }
@@ -6708,6 +6888,7 @@ function openTxDrawer(id) {
   const isPendingLike = cls === "pending" || cls === "processing";
 
   let html = '<div class="drawer-badge-wrap">' + statusBadge(r.state, r.refund_status) + '</div>';
+  html += complaintDrawerBlock(r);
   html += drawerRow("Transaction ID", txDisplayId(r));
   html += drawerRow("Mobile", maskMobile(r.mobile_number));
   html += drawerRow("Service", txServiceLabel(r));
@@ -6767,7 +6948,7 @@ function openTxDrawer(id) {
   } else {
     html += '<button type="button" class="btn primary" onclick="rechargeAgainFromTx(' + r.id + ')">Recharge Again</button>';
   }
-  html += '<button type="button" class="btn" disabled title="Coming soon">Raise Complaint</button>';
+  html += complaintDrawerButton(r);
   html += '<button type="button" class="btn" onclick="closeDrawer()">Close</button>';
   html += "</div>";
 
