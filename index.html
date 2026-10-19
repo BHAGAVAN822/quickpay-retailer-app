@@ -2641,6 +2641,18 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 .plans-sheet-body{padding:0 16px 20px;overflow-y:auto;}
 .plans-sheet-body .plans-browser{gap:10px;}
 .rc-plan-match{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--color-text-success);margin-top:6px;}
+
+/* Confirm screen: plan benefits */
+.rc-confirm-plan{border:1px solid var(--color-border-default);border-radius:12px;padding:10px 12px;margin:0 0 12px;background:#fff;}
+.cpb-title{font-size:12.5px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.cpb-cat{font-size:11px;font-weight:600;color:var(--color-text-brand);background:var(--color-bg-brand-subtle);border-radius:6px;padding:1px 6px;}
+.cpb-row{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--color-text-primary);line-height:1.4;margin:3px 0;}
+.cpb-row i{color:var(--color-icon-brand);font-size:15px;margin-top:1px;flex-shrink:0;}
+.rc-confirm-plan .plan-bens{margin-top:6px;}
+
+.rc-confirm-box .modal-actions{flex-wrap:nowrap;}
+.rc-confirm-box .modal-actions .btn{flex:1 1 0;min-width:0;}
+.rc-confirm-box .modal-actions #rc-cancel-btn{flex:0 0 34%;height:48px;min-height:48px;}
 </style>
 </head>
 <body>
@@ -2974,7 +2986,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
                   <input type="number" id="rc-amount" placeholder="0" min="1" step="1" oninput="onRcAmountInput()" onblur="onRcAmountBlur()" inputmode="numeric">
                 </div>
                 <div class="rc-plan-match hidden" id="rc-plan-match"></div>
-                <div class="hint">Or pick a quick amount below</div>
+                <div class="hint" id="rc-quick-hint">Or pick a quick amount below</div>
                 <div class="field-error" id="rc-amount-error"></div>
                 <div class="qa-pills" id="rc-quick-amounts" aria-label="Quick amounts"></div>
               </div>
@@ -6588,8 +6600,31 @@ function closePlansSheet() {
   setTimeout(() => el.setAttribute("hidden", ""), prefersReducedMotion() ? 0 : 180);
 }
 
+/* Quick amounts: the operator's most recharged amounts (last 30 days, from
+   GET /api/popular-amounts), most popular first; the fixed list until known. */
+state.popularAmounts = {};
+async function loadPopularAmounts(code) {
+  if (!code || state.popularAmounts[code] !== undefined) return;
+  state.popularAmounts[code] = null;
+  try {
+    const url = new URL(API_BASE + "/api/popular-amounts");
+    url.searchParams.set("operator_code", code);
+    const res = await fetch(url.toString(), { headers: authHeaders() });
+    if (res.status === 200) {
+      const body = await res.json();
+      if (body && body.status === "success" && (body.amounts || []).length) state.popularAmounts[code] = body.amounts;
+    }
+  } catch (e) { /* keep the fixed list */ }
+  if (state.rc.operator === code) renderQuickAmountPills();
+}
+
 function renderQuickAmountPills() {
-  const amounts = [10, 49, 99, 199, 299, 399];
+  const code = state.rc.operator;
+  if (code && (state.rc.serviceType || "mobile") === "mobile") loadPopularAmounts(code);
+  const popular = code ? state.popularAmounts[code] : null;
+  const hint = document.getElementById("rc-quick-hint");
+  if (hint) hint.textContent = popular ? "Most recharged " + (operatorDisplayName() || "") + " amounts" : "Or pick a quick amount below";
+  const amounts = popular || [10, 49, 99, 199, 299, 399];
   const op = state.rc.operatorObj;
   const visible = amounts.filter((a) => {
     if (op && op.min_amount && a < op.min_amount) return false;
@@ -6599,7 +6634,7 @@ function renderQuickAmountPills() {
   const wrap = document.getElementById("rc-quick-amounts");
   if (!wrap) return;
   wrap.innerHTML = visible.map((a) =>
-    '<button type="button" class="qa-pill" onclick="setQuickAmount(' + a + ')">₹' + a + "</button>").join("");
+    '<button type="button" class="qa-pill' + (Number(state.rc.amount) === Number(a) ? " active" : "") + '" onclick="setQuickAmount(' + a + ')">₹' + a + "</button>").join("");
 }
 function setQuickAmount(a) {
   // Populate amount only — never submit.
@@ -6609,6 +6644,8 @@ function setQuickAmount(a) {
   document.querySelectorAll("#rc-quick-amounts .qa-pill").forEach((el) => el.classList.toggle("active", el.textContent === "₹" + a));
   updateRcSubmitState();
   updateRcSummary();
+  renderPlanMatch();
+  if (currentPlans()) renderPlansPanel();
 }
 function onRcAmountInput() {
   state.rc.amount = Number(document.getElementById("rc-amount").value) || 0;
@@ -6683,6 +6720,31 @@ function operatorDisplayName() {
   return (state.rc.operatorObj && state.rc.operatorObj.name) || state.rc.operator || "";
 }
 
+/* Benefits of the plan matching the chosen amount (operator website plans). */
+function matchedPlan() {
+  const data = currentPlans();
+  const amt = Number(state.rc.amount) || 0;
+  if (!data || !amt) return null;
+  for (const c of data.categories) {
+    const p = c.plans.find((x) => Number(x.amount) === amt);
+    if (p) return Object.assign({ category: c.name }, p);
+  }
+  return null;
+}
+function confirmPlanBenefitsHtml() {
+  const p = matchedPlan();
+  if (!p) return "";
+  const row = (icon, text) => text ? '<div class="cpb-row"><i class="ti ti-' + icon + '" aria-hidden="true"></i><span>' + escapeHtml(text) + "</span></div>" : "";
+  const extra = !p.data && !p.calls ? (p.description || []).join(" · ") : "";
+  const bens = (p.benefits || []).map((b) => '<span class="plan-ben">' + escapeHtml(b) + "</span>").join("")
+    + (p.more_benefits ? '<span class="plan-ben more">+' + p.more_benefits + " more</span>" : "");
+  return '<div class="rc-confirm-plan"><div class="cpb-title">Plan benefits <span class="cpb-cat">' + escapeHtml(p.category.replace(" (top up voucher)", "")) + "</span></div>"
+    + row("calendar", p.validity ? "Validity " + p.validity : "")
+    + row("world", p.data) + row("phone", p.calls) + row("info-circle", extra)
+    + (bens ? '<div class="plan-bens">' + bens + "</div>" : "")
+    + "</div>";
+}
+
 function renderRechargeConfirmModal() {
   const available = Number(state.wallets.main) || 0;
   const after = available - state.rc.amount;
@@ -6700,11 +6762,10 @@ function renderRechargeConfirmModal() {
     + escapeHtml(operatorDisplayName()) + "</div>"
     + '<div class="rc-confirm-amount">' + formatMoney(state.rc.amount) + "</div>"
     + "</div>"
-    + '<div class="rc-confirm-details">'
-    + modalRow("Wallet balance now", formatMoney(available))
-    + modalRow("After this recharge", formatMoney(after))
-    + (est ? '<div class="modal-row"><span class="k">Estimated commission</span><span class="v" style="color:var(--color-text-success);">≈ ' + escapeHtml(formatMoney(est.amount)) + "</span></div>" : "")
-    + "</div>"
+    + confirmPlanBenefitsHtml()
+    + (est ? '<div class="rc-confirm-details">'
+      + '<div class="modal-row"><span class="k">Estimated commission</span><span class="v" style="color:var(--color-text-success);">≈ ' + escapeHtml(formatMoney(est.amount)) + "</span></div>"
+      + "</div>" : "")
     + (est ? '<div class="rc-confirm-note">Estimate from your last ' + est.basedOn + " " + escapeHtml(operatorDisplayName()) + " recharge" + (est.basedOn === 1 ? "" : "s") + ". Final commission is shown after success.</div>" : "")
     + '<div class="modal-warn">A successful recharge cannot be reversed. Please match the number with the customer.</div>'
     + '<div class="modal-actions">'
