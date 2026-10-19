@@ -5583,7 +5583,7 @@ function renderDashComparisons(history, total, today) {
 /* D3: today's summary in the greeting line. */
 function renderDashTodaySummary(totalToday, successCount, amount, commission) {
   if (!totalToday) {
-    setText("dash-date", "No recharges yet today. Enter a mobile number below to start.");
+    setText("dash-date", "No recharges yet today.");
     return;
   }
   if (!successCount) {
