@@ -2653,6 +2653,12 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 .rc-confirm-box .modal-actions{flex-wrap:nowrap;}
 .rc-confirm-box .modal-actions .btn{flex:1 1 0;min-width:0;}
 .rc-confirm-box .modal-actions #rc-cancel-btn{flex:0 0 34%;height:48px;min-height:48px;}
+
+/* Quick amounts: up to 10, two even rows of 5 on phones (owner, 19 Oct) */
+@media (max-width:639px){
+  #rc-quick-amounts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;}
+  #rc-quick-amounts .qa-pill{min-width:0;width:100%;padding:8px 2px;font-size:13px;justify-content:center;text-align:center;white-space:nowrap;}
+}
 </style>
 </head>
 <body>
@@ -6624,7 +6630,7 @@ function renderQuickAmountPills() {
   const popular = code ? state.popularAmounts[code] : null;
   const hint = document.getElementById("rc-quick-hint");
   if (hint) hint.textContent = popular ? "Most recharged " + (operatorDisplayName() || "") + " amounts" : "Or pick a quick amount below";
-  const amounts = popular || [10, 49, 99, 199, 299, 399];
+  const amounts = (popular || [10, 49, 99, 149, 199, 249, 299, 349, 399, 499]).slice(0, 10);
   const op = state.rc.operatorObj;
   const visible = amounts.filter((a) => {
     if (op && op.min_amount && a < op.min_amount) return false;
