@@ -2607,6 +2607,40 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 #rc-op-detect{display:none !important;}
 #rc-field-operator .op-auto-hint{display:none !important;}
 #rc-field-operator .op-auto-hint.show{display:block !important;color:var(--color-text-secondary);font-size:12px;margin-top:6px;}
+
+/* ===== Browse Plans ===== */
+.plans-browser{display:flex;flex-direction:column;gap:10px;}
+.plans-loading{padding:4px 0;}
+.plans-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.plans-circle{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;color:var(--color-text-primary);}
+.plans-circle i{color:var(--color-icon-brand);}
+.plans-circle select{border:1px solid var(--color-border-default);border-radius:8px;padding:5px 8px;font:inherit;font-size:12.5px;
+  font-weight:600;background:#fff;color:var(--color-text-primary);max-width:190px;}
+.plans-upd{font-size:11px;color:var(--color-text-secondary);}
+.plans-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.plans-tabs::-webkit-scrollbar{display:none;}
+.plans-tab{flex-shrink:0;border:1px solid var(--color-border-default);background:#fff;border-radius:999px;padding:6px 12px;
+  font:inherit;font-size:12.5px;font-weight:600;color:var(--color-text-secondary);cursor:pointer;white-space:nowrap;}
+.plans-tab.active{background:var(--color-bg-brand-subtle);border-color:var(--color-border-brand);color:var(--color-text-brand);}
+.plans-count{font-size:11px;opacity:.7;}
+.plans-list{display:flex;flex-direction:column;gap:8px;max-height:520px;overflow-y:auto;padding-right:2px;}
+.plans-list.in-sheet{max-height:none;overflow:visible;}
+.plan-card{display:block;width:100%;text-align:left;border:1.5px solid var(--color-border-default);background:#fff;border-radius:12px;
+  padding:10px 12px;font:inherit;cursor:pointer;}
+.plan-card:hover{border-color:var(--color-border-brand);}
+.plan-card.selected{border-color:var(--color-border-brand);background:var(--color-bg-brand-subtle);}
+.plan-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.plan-amt{font-size:18px;font-weight:800;color:var(--color-text-primary);}
+.plan-pick{font-size:12px;font-weight:700;color:var(--color-text-brand);border:1px solid var(--color-border-brand);border-radius:8px;padding:4px 10px;}
+.plan-card.selected .plan-pick{background:var(--color-bg-brand);color:#fff;}
+.plan-facts{font-size:12.5px;color:var(--color-text-secondary);margin-top:4px;line-height:1.4;}
+.plan-bens{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.plan-ben{font-size:11px;background:var(--color-bg-muted);color:var(--color-text-secondary);border-radius:6px;padding:2px 6px;}
+.plan-ben.more{background:none;font-weight:600;}
+.plans-sheet{max-height:88vh;}
+.plans-sheet-body{padding:0 16px 20px;overflow-y:auto;}
+.plans-sheet-body .plans-browser{gap:10px;}
+.rc-plan-match{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--color-text-success);margin-top:6px;}
 </style>
 </head>
 <body>
@@ -2933,12 +2967,13 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
               <div class="rc-field" id="rc-field-amount">
                 <label>
                   Recharge Amount
-                  <button type="button" class="rc-label-action" onclick="focusPlansPanel()">Browse Plans</button>
+                  <button type="button" class="rc-label-action" onclick="openPlansBrowser()">Browse Plans</button>
                 </label>
                 <div class="amt-input-wrap">
                   <span class="rupee" aria-hidden="true">₹</span>
                   <input type="number" id="rc-amount" placeholder="0" min="1" step="1" oninput="onRcAmountInput()" onblur="onRcAmountBlur()" inputmode="numeric">
                 </div>
+                <div class="rc-plan-match hidden" id="rc-plan-match"></div>
                 <div class="hint">Or pick a quick amount below</div>
                 <div class="field-error" id="rc-amount-error"></div>
                 <div class="qa-pills" id="rc-quick-amounts" aria-label="Quick amounts"></div>
@@ -2959,7 +2994,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           <div class="rc-side-col">
             <div class="card rc-plans-card" id="rc-plans-card">
               <div class="rc-card-title">Plans &amp; Offers</div>
-              <div class="rc-card-sub">Choose a plan when available, or enter the amount manually.</div>
+              <div class="rc-card-sub" id="rc-plans-sub">Choose a plan, or enter the amount manually.</div>
               <div class="plans-placeholder" id="rc-plans-panel">
                 <i class="ti ti-device-mobile"></i>
                 Enter a mobile number to look up plans.
@@ -6359,19 +6394,198 @@ function onRcMobileInput() {
 }
 
 /* Honest plans panel — never fabricate plan rows. */
+/* ===== Browse Plans (operator website plans via GET /api/plans) ===== */
+state.plans = {};      // "OP|circle" -> response (null = none / failed)
+state.plansTab = {};   // "OP|circle" -> category name
+function plansCircle() {
+  try { return localStorage.getItem("qp_plans_circle") || ""; } catch (e) { return ""; }
+}
+function plansKey(op) { return (op || "") + "|" + (plansCircle() || "default"); }
+
+async function apiGetPlans(op, circle) {
+  const url = new URL(API_BASE + "/api/plans");
+  url.searchParams.set("operator_code", op);
+  if (circle) url.searchParams.set("circle", circle);
+  const res = await fetch(url.toString(), { headers: authHeaders() });
+  if (res.status === 404) return { httpStatus: 404, body: null };
+  return { httpStatus: res.status, body: await res.json() };
+}
+
+async function loadPlans(op) {
+  const key = plansKey(op);
+  if (state.plans[key] !== undefined) return state.plans[key];
+  state.plans[key] = "loading";
+  let data = null;
+  try {
+    const { httpStatus, body } = await apiGetPlans(op, plansCircle());
+    if (httpStatus === 200 && body && body.status === "success" && (body.categories || []).length) data = body;
+  } catch (e) { data = null; }
+  state.plans[key] = data;
+  renderPlansPanel();
+  renderPlansSheet();
+  renderPlanMatch();
+  return data;
+}
+
+function currentPlans() {
+  if ((state.rc.serviceType || "mobile") !== "mobile" || !state.rc.operator) return null;
+  const v = state.plans[plansKey(state.rc.operator)];
+  return v && v !== "loading" ? v : null;
+}
+
+function planCardHtml(p) {
+  const sel = Number(state.rc.amount) === Number(p.amount);
+  const facts = [p.validity, p.data, p.calls].filter(Boolean).map(escapeHtml).join(" · ");
+  const ben = (p.benefits || []).slice(0, 2).map((b) => '<span class="plan-ben">' + escapeHtml(b) + "</span>").join("")
+    + (p.more_benefits ? '<span class="plan-ben more">+' + p.more_benefits + " more</span>" : "");
+  const extra = !p.data && !p.calls && (p.description || []).length ? escapeHtml(p.description.join(" · ")) : "";
+  return '<button type="button" class="plan-card' + (sel ? " selected" : "") + '" onclick="pickPlan(' + Number(p.amount) + ')">'
+    + '<div class="plan-top"><span class="plan-amt">' + formatMoney(p.amount).replace(".00", "") + "</span>"
+    + '<span class="plan-pick">' + (sel ? '<i class="ti ti-check"></i> Selected' : "Select") + "</span></div>"
+    + '<div class="plan-facts">' + (facts || extra) + "</div>"
+    + (ben ? '<div class="plan-bens">' + ben + "</div>" : "")
+    + "</button>";
+}
+
+function plansBrowserHtml(data, where) {
+  const key = plansKey(state.rc.operator);
+  const cats = data.categories || [];
+  let tab = state.plansTab[key];
+  if (!cats.some((c) => c.name === tab)) tab = cats[0].name;
+  const cat = cats.find((c) => c.name === tab) || cats[0];
+  const circles = data.circles || [];
+  const upd = data.updated_at ? parseApiDate(data.updated_at) : null;
+  const updTxt = upd ? upd.toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "";
+  return '<div class="plans-head">'
+    + (circles.length > 1
+      ? '<label class="plans-circle"><i class="ti ti-map-pin" aria-hidden="true"></i><select aria-label="Circle" onchange="setPlansCircle(this.value)">'
+        + circles.map((c) => "<option" + (c === data.circle ? " selected" : "") + ">" + escapeHtml(c) + "</option>").join("") + "</select></label>"
+      : '<span class="plans-circle"><i class="ti ti-map-pin" aria-hidden="true"></i>' + escapeHtml(data.circle || "") + "</span>")
+    + (updTxt ? '<span class="plans-upd">From operator website · ' + updTxt + "</span>" : "")
+    + "</div>"
+    + '<div class="plans-tabs" role="tablist">' + cats.map((c) =>
+      '<button type="button" role="tab" class="plans-tab' + (c.name === cat.name ? " active" : "") + '" aria-selected="' + (c.name === cat.name)
+      + '" onclick="setPlansTab(' + escapeHtml(JSON.stringify(c.name)).replace(/"/g, "&quot;") + ')">' + escapeHtml(c.name.replace(" (top up voucher)", ""))
+      + ' <span class="plans-count">' + c.plans.length + "</span></button>").join("") + "</div>"
+    + '<div class="plans-list' + (where === "sheet" ? " in-sheet" : "") + '">' + cat.plans.slice().sort((x, y) => Number(x.amount) - Number(y.amount)).map(planCardHtml).join("") + "</div>";
+}
+
+function setPlansTab(name) {
+  state.plansTab[plansKey(state.rc.operator)] = name;
+  renderPlansPanel();
+  renderPlansSheet();
+}
+
+function setPlansCircle(circle) {
+  try { localStorage.setItem("qp_plans_circle", circle); } catch (e) {}
+  if (state.rc.operator) loadPlans(state.rc.operator);
+  renderPlansPanel();
+  renderPlansSheet();
+}
+
+function pickPlan(amount) {
+  const el = document.getElementById("rc-amount");
+  if (el) el.value = String(amount);
+  onRcAmountInput();
+  closePlansSheet();
+  showToast(formatMoney(amount).replace(".00", "") + " plan selected. Check and Proceed.");
+}
+
+function renderPlanMatch() {
+  const box = document.getElementById("rc-plan-match");
+  if (!box) return;
+  const data = currentPlans();
+  const amt = Number(state.rc.amount) || 0;
+  let found = null;
+  if (data && amt) {
+    for (const c of data.categories) { found = c.plans.find((p) => Number(p.amount) === amt); if (found) break; }
+  }
+  box.classList.toggle("hidden", !found);
+  if (found) {
+    box.innerHTML = '<i class="ti ti-circle-check" aria-hidden="true"></i> '
+      + escapeHtml([found.validity, found.data, found.calls].filter(Boolean).join(" · ") || (found.description || []).join(" · "));
+  }
+}
+
 function renderPlansPanel() {
   const panel = document.getElementById("rc-plans-panel");
   if (!panel) return;
-  const needLen = (state.rc.serviceType || "mobile") === "mobile" ? 10 : 1;
-  if (state.rc.mobile.length >= needLen) {
-    panel.innerHTML = '<i class="ti ti-clipboard-list"></i>'
-      + "<strong>Plans & Offers unavailable</strong><br>"
-      + "Recharge plans are currently unavailable. Enter the amount manually.";
-  } else {
-    panel.innerHTML = '<i class="ti ti-device-mobile"></i>Enter a '
-      + ((state.rc.serviceType || "mobile") === "dth" ? "customer number" : "mobile number")
-      + " to look up plans.";
+  const svc = state.rc.serviceType || "mobile";
+  const placeholder = (html) => { panel.className = "plans-placeholder"; panel.innerHTML = html; };
+  if (svc !== "mobile") {
+    placeholder('<i class="ti ti-clipboard-list"></i><strong>Plans not available for DTH yet</strong>Enter the amount manually.');
+    return;
   }
+  if (!state.rc.operator) {
+    placeholder('<i class="ti ti-antenna-bars-5"></i>Select an operator to see its plans.');
+    return;
+  }
+  const v = state.plans[plansKey(state.rc.operator)];
+  if (v === undefined) { loadPlans(state.rc.operator); }
+  if (v === undefined || v === "loading") {
+    panel.className = "plans-loading";
+    panel.innerHTML = Array(3).fill('<div class="skel skel-line" style="height:64px;border-radius:12px;margin-bottom:8px;"></div>').join("");
+    return;
+  }
+  if (!v) {
+    placeholder('<i class="ti ti-clipboard-list"></i><strong>Plans not available for ' + escapeHtml(operatorDisplayName())
+      + "</strong>Enter the amount manually.");
+    return;
+  }
+  panel.className = "plans-browser";
+  panel.innerHTML = plansBrowserHtml(v, "panel");
+}
+
+/* Phones/tablets: Browse Plans opens a bottom sheet; desktop scrolls to the side card. */
+function plansSheetEl() {
+  let el = document.getElementById("plans-sheet");
+  if (el) return el;
+  el = document.createElement("div");
+  el.id = "plans-sheet";
+  el.className = "op-sheet-backdrop";
+  el.setAttribute("hidden", "");
+  el.innerHTML = '<div class="op-sheet plans-sheet" role="dialog" aria-modal="true" aria-labelledby="plans-sheet-title">'
+    + '<div class="op-sheet-grip" aria-hidden="true"></div>'
+    + '<div class="op-sheet-head"><h3 id="plans-sheet-title">Plans</h3>'
+    + '<button type="button" class="op-sheet-close" onclick="closePlansSheet()" aria-label="Close"><i class="ti ti-x"></i></button></div>'
+    + '<div class="plans-sheet-body" id="plans-sheet-body"></div></div>';
+  el.addEventListener("click", (e) => { if (e.target === el) closePlansSheet(); });
+  el.addEventListener("keydown", (e) => { if (e.key === "Escape") closePlansSheet(); });
+  document.body.appendChild(el);
+  return el;
+}
+
+function renderPlansSheet() {
+  const el = document.getElementById("plans-sheet");
+  if (!el || el.hasAttribute("hidden")) return;
+  const body = document.getElementById("plans-sheet-body");
+  document.getElementById("plans-sheet-title").textContent = (operatorDisplayName() || "Operator") + " plans";
+  const v = state.plans[plansKey(state.rc.operator)];
+  if (v === undefined || v === "loading") {
+    body.innerHTML = Array(4).fill('<div class="skel skel-line" style="height:64px;border-radius:12px;margin-bottom:8px;"></div>').join("");
+  } else if (!v) {
+    body.innerHTML = '<div class="plans-placeholder"><i class="ti ti-clipboard-list"></i><strong>Plans not available</strong>Enter the amount manually.</div>';
+  } else {
+    body.innerHTML = plansBrowserHtml(v, "sheet");
+  }
+}
+
+function openPlansBrowser() {
+  if ((state.rc.serviceType || "mobile") !== "mobile") { focusPlansPanel(); return; }
+  if (!state.rc.operator) { showToast("Select an operator first."); openOperatorSheet(); return; }
+  if (window.matchMedia("(min-width:1024px)").matches) { focusPlansPanel(); return; }
+  const el = plansSheetEl();
+  el.removeAttribute("hidden");
+  requestAnimationFrame(() => el.classList.add("show"));
+  if (state.plans[plansKey(state.rc.operator)] === undefined) loadPlans(state.rc.operator);
+  renderPlansSheet();
+}
+
+function closePlansSheet() {
+  const el = document.getElementById("plans-sheet");
+  if (!el || el.hasAttribute("hidden")) return;
+  el.classList.remove("show");
+  setTimeout(() => el.setAttribute("hidden", ""), prefersReducedMotion() ? 0 : 180);
 }
 
 function renderQuickAmountPills() {
@@ -6402,6 +6616,8 @@ function onRcAmountInput() {
   document.querySelectorAll("#rc-quick-amounts .qa-pill").forEach((el) => el.classList.remove("active"));
   updateRcSubmitState();
   updateRcSummary();
+  renderPlanMatch();
+  if (currentPlans()) renderPlansPanel();
 }
 function validateAmount() {
   const op = state.rc.operatorObj;
