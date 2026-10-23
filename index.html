@@ -3482,6 +3482,9 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             <div class="label">Commission Wallet</div>
             <div class="bal" id="w-commission">—</div>
             <div class="sub" style="font-size:11.5px;color:var(--text-secondary);">Commission earned</div>
+            <div class="wallet-balance-actions" onclick="event.stopPropagation()">
+              <button type="button" class="btn" id="comm-transfer-btn" onclick="openCommTransfer()" aria-label="Move commission to main wallet"><i class="ti ti-arrows-exchange"></i> Move to Main</button>
+            </div>
           </div>
           <div class="card wallet-bal-card" id="wallet-card-dmr" role="tab" aria-selected="false" onclick="setWalletTab('dmr')" data-tab="dmr">
             <div class="wallet-bal-top">
@@ -8747,6 +8750,96 @@ function renderWalletSummary() {
     setText("w-dmr", "—");
     setText("w-balance", "—");
     setText("w-last-updated", "Last updated —");
+  }
+}
+
+/* =========================================================================
+   COMMISSION -> MAIN TRANSFER
+   Moves retailer's own commission balance into the main wallet.
+   POST /api/commission/transfer {amount, reference}; the reference is
+   generated once per dialog-open so a double-tap/refresh retry is
+   deduplicated server-side instead of moving money twice.
+   ========================================================================= */
+let commTransferSubmitting = false;
+
+async function apiPostCommissionTransfer(payload) {
+  const res = await fetch(API_BASE + "/api/commission/transfer", {
+    method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() }, body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+
+function openCommTransfer() {
+  const avail = Number(state.wallets && state.wallets.commission) || 0;
+  if (avail <= 0) {
+    showToast("No commission balance to move.");
+    return;
+  }
+  // One idempotency reference per dialog open - a retried POST with the
+  // same reference is a server-side no-op, not a second transfer.
+  state.commTransferRef = "comm-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+  const box = document.getElementById("rc-modal-box");
+  box.innerHTML =
+    '<h3 class="rc-confirm-title" id="rc-modal-title">Move commission to Main wallet</h3>'
+    + '<div class="modal-row"><span class="k">Available commission</span><span class="v">' + formatMoney(avail) + '</span></div>'
+    + '<div class="rc-field" style="margin:14px 0 4px;text-align:left;">'
+    + '<label for="comm-transfer-amount" style="font-size:12.5px;font-weight:600;color:var(--text-secondary);">Amount to move</label>'
+    + '<div class="amt-input-wrap" style="display:flex;align-items:center;gap:8px;">'
+    + '<span class="rupee">&#8377;</span>'
+    + '<input type="number" id="comm-transfer-amount" min="1" step="0.01" inputmode="decimal" value="' + avail.toFixed(2) + '" style="flex:1;height:44px;" aria-label="Amount to move">'
+    + '<button type="button" class="btn sm" onclick="commTransferSetMax()">Max</button>'
+    + '</div></div>'
+    + '<div class="modal-actions">'
+    + '<button type="button" class="btn" onclick="closeRcModal()">Cancel</button>'
+    + '<button type="button" class="btn primary" id="comm-transfer-submit" onclick="submitCommTransfer()">Move to Main</button>'
+    + '</div>';
+  openRcModalBackdrop();
+  setTimeout(function () { const i = document.getElementById("comm-transfer-amount"); if (i) i.focus(); }, 60);
+}
+
+function commTransferSetMax() {
+  const avail = Number(state.wallets && state.wallets.commission) || 0;
+  const i = document.getElementById("comm-transfer-amount");
+  if (i) i.value = avail.toFixed(2);
+}
+
+async function submitCommTransfer() {
+  if (commTransferSubmitting) return;
+  const avail = Number(state.wallets && state.wallets.commission) || 0;
+  const input = document.getElementById("comm-transfer-amount");
+  const amount = input ? Number(input.value) : 0;
+  if (!amount || amount <= 0) { showToast("Enter an amount above zero."); return; }
+  if (amount > avail + 0.001) { showToast("Amount is more than your commission balance."); return; }
+
+  commTransferSubmitting = true;
+  const btn = document.getElementById("comm-transfer-submit");
+  if (btn) { btn.disabled = true; btn.textContent = "Moving..."; }
+  try {
+    const { httpStatus, body } = await apiPostCommissionTransfer({
+      amount: Math.round(amount * 100) / 100,
+      reference: state.commTransferRef,
+    });
+    if (httpStatus === 401) { handleAuthFailure(); return; }
+    if (body && body.status === "success") {
+      const moved = body.transferred != null ? body.transferred : amount;
+      const box = document.getElementById("rc-modal-box");
+      box.innerHTML =
+        '<div class="result-icon success"><i class="ti ti-check"></i></div>'
+        + '<div class="result-title" id="rc-modal-title">' + formatMoney(moved) + ' moved to Main wallet</div>'
+        + '<div class="modal-row"><span class="k">Main balance</span><span class="v">' + formatMoney(body.main_balance_after) + '</span></div>'
+        + '<div class="modal-row"><span class="k">Commission left</span><span class="v">' + formatMoney(body.balance_after) + '</span></div>'
+        + '<div class="modal-actions"><button type="button" class="btn primary block" onclick="closeRcModal()">Done</button></div>';
+      try { await refreshWalletBalance(); renderWalletSummary(); } catch (e) {}
+    } else {
+      showToast((body && body.message) || "Transfer failed. Please try again.");
+      if (btn) { btn.disabled = false; btn.textContent = "Move to Main"; }
+    }
+  } catch (e) {
+    showToast("Could not reach the server. Check Transactions before retrying.");
+    if (btn) { btn.disabled = false; btn.textContent = "Move to Main"; }
+  } finally {
+    commTransferSubmitting = false;
   }
 }
 
