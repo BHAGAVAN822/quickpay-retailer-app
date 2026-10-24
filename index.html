@@ -2010,6 +2010,41 @@ a:focus:not(:focus-visible),
 .settings-card{padding:16px;}
 .settings-card .title{margin:0 0 14px;font-size:14px;font-weight:700;color:var(--color-text-primary);}
 .settings-card .hint{font-size:12px;color:var(--text-secondary);margin:0 0 12px;line-height:1.45;}
+body:not(.is-channel) .channel-only{display:none !important;}
+body.is-channel .retailer-only{display:none !important;}
+.net-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px;}
+@media (min-width:1024px){.net-kpis{grid-template-columns:repeat(5,minmax(0,1fr));}}
+.net-kpi{background:#fff;border:1px solid var(--color-border-default,#e2e8f0);border-radius:14px;padding:12px 14px;}
+.net-kpi span{display:block;font-size:12px;color:var(--text-secondary);}
+.net-kpi b{display:block;font-size:19px;margin-top:2px;color:var(--color-text-primary);}
+.net-kpi.warn b{color:#b91c1c;}
+.net-tabs{display:flex;gap:6px;margin-bottom:10px;}
+.net-tab{flex:1;padding:10px;border-radius:999px;border:1px solid var(--color-border-default,#e2e8f0);background:#fff;font-weight:600;font-size:13px;cursor:pointer;color:var(--text-secondary);}
+.net-tab.active{background:var(--color-text-brand,#c2410c);border-color:transparent;color:#fff;}
+.net-count{display:inline-block;min-width:18px;padding:0 5px;border-radius:999px;background:#dc2626;color:#fff;font-size:11px;margin-left:4px;}
+.net-panel{padding:12px 14px;}
+.net-panel[hidden]{display:none !important;}
+.net-search{width:100%;padding:11px 12px;border:1px solid var(--color-border-default);border-radius:var(--radius-md,10px);margin-bottom:6px;}
+.net-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--color-border-default,#eef2f7);}
+.net-row:last-child{border-bottom:0;}
+.net-main{flex:1 1 auto;min-width:0;}
+.net-name{font-weight:600;font-size:14px;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.net-sub{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+.net-bal{font-weight:700;font-size:14px;text-align:right;white-space:nowrap;}
+.net-bal.low{color:#b91c1c;}
+.net-tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:6px;background:#eef2ff;color:#4338ca;margin-left:6px;vertical-align:middle;}
+.net-empty{padding:18px 4px;text-align:center;color:var(--text-secondary);font-size:13px;}
+.net-sheet-body{padding:4px 20px 22px;}
+.net-sheet-body .settings-field input{letter-spacing:.5px;}
+.net-pin input{font-size:22px;letter-spacing:10px;text-align:center;}
+.net-auto-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:13px;}
+.net-auto-bar.paused{background:#fff7ed;border-color:#fed7aa;}
+.net-auto-bar[hidden]{display:none !important;}
+.net-tag.auto{background:#dcfce7;color:#15803d;}
+.net-tag.auto.off{background:#f1f5f9;color:#64748b;}
+.net-switch{display:flex;align-items:center;gap:10px;font-weight:600;margin:4px 0 12px;}
+.net-quick{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 10px;}
+.net-quick button{padding:7px 12px;border-radius:999px;border:1px solid var(--color-border-default,#e2e8f0);background:#fff;font-weight:600;cursor:pointer;}
 .kyc-card{margin-top:16px;}
 .kyc-row{display:flex;align-items:center;gap:12px;}
 .kyc-icon{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--color-bg-muted,#f1f5f9);color:var(--color-text-brand);font-size:20px;}
@@ -2814,6 +2849,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
         <div class="sb-section nav-section">
           <div class="sb-section-label nav-section-label">MAIN</div>
           <div class="sb-item" data-nav="dashboard" onclick="goTo('dashboard')"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></div>
+          <div class="sb-item channel-only" data-nav="network" onclick="goTo('network')"><i class="ti ti-users-group"></i><span>My Network</span></div>
           <div class="sb-item" id="sb-recharge-toggle" onclick="toggleRechargeMenu()"><i class="ti ti-refresh"></i><span>Recharge</span><i class="ti ti-chevron-down chev"></i></div>
           <div class="sb-sub" id="sb-recharge-sub">
             <!-- filled by renderServiceNav() from /api/services -->
@@ -3766,6 +3802,26 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
       </div>
 
 <!-- ============ SUPPORT V2 ============ -->
+      <!-- MD / DT: My Network (GET/POST /api/channel/*) -->
+      <div class="screen hidden" id="screen-network">
+        <div class="net-kpis" id="net-kpis"></div>
+        <div class="net-tabs" role="tablist">
+          <button type="button" class="net-tab active" data-ntab="people" onclick="setNetTab('people')">Network</button>
+          <button type="button" class="net-tab" data-ntab="transfers" onclick="setNetTab('transfers')">Sent</button>
+          <button type="button" class="net-tab" data-ntab="requests" onclick="setNetTab('requests')">Requests <span class="net-count" id="net-req-count" hidden></span></button>
+        </div>
+        <div class="card net-panel" id="net-panel-people">
+          <div class="net-auto-bar" id="net-auto-bar" hidden>
+            <span id="net-auto-text"></span>
+            <button type="button" class="btn sm" id="net-auto-pause" onclick="toggleNetAutoPause()"></button>
+          </div>
+          <input type="search" class="net-search" id="net-search" placeholder="Search name or mobile" oninput="renderNetPeople()">
+          <div id="net-people"></div>
+        </div>
+        <div class="card net-panel" id="net-panel-transfers" hidden><div id="net-transfers"></div></div>
+        <div class="card net-panel" id="net-panel-requests" hidden><div id="net-requests"></div></div>
+      </div>
+
       <div class="screen hidden" id="screen-support">
         <div class="support-page-intro">
           <div>
@@ -4115,7 +4171,8 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
   <button type="button" class="bn-item" data-nav="dashboard" onclick="goTo('dashboard')" aria-label="Home"><i class="ti ti-layout-grid" aria-hidden="true"></i>Home</button>
   <button type="button" class="bn-item" data-nav="recharge" onclick="goTo('recharge')" aria-label="Recharge"><i class="ti ti-bolt" aria-hidden="true"></i>Recharge</button>
   <button type="button" class="bn-item" data-nav="transactions" onclick="goTo('transactions')" aria-label="Transactions"><i class="ti ti-list-details" aria-hidden="true"></i>Txns</button>
-  <button type="button" class="bn-item" data-nav="ledger" onclick="goTo('ledger')" aria-label="Ledger"><i class="ti ti-receipt" aria-hidden="true"></i>Ledger</button>
+  <button type="button" class="bn-item retailer-only" data-nav="ledger" onclick="goTo('ledger')" aria-label="Ledger"><i class="ti ti-receipt" aria-hidden="true"></i>Ledger</button>
+  <button type="button" class="bn-item channel-only" data-nav="network" onclick="goTo('network')" aria-label="My Network"><i class="ti ti-users-group" aria-hidden="true"></i>Network</button>
   <button type="button" class="bn-item" data-nav="wallet" onclick="goTo('wallet')" aria-label="Wallet"><i class="ti ti-wallet" aria-hidden="true"></i>Wallet</button>
 </nav>
 
@@ -5013,7 +5070,7 @@ function goTo(screen, opts) {
     dashboard: "Dashboard",
     recharge: "Recharge",
     transactions: "Transactions", ledger: "Ledger", commission: "Commission Report",
-    reports: "Reports", wallet: "Wallet", support: "Support", settings: "Settings",
+    reports: "Reports", wallet: "Wallet", support: "Support", settings: "Settings", network: "My Network",
   };
   document.getElementById("page-title").textContent = titles[screen] || "QuickPay";
 
@@ -5042,6 +5099,7 @@ function goTo(screen, opts) {
     else if (screen === "wallet") loadWalletScreen();
     else if (screen === "support") loadSupportScreen();
     else if (screen === "settings") loadSettingsScreen(opts);
+    else if (screen === "network") loadNetworkScreen();
   } catch (e) {
     showToast("Something went wrong loading this screen. Please try again.");
   }
@@ -10422,6 +10480,7 @@ function scheduleUpiAutoClose() {
 }
 
 function routeAfterAuth() {
+  applyChannelRole();
   let pendingUpi = null;
   try { pendingUpi = sessionStorage.getItem("upi_amount"); } catch (e) {}
   const upiReturnStatus = readUpiReturnParams();
@@ -11125,6 +11184,281 @@ async function loadSettingsScreen(opts) {
   renderSettingsProfile();
 }
 
+
+/* ===== MD / DT: My Network (owner, 24 Oct 2026) =====
+   Shown only to MD / distributor logins. Send balance = plain transfer with the
+   4-digit transaction PIN (not udhaar); reversal only through QuickPay admin. */
+const CHANNEL_ROLES = ["distributor", "sub_distributor", "md"];
+function isChannelRole() { return CHANNEL_ROLES.includes((state.role || "").toLowerCase()); }
+function applyChannelRole() { document.body.classList.toggle("is-channel", isChannelRole()); }
+applyChannelRole();
+state.net = { summary: null, people: [], transfers: [], requests: [], tab: "people" };
+
+async function netCall(path, body) {
+  const opts = body === undefined ? { headers: authHeaders() }
+    : { method: "POST", headers: Object.assign({ "Content-Type": "application/json" }, authHeaders()), body: JSON.stringify(body) };
+  const res = await fetch(API_BASE + "/api/channel" + path, opts);
+  const data = await res.json().catch(() => null);
+  if (res.status === 200 && data && data.status === "success") return data;
+  throw new Error((data && data.message) || "Something went wrong. Try again.");
+}
+function netMoney(n) { return "₹" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 }); }
+
+async function loadNetworkScreen() {
+  if (!isChannelRole()) { goTo("dashboard"); return; }
+  document.getElementById("net-kpis").innerHTML = Array(5).fill('<div class="net-kpi"><span>&nbsp;</span><b class="skel" style="height:20px"></b></div>').join("");
+  try {
+    const [sum, down] = await Promise.all([netCall("/summary"), netCall("/downline")]);
+    state.net.summary = sum; state.net.people = down.partners || [];
+    renderNetKpis(); renderNetPeople();
+    netCall("/fund-requests").then((r) => { state.net.requests = r.requests || []; renderNetRequests(); }).catch(() => {});
+    if (state.net.tab !== "people") setNetTab(state.net.tab);
+  } catch (e) {
+    document.getElementById("net-people").innerHTML = '<div class="net-empty">' + escapeHtml(e.message) + "</div>";
+  }
+}
+
+function renderNetKpis() {
+  const s = state.net.summary;
+  if (!s) return;
+  const k = (label, val, cls) => '<div class="net-kpi ' + (cls || "") + '"><span>' + label + "</span><b>" + val + "</b></div>";
+  document.getElementById("net-kpis").innerHTML =
+    k("My balance", netMoney(s.balance)) + k("Retailers", s.retailer_count + (s.network_count > s.retailer_count ? " + " + (s.network_count - s.retailer_count) + " DT" : "")) +
+    k("Today's sale", netMoney(s.today_sale) + '<small style="font-size:12px;font-weight:500;color:var(--text-secondary)"> · ' + s.today_recharges + "</small>") +
+    k("Low balance", s.low_balance_count, s.low_balance_count ? "warn" : "") + k("Requests", s.pending_requests, s.pending_requests ? "warn" : "");
+  const c = document.getElementById("net-req-count");
+  c.hidden = !s.pending_requests; c.textContent = s.pending_requests || "";
+  const bar = document.getElementById("net-auto-bar");
+  bar.hidden = !s.auto_count;
+  bar.classList.toggle("paused", !!s.auto_paused);
+  const nr = s.auto_count + " retailer" + (s.auto_count > 1 ? "s" : "");
+  document.getElementById("net-auto-text").textContent = s.auto_paused ? "Auto Sale paused (" + nr + ")" : "Auto Sale on for " + nr;
+  document.getElementById("net-auto-pause").textContent = s.auto_paused ? "Resume" : "Pause all";
+}
+
+async function toggleNetAutoPause() {
+  const s = state.net.summary;
+  try {
+    const r = await netCall("/auto/pause", { paused: !s.auto_paused });
+    s.auto_paused = r.paused; renderNetKpis(); renderNetPeople();
+    showToast(r.paused ? "Auto Sale paused." : "Auto Sale resumed.", "success");
+  } catch (e) { showToast(e.message, "error"); }
+}
+
+function openNetAuto(pid) {
+  const p = state.net.people.find((x) => x.id === pid);
+  const s = state.net.summary;
+  if (!p || !s) return;
+  if (!s.pin_set) { openNetSetPin(() => openNetAuto(pid)); return; }
+  const a = p.auto || { active: false, threshold: 500, amount: 1000, max_per_day: 2, today_count: 0 };
+  const other = p.auto && p.auto.sender_id && p.auto.sender_id !== Number(state.partnerId) ? p.auto.sender : "";
+  netSheet("Auto Sale – " + p.name,
+    (other ? '<div class="field-error show">Auto Sale for this retailer is set by ' + escapeHtml(other) + ".</div>" : "")
+    + '<label class="net-switch"><input type="checkbox" id="net-auto-on"' + (a.active ? " checked" : "") + "> Auto Sale on for this retailer</label>"
+    + '<div class="settings-field-row"><div class="settings-field"><label>When balance is below ₹</label><input id="net-auto-th" type="number" inputmode="numeric" min="0" value="' + a.threshold + '"></div>'
+    + '<div class="settings-field"><label>Send ₹ (max ' + netMoney(s.max_transfer) + ')</label><input id="net-auto-amt" type="number" inputmode="numeric" min="1" value="' + a.amount + '"></div></div>'
+    + '<div class="settings-field"><label>At most how many times a day</label><input id="net-auto-n" type="number" inputmode="numeric" min="1" max="20" value="' + a.max_per_day + '"></div>'
+    + (p.auto ? '<div class="hint">Sent today: ' + a.today_count + " of " + a.max_per_day + (a.last_error ? ' · <span style="color:#b91c1c">' + escapeHtml(a.last_error) + "</span>" : "") + "</div>" : "")
+    + '<div class="hint">Example: below ₹' + a.threshold + " → ₹" + a.amount + " goes from your balance automatically (checked every minute).</div>"
+    + '<div class="settings-field net-pin"><label>Transaction PIN</label><input id="net-auto-pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></div>'
+    + '<div class="field-error" id="net-auto-err"></div><button type="button" class="btn primary block" id="net-auto-btn">Save</button>');
+  document.getElementById("net-auto-btn").onclick = async (ev) => {
+    const body = { retailer_id: pid, active: document.getElementById("net-auto-on").checked,
+      threshold: Number(document.getElementById("net-auto-th").value), amount: Number(document.getElementById("net-auto-amt").value),
+      max_per_day: Number(document.getElementById("net-auto-n").value), pin: document.getElementById("net-auto-pin").value };
+    hideFieldError("net-auto-err");
+    if (body.active && !(body.amount >= 1)) return showFieldError("net-auto-err", "Enter the amount to send.");
+    if (body.amount > s.max_transfer) return showFieldError("net-auto-err", "Maximum per transfer is " + netMoney(s.max_transfer) + ".");
+    if (!/^\d{4}$/.test(body.pin)) return showFieldError("net-auto-err", "Enter your 4-digit PIN.");
+    ev.target.disabled = true;
+    try {
+      await netCall("/auto", body);
+      closeNetSheet();
+      showToast(body.active ? "Auto Sale saved for " + p.name + "." : "Auto Sale switched off for " + p.name + ".", "success", 5000);
+      loadNetworkScreen();
+    } catch (e) { showFieldError("net-auto-err", e.message); ev.target.disabled = false; }
+  };
+}
+
+function setNetTab(tab) {
+  state.net.tab = tab;
+  document.querySelectorAll(".net-tab").forEach((b) => b.classList.toggle("active", b.getAttribute("data-ntab") === tab));
+  ["people", "transfers", "requests"].forEach((t) => { document.getElementById("net-panel-" + t).hidden = t !== tab; });
+  if (tab === "transfers") loadNetTransfers();
+  if (tab === "requests") renderNetRequests();
+}
+
+function renderNetPeople() {
+  const q = (document.getElementById("net-search").value || "").trim().toLowerCase();
+  const list = state.net.people.filter((p) => !q || p.name.toLowerCase().includes(q) || (p.mobile || "").includes(q));
+  const box = document.getElementById("net-people");
+  if (!list.length) { box.innerHTML = '<div class="net-empty">' + (state.net.people.length ? "No match." : "No retailers in your network yet.") + "</div>"; return; }
+  box.innerHTML = list.map((p) => {
+    const dt = p.role !== "retailer" ? '<span class="net-tag">DT</span>' : "";
+    const auto = p.auto && p.auto.active ? '<span class="net-tag auto' + (state.net.summary && state.net.summary.auto_paused ? " off" : "") + '">AUTO ₹' + p.auto.amount + "</span>" : "";
+    const sub = [p.mobile, p.upline ? "via " + p.upline : "", p.today_recharges ? "Today " + netMoney(p.today_sale) + " · " + p.today_recharges : "No sale today"]
+      .filter(Boolean).join(" · ");
+    const autoBtn = p.role === "retailer" ? '<button type="button" class="btn sm" onclick="openNetAuto(' + p.id + ')" aria-label="Auto Sale">Auto</button>' : "";
+    return '<div class="net-row"><div class="net-main"><div class="net-name">' + escapeHtml(p.name) + dt + auto + '</div><div class="net-sub">' + escapeHtml(sub) + "</div></div>"
+      + '<div class="net-bal' + (p.low ? " low" : "") + '">' + netMoney(p.balance) + "</div>"
+      + autoBtn + '<button type="button" class="btn sm primary" onclick="openNetSend(' + p.id + ')">Send</button></div>';
+  }).join("");
+}
+
+/* ---- bottom sheet (send / PIN) ---- */
+function netSheet(title, html) {
+  let el = document.getElementById("net-sheet");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "net-sheet"; el.className = "op-sheet-backdrop"; el.setAttribute("hidden", "");
+    el.innerHTML = '<div class="op-sheet" role="dialog" aria-modal="true"><div class="op-sheet-grip" aria-hidden="true"></div>'
+      + '<div class="op-sheet-head"><h3 id="net-sheet-title"></h3><button type="button" class="op-sheet-close" onclick="closeNetSheet()" aria-label="Close"><i class="ti ti-x"></i></button></div>'
+      + '<div class="net-sheet-body" id="net-sheet-body"></div></div>';
+    el.addEventListener("click", (e) => { if (e.target === el) closeNetSheet(); });
+    document.body.appendChild(el);
+  }
+  document.getElementById("net-sheet-title").textContent = title;
+  document.getElementById("net-sheet-body").innerHTML = html;
+  el.removeAttribute("hidden");
+  requestAnimationFrame(() => el.classList.add("show"));
+  const first = el.querySelector("input");
+  if (first) setTimeout(() => first.focus(), 250);
+}
+function closeNetSheet() {
+  const el = document.getElementById("net-sheet");
+  if (!el) return;
+  el.classList.remove("show");
+  setTimeout(() => el.setAttribute("hidden", ""), 180);
+}
+
+function openNetSetPin(after) {
+  const has = state.net.summary && state.net.summary.pin_set;
+  netSheet(has ? "Change transaction PIN" : "Set transaction PIN",
+    (has ? '<div class="settings-field net-pin"><label>Current PIN</label><input id="net-pin-old" type="password" inputmode="numeric" maxlength="4"></div>' : '<div class="hint">You need this 4-digit PIN every time you send balance. Do not share it.</div>')
+    + '<div class="settings-field net-pin"><label>New PIN</label><input id="net-pin-new" type="password" inputmode="numeric" maxlength="4"></div>'
+    + '<div class="settings-field net-pin"><label>Confirm new PIN</label><input id="net-pin-new2" type="password" inputmode="numeric" maxlength="4"></div>'
+    + '<div class="field-error" id="net-pin-err"></div><button type="button" class="btn primary block" id="net-pin-btn">Save PIN</button>');
+  document.getElementById("net-pin-btn").onclick = async () => {
+    const n1 = document.getElementById("net-pin-new").value, n2 = document.getElementById("net-pin-new2").value;
+    const old = has ? document.getElementById("net-pin-old").value : "";
+    if (!/^\d{4}$/.test(n1)) return showFieldError("net-pin-err", "PIN must be 4 digits.");
+    if (n1 !== n2) return showFieldError("net-pin-err", "The two PINs do not match.");
+    try {
+      await netCall("/pin", { new_pin: n1, old_pin: old });
+      state.net.summary.pin_set = true;
+      closeNetSheet(); showToast("PIN saved.", "success");
+      if (after) setTimeout(after, 250);
+    } catch (e) { showFieldError("net-pin-err", e.message); }
+  };
+}
+
+function openNetSend(pid) {
+  const p = state.net.people.find((x) => x.id === pid);
+  const s = state.net.summary;
+  if (!p || !s) return;
+  if (!s.pin_set) { openNetSetPin(() => openNetSend(pid)); return; }
+  const quick = [500, 1000, 2000, 5000].filter((a) => a <= s.max_transfer);
+  netSheet("Send balance",
+    '<div class="net-row" style="padding-top:0"><div class="net-main"><div class="net-name">' + escapeHtml(p.name) + '</div><div class="net-sub">' + escapeHtml(p.mobile)
+      + " · balance " + netMoney(p.balance) + "</div></div></div>"
+    + '<div class="settings-field"><label>Amount (max ' + netMoney(s.max_transfer) + ")</label><input id=\"net-amt\" type=\"number\" inputmode=\"numeric\" min=\"1\" step=\"1\"></div>"
+    + '<div class="net-quick">' + quick.map((a) => '<button type="button" onclick="document.getElementById(\'net-amt\').value=' + a + '">₹' + a + "</button>").join("") + "</div>"
+    + '<div class="settings-field net-pin"><label>Transaction PIN</label><input id="net-pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></div>'
+    + '<div class="hint">Your balance: ' + netMoney(s.balance) + '. Money moves instantly. Only QuickPay admin can reverse a transfer.</div>'
+    + '<div class="field-error" id="net-send-err"></div><button type="button" class="btn primary block" id="net-send-btn">Send</button>'
+    + '<button type="button" class="btn block" style="margin-top:8px" onclick="openNetSetPin()">Forgot / change PIN</button>');
+  const ref = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random();
+  document.getElementById("net-send-btn").onclick = async (ev) => {
+    const amt = Number(document.getElementById("net-amt").value), pin = document.getElementById("net-pin").value;
+    hideFieldError("net-send-err");
+    if (!(amt >= 1)) return showFieldError("net-send-err", "Enter the amount.");
+    if (amt > s.max_transfer) return showFieldError("net-send-err", "Maximum per transfer is " + netMoney(s.max_transfer) + ".");
+    if (!/^\d{4}$/.test(pin)) return showFieldError("net-send-err", "Enter your 4-digit PIN.");
+    ev.target.disabled = true; ev.target.textContent = "Sending…";
+    try {
+      const r = await netCall("/transfer", { to_partner_id: pid, amount: amt, pin: pin, client_ref: ref });
+      s.balance = r.balance; p.balance = r.receiver_balance; p.low = p.role === "retailer" && p.balance < 500;
+      closeNetSheet(); renderNetKpis(); renderNetPeople();
+      showToast(netMoney(amt) + " sent to " + p.name + ".", "success", 5000);
+    } catch (e) {
+      showFieldError("net-send-err", e.message);
+      ev.target.disabled = false; ev.target.textContent = "Send";
+    }
+  };
+}
+
+async function loadNetTransfers() {
+  const box = document.getElementById("net-transfers");
+  try {
+    const r = await netCall("/transfers");
+    state.net.transfers = r.transfers || [];
+  } catch (e) { box.innerHTML = '<div class="net-empty">' + escapeHtml(e.message) + "</div>"; return; }
+  if (!state.net.transfers.length) { box.innerHTML = '<div class="net-empty">No transfers yet.</div>'; return; }
+  const label = { requested: "Reverse requested", reversed: "Reversed", rejected: "Reverse rejected" };
+  box.innerHTML = state.net.transfers.map((t) => {
+    let when = ""; try { when = new Date(t.at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }); } catch (e) {}
+    const st = label[t.reverse_state] ? " · " + label[t.reverse_state] : "";
+    const btn = t.reverse_state === "none"
+      ? '<button type="button" class="btn sm" onclick="netReverse(' + t.id + ')">Reverse?</button>' : "";
+    return '<div class="net-row"><div class="net-main"><div class="net-name">' + escapeHtml(t.to) + (t.source === "auto" ? '<span class="net-tag">AUTO</span>' : "") + '</div><div class="net-sub">'
+      + escapeHtml(when + st) + "</div></div><div class=\"net-bal\">" + netMoney(t.amount) + "</div>" + btn + "</div>";
+  }).join("");
+}
+
+function netReverse(tid) {
+  netSheet("Ask to reverse",
+    '<div class="hint">QuickPay admin checks it. The money comes back only if the retailer still has it.</div>'
+    + '<div class="settings-field"><label>Why?</label><input id="net-rev-reason" placeholder="e.g. sent to the wrong shop"></div>'
+    + '<div class="field-error" id="net-rev-err"></div><button type="button" class="btn primary block" id="net-rev-btn">Send request</button>');
+  document.getElementById("net-rev-btn").onclick = async () => {
+    try {
+      const r = await netCall("/transfers/" + tid + "/reverse", { reason: document.getElementById("net-rev-reason").value });
+      closeNetSheet(); showToast(r.message, "success", 6000); loadNetTransfers();
+    } catch (e) { showFieldError("net-rev-err", e.message); }
+  };
+}
+
+function renderNetRequests() {
+  const box = document.getElementById("net-requests");
+  const list = state.net.requests || [];
+  if (!list.length) { box.innerHTML = '<div class="net-empty">No pending fund requests.</div>'; return; }
+  box.innerHTML = list.map((r) => '<div class="net-row"><div class="net-main"><div class="net-name">' + escapeHtml(r.from) + '</div><div class="net-sub">'
+    + escapeHtml((r.mobile || "") + " · " + (r.mode || "")) + (r.can_approve ? "" : " · admin only") + "</div></div>"
+    + '<div class="net-bal">' + netMoney(r.amount) + "</div>"
+    + (r.can_approve ? '<button type="button" class="btn sm primary" onclick="netApprove(' + r.id + ')">Approve</button>' : "")
+    + '<button type="button" class="btn sm" onclick="netReject(' + r.id + ')">Reject</button></div>').join("");
+}
+
+function netApprove(rid) {
+  const r = state.net.requests.find((x) => x.id === rid);
+  if (!state.net.summary.pin_set) { openNetSetPin(() => netApprove(rid)); return; }
+  netSheet("Approve request",
+    '<div class="hint">' + netMoney(r.amount) + " goes from your balance to " + escapeHtml(r.from) + ".</div>"
+    + '<div class="settings-field net-pin"><label>Transaction PIN</label><input id="net-ap-pin" type="password" inputmode="numeric" maxlength="4"></div>'
+    + '<div class="field-error" id="net-ap-err"></div><button type="button" class="btn primary block" id="net-ap-btn">Approve</button>');
+  document.getElementById("net-ap-btn").onclick = async () => {
+    try {
+      const res = await netCall("/fund-requests/" + rid + "/approve", { pin: document.getElementById("net-ap-pin").value });
+      state.net.summary.balance = res.balance; state.net.summary.pending_requests = Math.max(0, state.net.summary.pending_requests - 1);
+      state.net.requests = state.net.requests.filter((x) => x.id !== rid);
+      closeNetSheet(); renderNetKpis(); renderNetRequests(); showToast("Approved.", "success");
+    } catch (e) { showFieldError("net-ap-err", e.message); }
+  };
+}
+
+function netReject(rid) {
+  netSheet("Reject request",
+    '<div class="settings-field"><label>Reason (the retailer sees it)</label><input id="net-rj-reason"></div>'
+    + '<div class="field-error" id="net-rj-err"></div><button type="button" class="btn primary block" id="net-rj-btn">Reject</button>');
+  document.getElementById("net-rj-btn").onclick = async () => {
+    try {
+      await netCall("/fund-requests/" + rid + "/reject", { reason: document.getElementById("net-rj-reason").value });
+      state.net.requests = state.net.requests.filter((x) => x.id !== rid);
+      state.net.summary.pending_requests = Math.max(0, state.net.summary.pending_requests - 1);
+      closeNetSheet(); renderNetKpis(); renderNetRequests(); showToast("Rejected.", "success");
+    } catch (e) { showFieldError("net-rj-err", e.message); }
+  };
+}
 
 /* ===== KYC documents + details (owner, 24 Oct 2026) =====
    Not required for anything yet (QR works without it); admin reviews it.
