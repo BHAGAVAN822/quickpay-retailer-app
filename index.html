@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>QuickPay Retailer Portal</title>
 <!-- Installable app (PWA): home-screen icon, opens full-screen without the URL bar -->
@@ -18,6 +19,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 /* =========================================================================
    DESIGN SYSTEM — QuickPay Retailer V2 (Figma file rUiecXxyXGj0hMh1f8L06c)
@@ -1392,6 +1394,7 @@ a:focus:not(:focus-visible),
   display:grid;grid-template-columns:minmax(280px,1.35fr) repeat(2,minmax(0,1fr));
   gap:14px;margin-bottom:16px;
 }
+.wallet-bal-grid.dmr-hidden{grid-template-columns:minmax(280px,1.35fr) minmax(0,1fr);}
 .wallet-bal-card{
   padding:16px;display:flex;flex-direction:column;gap:12px;min-height:140px;
   border-radius:var(--radius-xl,16px);cursor:pointer;
@@ -1425,8 +1428,12 @@ a:focus:not(:focus-visible),
 .wallet-bal-card .wallet-balance-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;}
 .wallet-bal-card .wallet-balance-actions .btn{min-height:40px;font-size:13px;}
 @media (max-width:1023px){
-  .wallet-bal-grid{grid-template-columns:1fr;}
+  .wallet-bal-grid{grid-template-columns:1fr 1fr;}
+  .wallet-bal-card.wallet-bal-main{grid-column:1 / -1;}
   .wallet-bal-card.wallet-bal-main .bal{font-size:28px;}
+  #wallet-card-commission,#wallet-card-dmr{min-height:0;padding:12px 14px;gap:6px;}
+  #wallet-card-commission .bal,#wallet-card-dmr .bal{font-size:17px;line-height:22px;}
+  .wallet-bal-grid.dmr-hidden #wallet-card-commission{grid-column:1 / -1;}
 }
 .upi-quick{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 14px;}
 .upi-quick .upi-chip{
@@ -1490,7 +1497,7 @@ a:focus:not(:focus-visible),
 .wallet-balance-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
 .wallet-balance-actions .btn{min-height:44px;}
 
-.wallet-kpi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+.wallet-kpi-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
 .wallet-kpi{padding:14px 16px;}
 .wallet-kpi .label-caps{margin-bottom:6px;font-size:10.5px;}
 .wallet-kpi .val{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--color-text-primary);}
@@ -1575,6 +1582,66 @@ a:focus:not(:focus-visible),
 .wallet-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
 .upi-form{max-width:560px;display:none;margin-bottom:14px;}
 .upi-form.show{display:block;}
+/* UPI top-up as a bottom-sheet that can open over ANY screen (home, wallet). */
+.upi-sheet{position:fixed;left:0;right:0;bottom:0;z-index:401;width:100%;max-width:480px;margin:0 auto;
+  display:block;max-height:88vh;overflow-y:auto;border-radius:18px 18px 0 0;
+  padding:26px 16px calc(24px + env(safe-area-inset-bottom,0px));
+  box-shadow:0 -12px 40px -8px rgba(15,23,42,.35);
+  transform:translateY(105%);visibility:hidden;
+  transition:transform .28s cubic-bezier(.4,0,.2,1),visibility .28s;}
+.upi-sheet.show{transform:translateY(0);visibility:visible;}
+.upi-sheet-handle{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:42px;height:4px;border-radius:2px;background:var(--color-border-default,#e2e8f0);}
+.upi-sheet-close{position:absolute;top:12px;right:12px;background:none;border:0;font-size:26px;line-height:1;color:var(--color-icon-muted,#94a3b8);cursor:pointer;width:34px;height:34px;z-index:1;}
+.upi-sheet-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:400;}
+.upi-sheet-backdrop[hidden]{display:none;}
+/* Branded payment-gateway chips (ICICI orange, HDFC blue) */
+.upi-quick .upi-chip.pg-chip{display:inline-flex;align-items:center;gap:6px;font-weight:700;padding:9px 15px;}
+.pg-chip.pg-icici i{color:#E87722;}
+.pg-chip.pg-hdfc i{color:#004C8F;}
+.upi-quick .upi-chip.pg-icici.active{background:#FFF4EC;border-color:#E87722;color:#B5540F;}
+.upi-quick .upi-chip.pg-hdfc.active{background:#EAF2FB;border-color:#004C8F;color:#004C8F;}
+/* UPI app chooser buttons (PhonePe / GPay / Paytm / All UPI) */
+.upi-app-grid{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+.upi-app-btn{display:flex;align-items:center;gap:12px;width:100%;padding:11px 14px;border:1px solid var(--color-border-default,#E2E8F0);border-radius:12px;background:#fff;cursor:pointer;font:inherit;min-height:52px;text-align:left;}
+.upi-app-btn:hover{border-color:var(--color-border-brand,#A7F3D0);background:var(--color-bg-brand-subtle,#F0FDF4);}
+.upi-app-ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0;background:var(--color-bg-muted,#F1F5F9);color:var(--text-secondary);}
+.upi-app-lbl{font-size:14px;font-weight:700;color:var(--color-text-primary);flex:1;}
+.upi-app-go{color:var(--text-secondary);font-size:18px;}
+/* Slim confirm banner (replaces the confusing waiting modal on the dashboard) */
+.upi-banner{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:500;max-width:440px;margin:0 auto;
+  display:flex;align-items:center;gap:10px;background:#0F172A;color:#fff;border-radius:12px;padding:12px 14px;
+  box-shadow:0 10px 30px -8px rgba(15,23,42,.5);font-size:13.5px;font-weight:600;}
+.upi-banner[hidden]{display:none;}
+.upi-banner.success{background:#047857;}
+.upi-banner-spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:qpspin .8s linear infinite;flex-shrink:0;}
+.upi-banner.success .upi-banner-spin{display:none;}
+#upi-banner-text{flex:1;}
+#upi-banner-x{background:none;border:0;color:rgba(255,255,255,.85);font-size:20px;cursor:pointer;line-height:1;width:24px;height:24px;flex-shrink:0;}
+@keyframes qpspin{to{transform:rotate(360deg);}}
+/* Notification bell badge + panel */
+.qp-bell{position:relative;}
+.qp-bell-badge{position:absolute;top:2px;right:2px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;
+  background:#DC2626;color:#fff;font-size:10px;font-weight:800;line-height:16px;text-align:center;box-shadow:0 0 0 2px var(--color-bg-surface,#fff);}
+.qp-bell-badge[hidden]{display:none;}
+.notif-sheet{padding-top:14px;}
+.notif-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 10px;}
+.notif-head h3{margin:0;font-size:16px;}
+.notif-list{display:flex;flex-direction:column;gap:2px;}
+.notif-item{display:flex;gap:11px;align-items:flex-start;padding:12px 8px;border-radius:10px;cursor:pointer;border-bottom:1px solid var(--color-border-default,#EEF2F6);}
+.notif-item:last-child{border-bottom:0;}
+.notif-item.unread{background:var(--color-bg-brand-subtle,#F0FDF4);}
+.notif-ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;background:var(--color-bg-muted,#F1F5F9);color:var(--text-secondary);}
+.notif-ic.money{background:#ECFDF5;color:#047857;}
+.notif-ic.recharge{background:#EFF6FF;color:#1D4ED8;}
+.notif-ic.recharge.fail{background:#FEF2F2;color:#DC2626;}
+.notif-ic.earning{background:#FFFBEB;color:#B45309;}
+.notif-ic.ops{background:#F5F3FF;color:#6D28D9;}
+.notif-body{flex:1;min-width:0;}
+.notif-title{font-size:13.5px;font-weight:700;color:var(--color-text-primary);line-height:1.3;}
+.notif-text{font-size:12.5px;color:var(--text-secondary);line-height:1.4;margin-top:2px;word-break:break-word;}
+.notif-time{font-size:11px;color:var(--color-text-muted,#94A3B8);margin-top:3px;}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:#DC2626;flex-shrink:0;margin-top:6px;}
+.notif-empty{text-align:center;color:var(--text-secondary);padding:28px 10px;font-size:13.5px;}
 .upi-quick{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 14px;}
 .upi-quick .btn{flex:1;min-width:72px;min-height:40px;}
 .upi-waiting,.upi-redirect{text-align:center;padding:8px 0;}
@@ -1598,10 +1665,17 @@ a:focus:not(:focus-visible),
   .wallet-page-intro{margin-top:12px;}
   .wallet-page-intro h2{font-size:20px;}
   .wallet-hero-grid{grid-template-columns:1fr;}
-  .wallet-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .wallet-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+  .wallet-kpi{padding:12px 10px;}
+  .wallet-kpi .label-caps{font-size:9.5px;margin-bottom:4px;}
+  .wallet-kpi .val{font-size:15px;white-space:nowrap;}
   .wallet-balance-card .bal{font-size:28px;}
   .wallet-qa-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
-  .wallet-funding-grid{grid-template-columns:1fr;}
+  .wallet-funding-grid{grid-template-columns:1fr;gap:8px;}
+  .w-fund-card{min-height:0;padding:12px 14px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;align-items:center;column-gap:10px;}
+  .w-fund-card .t{margin-bottom:2px;grid-column:1;grid-row:1;}
+  .w-fund-card .s{margin-bottom:0;grid-column:1;grid-row:2;}
+  .w-fund-card .go{grid-column:2;grid-row:1 / span 2;align-self:center;}
   .wallet-table-wrap{display:none;}
   .wallet-act-cards,.wallet-fund-cards{display:block;}
 }
@@ -1936,6 +2010,31 @@ a:focus:not(:focus-visible),
 .settings-card{padding:16px;}
 .settings-card .title{margin:0 0 14px;font-size:14px;font-weight:700;color:var(--color-text-primary);}
 .settings-card .hint{font-size:12px;color:var(--text-secondary);margin:0 0 12px;line-height:1.45;}
+.kyc-card{margin-top:16px;}
+.kyc-row{display:flex;align-items:center;gap:12px;}
+.kyc-icon{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--color-bg-muted,#f1f5f9);color:var(--color-text-brand);font-size:20px;}
+.kyc-body{flex:1 1 auto;min-width:0;}
+.kyc-label{font-weight:600;font-size:14px;color:var(--color-text-primary);}
+.kyc-status{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+.kyc-status.ok{color:#15803d;}
+.kyc-hint{margin:12px 0 0 !important;}
+#kyc-docs [hidden]{display:none !important;}
+.kyc-docs{margin-top:18px;padding-top:16px;border-top:1px solid var(--color-border-default,#e2e8f0);}
+.kyc-docs-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.kyc-badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--color-bg-muted,#f1f5f9);color:var(--text-secondary);}
+.kyc-badge.submitted{background:#e0f2fe;color:#0369a1;}
+.kyc-badge.approved{background:#dcfce7;color:#15803d;}
+.kyc-badge.rejected{background:#fee2e2;color:#b91c1c;}
+.kyc-reject{background:#fef2f2;color:#991b1b;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:10px;}
+.kyc-doc{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--color-border-default,#e2e8f0);}
+.kyc-doc .kyc-doc-name{flex:1 1 auto;font-size:14px;color:var(--color-text-primary);}
+.kyc-doc .ok{color:#15803d;font-size:12px;font-weight:600;}
+.kyc-doc .redo{color:#b91c1c;font-size:12px;font-weight:700;}
+.kyc-doc .no{color:var(--text-secondary);font-size:12px;}
+#kyc-form{margin-top:12px;}
+#kyc-form select{width:100%;padding:12px;border:1px solid var(--color-border-default);border-radius:var(--radius-md);background:#fff;}
+.kyc-declare{display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:12px 0 8px;color:var(--color-text-primary);}
+.kyc-declare input{margin-top:2px;}
 
 .settings-field{margin-bottom:12px;}
 .settings-field label{
@@ -2637,6 +2736,18 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 .plan-ben{font-size:11px;background:var(--color-bg-muted);color:var(--color-text-secondary);border-radius:6px;padding:2px 6px;}
 .plan-ben.more{background:none;font-weight:600;}
 .plans-sheet{max-height:88vh;}
+/* DTH Info (customer details from Plan Connect via GET /api/dth-info) */
+.dth-info-name{font-size:18px;font-weight:700;margin:4px 0 12px;display:flex;align-items:center;gap:8px;}
+.dth-info-rows{display:flex;flex-direction:column;border:1px solid var(--color-border-default,#e2e8f0);border-radius:12px;overflow:hidden;}
+.dth-info-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 14px;font-size:14px;}
+.dth-info-row + .dth-info-row{border-top:1px solid var(--color-border-default,#e2e8f0);}
+.dth-info-row .k{color:var(--color-text-muted,#64748b);}
+.dth-info-row .v{font-weight:600;text-align:right;}
+.dth-info-row .v.low{color:#B91C1C;}
+.dth-info-tag{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:700;background:#FEF2F2;color:#B91C1C;}
+.dth-info-foot{margin-top:12px;font-size:12px;color:var(--color-text-muted,#64748b);}
+.dth-info-refresh{margin-top:16px;padding-top:14px;border-top:1px dashed var(--color-border-default,#e2e8f0);}
+.dth-info-refresh .hint{margin-top:6px;font-size:12px;color:var(--color-text-muted,#64748b);}
 .plans-sheet-body{padding:0 16px 20px;overflow-y:auto;}
 .plans-sheet-body .plans-browser{gap:10px;}
 .rc-plan-match{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--color-text-success);margin-top:6px;}
@@ -2747,7 +2858,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
       <div class="topbar-right">
         <div class="wallet-pill"><i class="ti ti-wallet"></i><span id="topbar-balance">₹0.00</span></div>
         <button type="button" class="icon-btn" aria-label="Help" title="Help" onclick="goTo('support')"><i class="ti ti-help" aria-hidden="true"></i></button>
-        <button type="button" class="icon-btn hidden" aria-label="Notifications" title="Notifications"><i class="ti ti-bell" aria-hidden="true"></i></button>
+        <button type="button" class="icon-btn qp-bell" id="qp-bell-btn" aria-label="Notifications" title="Notifications" onclick="openNotifications()"><i class="ti ti-bell" aria-hidden="true"></i><span class="qp-bell-badge" id="qp-bell-badge" hidden>0</span></button>
         <div class="profile-dd">
           <button type="button" class="profile-trigger" onclick="toggleProfileMenu()" aria-label="Account menu" aria-haspopup="true" aria-expanded="false" id="profile-trigger-btn">
             <div class="profile-avatar" id="profile-avatar" aria-hidden="true">R</div>
@@ -2775,7 +2886,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             <div class="dash-alert-title">Low wallet balance</div>
             <div class="dash-alert-msg" id="dash-low-balance-msg">Your available balance is below the alert threshold. Add money to continue recharges smoothly.</div>
           </div>
-          <button type="button" class="btn sm" onclick="openFundRequest()">Add Money</button>
+          <button type="button" class="btn sm" onclick="goToUpiTopup()">Add Money</button>
         </div>
 
         <div class="dash-hero-row">
@@ -2835,7 +2946,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             <div class="dash-wallet-foot">
               <div class="wallet-status" id="dash-wallet-status"><span class="dot"></span> Checking balance…</div>
               <div class="dash-wallet-actions">
-                <button type="button" class="btn-hero-primary" onclick="openFundRequest()"><i class="ti ti-plus"></i> Add Money</button>
+                <button type="button" class="btn-hero-primary" onclick="goToUpiTopup()"><i class="ti ti-plus"></i> Add Money</button>
               </div>
             </div>
           </div>
@@ -2968,7 +3079,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             <div class="card rc-form-card">
               <h3 class="rc-form-title" id="rc-form-title">Mobile Recharge</h3>
               <div class="rc-field" id="rc-field-mobile">
-                <label id="rc-mobile-label">Mobile Number</label>
+                <label><span id="rc-mobile-label">Mobile Number</span><button type="button" class="rc-label-action" id="rc-opcheck-btn" onclick="checkOperator()">Check Operator</button></label>
                 <input type="tel" id="rc-mobile" inputmode="numeric" placeholder="Enter 10-digit mobile number" oninput="onRcMobileInput()" onblur="onRcMobileBlur()" autocomplete="tel">
                 <div class="hint" id="rc-mobile-hint">10-digit Indian mobile number</div>
                 <div class="field-error" id="rc-mobile-error"></div>
@@ -2984,7 +3095,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
               <div class="rc-field" id="rc-field-amount">
                 <label>
                   Recharge Amount
-                  <button type="button" class="rc-label-action" onclick="openPlansBrowser()">Browse Plans</button>
+                  <button type="button" class="rc-label-action" id="rc-amount-action" onclick="openPlansBrowser()">Browse Plans</button>
                 </label>
                 <div class="amt-input-wrap">
                   <span class="rupee" aria-hidden="true">₹</span>
@@ -3010,7 +3121,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 
           <div class="rc-side-col">
             <div class="card rc-plans-card" id="rc-plans-card">
-              <div class="rc-card-title">Plans &amp; Offers</div>
+              <div class="rc-card-title" id="rc-plans-title">Plans &amp; Offers</div>
               <div class="rc-card-sub" id="rc-plans-sub">Choose a plan, or enter the amount manually.</div>
               <div class="plans-placeholder" id="rc-plans-panel">
                 <i class="ti ti-device-mobile"></i>
@@ -3469,7 +3580,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             <div class="bal" id="w-main">—</div>
             <div class="updated" id="w-last-updated" style="font-size:11.5px;color:var(--text-secondary);">Last updated —</div>
             <div class="wallet-balance-actions" onclick="event.stopPropagation()">
-              <button type="button" class="btn primary" onclick="toggleUpiForm()" aria-label="Add Money via UPI"><i class="ti ti-plus"></i> Add Money via UPI</button>
+              <button type="button" class="btn primary" onclick="openUpiSheet()" aria-label="Add Money via UPI"><i class="ti ti-plus"></i> Add Money via UPI</button>
               <button type="button" class="btn" onclick="toggleFundForm()" aria-label="Request Fund"><i class="ti ti-file-plus"></i> Request Fund</button>
             </div>
           </div>
@@ -3481,6 +3592,9 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             <div class="label">Commission Wallet</div>
             <div class="bal" id="w-commission">—</div>
             <div class="sub" style="font-size:11.5px;color:var(--text-secondary);">Commission earned</div>
+            <div class="wallet-balance-actions" onclick="event.stopPropagation()">
+              <button type="button" class="btn" id="comm-transfer-btn" onclick="openCommTransfer()" aria-label="Move commission to main wallet"><i class="ti ti-arrows-exchange"></i> Move to Main</button>
+            </div>
           </div>
           <div class="card wallet-bal-card" id="wallet-card-dmr" role="tab" aria-selected="false" onclick="setWalletTab('dmr')" data-tab="dmr">
             <div class="wallet-bal-top">
@@ -3500,36 +3614,24 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             <div class="card wallet-kpi tone-credit">
               <div class="label-caps">Today's Credit</div>
               <div class="val" id="w-today-credit">—</div>
-              <div class="sub">From ledger for selected wallet</div>
             </div>
             <div class="card wallet-kpi tone-debit">
               <div class="label-caps">Today's Debit</div>
               <div class="val" id="w-today-debit">—</div>
-              <div class="sub">From ledger for selected wallet</div>
             </div>
             <div class="card wallet-kpi tone-warn">
-              <div class="label-caps">Pending Amount</div>
+              <div class="label-caps">Pending</div>
               <div class="val" id="w-pending-amount">—</div>
-              <div class="sub" id="w-pending-sub">Fund requests awaiting review</div>
+              <span id="w-pending-sub" class="hidden" aria-hidden="true"></span>
             </div>
-            <div class="card wallet-kpi">
-              <div class="label-caps">Selected</div>
-              <div class="val" id="w-tab-label" style="font-size:16px;">Main</div>
-              <div class="sub" id="w-tab-hint">Selected wallet</div>
-            </div>
-        </div>
-
-        <div class="wallet-qa-grid" aria-label="Quick actions">
-          <button type="button" class="w-qa" onclick="toggleUpiForm()" aria-label="Add Money"><i class="ti ti-plus"></i><span class="t">Add Money</span><span class="s">UPI top-up</span></button>
-          <button type="button" class="w-qa" onclick="toggleFundForm()" aria-label="Fund Request"><i class="ti ti-file-plus"></i><span class="t">Fund Request</span><span class="s">Submit proof</span></button>
-          <button type="button" class="w-qa" onclick="goTo('ledger')" aria-label="Open Ledger"><i class="ti ti-receipt"></i><span class="t">Ledger</span><span class="s">Full statement</span></button>
-          <button type="button" class="w-qa" onclick="goTo('transactions')" aria-label="Open Transactions"><i class="ti ti-list-details"></i><span class="t">Transactions</span><span class="s">Recharges</span></button>
-          <button type="button" class="w-qa" onclick="goTo('recharge')" aria-label="Open Recharge"><i class="ti ti-bolt"></i><span class="t">Recharge</span><span class="s">Start recharge</span></button>
+            <!-- Legacy hidden nodes kept for setWalletTab() readers -->
+            <span id="w-tab-label" class="hidden" aria-hidden="true"></span>
+            <span id="w-tab-hint" class="hidden" aria-hidden="true"></span>
         </div>
 
         <div class="wallet-section-head"><h3>Add Money</h3></div>
         <div class="wallet-funding-grid">
-          <button type="button" class="w-fund-card primary" onclick="toggleUpiForm()" aria-label="UPI or QR funding">
+          <button type="button" class="w-fund-card primary" onclick="openUpiSheet()" aria-label="UPI or QR funding">
             <div class="t">UPI / QR</div>
             <div class="s">Instant or near-instant</div>
             <div class="go">Open →</div>
@@ -3546,70 +3648,44 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
           </button>
         </div>
 
-        <div class="card upi-form" id="upi-form-card">
-          <div id="upi-step-amount">
-            <h3 style="margin:0 0 16px;font-size:15px;">Add Money via UPI</h3>
-            <div class="rc-field">
-              <label for="upi-amount">Amount</label>
-              <div class="amt-input-wrap"><span class="rupee">₹</span><input type="number" id="upi-amount" placeholder="0" min="100" max="50000" style="height:44px;" aria-label="UPI amount"></div>
-            </div>
-            <div class="upi-quick" id="upi-quick-chips">
-              <button type="button" class="upi-chip" data-amt="500" onclick="setUpiAmount(500)">₹500</button>
-              <button type="button" class="upi-chip" data-amt="1000" onclick="setUpiAmount(1000)">₹1,000</button>
-              <button type="button" class="upi-chip" data-amt="2000" onclick="setUpiAmount(2000)">₹2,000</button>
-              <button type="button" class="upi-chip" data-amt="5000" onclick="setUpiAmount(5000)">₹5,000</button>
-            </div>
-            <p style="font-size:12px;color:var(--color-text-muted,#94A3B8);margin:0 0 12px;">Min ₹100 · Max ₹50,000</p>
-            <button class="btn primary block" id="upi-proceed-btn" onclick="proceedUpiPay()" style="min-height:44px;">Proceed to Pay</button>
-          </div>
-          <div id="upi-step-redirect" class="upi-redirect" style="display:none;">
-            <div style="font-size:28px;">💳</div>
-            <div class="big" style="font-weight:700;margin-top:8px;">Redirecting to payment page…</div>
-            <div class="upi-amt" id="upi-redir-amount">₹0</div>
-            <div class="upi-ref" id="upi-redir-ref"></div>
-            <ul class="upi-steps">
-              <li>✓ Complete UPI payment</li>
-              <li>✓ Return to this page</li>
-              <li>✓ Status updates automatically</li>
-            </ul>
-            <button class="btn primary block" id="upi-open-pay-btn" onclick="openUpiPaymentPage()" style="min-height:44px;">Open Payment Page →</button>
-            <button class="btn block" style="margin-top:8px;min-height:44px;" onclick="cancelUpiPay()">Cancel</button>
-          </div>
-          <div id="upi-step-waiting" class="upi-waiting" style="display:none;">
-            <div style="font-size:28px;">⏳</div>
-            <div class="big" style="font-weight:700;margin-top:8px;" id="upi-wait-title">Waiting for payment…</div>
-            <div class="upi-amt" id="upi-wait-amount">₹0</div>
-            <div class="upi-ref" id="upi-wait-ref"></div>
-            <div class="upi-msg">Complete payment in your UPI app. We auto-check every 5 seconds (up to 3 minutes).</div>
-            <div class="upi-msg" id="upi-poll-hint" style="font-size:12.5px;color:var(--text-muted);"></div>
-            <button class="btn primary block" id="upi-check-btn" onclick="checkUpiStatus(true)" style="min-height:44px;">✓ I've Paid — Check Status</button>
-            <button class="btn block" style="margin-top:8px;min-height:44px;" onclick="cancelUpiPay()">✕ Cancel</button>
-          </div>
-          <div id="upi-step-result" class="upi-result" style="display:none;"></div>
-        </div>
-
         <div class="card fund-form" id="fund-form-card">
           <h3 style="margin:0 0 16px;font-size:15px;">Request Fund</h3>
+          <div class="rc-field">
+            <label>Request To</label>
+            <div class="upi-quick" id="fund-recipient-chips">
+              <span class="upi-chip" style="opacity:.6;">Loading…</span>
+            </div>
+          </div>
+          <div class="rc-field">
+            <label>Request Type</label>
+            <div class="upi-quick" id="fund-type-chips">
+              <button type="button" class="upi-chip active" data-ftype="paid" onclick="setFundType('paid')">Paid — credit me</button>
+              <button type="button" class="upi-chip" data-ftype="credit" onclick="setFundType('credit')">Credit</button>
+            </div>
+          </div>
           <div class="rc-field">
             <label for="fund-amount">Amount</label>
             <div class="amt-input-wrap"><span class="rupee">₹</span><input type="number" id="fund-amount" placeholder="0" min="1" style="height:44px;" aria-label="Fund request amount"></div>
           </div>
-          <div class="rc-field">
-            <label>Payment Mode</label>
-            <div class="radio-row">
-              <label class="radio-opt"><input type="radio" name="pay-mode" value="IMPS" checked> IMPS</label>
-              <label class="radio-opt"><input type="radio" name="pay-mode" value="NEFT"> NEFT</label>
-              <label class="radio-opt"><input type="radio" name="pay-mode" value="UPI"> UPI</label>
-              <label class="radio-opt"><input type="radio" name="pay-mode" value="Cash"> Cash</label>
+          <div id="fund-paid-fields">
+            <div class="rc-field">
+              <label>Payment Mode</label>
+              <div class="radio-row">
+                <label class="radio-opt"><input type="radio" name="pay-mode" value="Bank" checked> Bank</label>
+                <label class="radio-opt"><input type="radio" name="pay-mode" value="Cash"> Cash</label>
+              </div>
+            </div>
+            <div class="rc-field">
+              <label for="fund-utr">UTR / Reference</label>
+              <input type="text" id="fund-utr" placeholder="Transaction UTR / reference number" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:8px;min-height:44px;font:inherit;box-sizing:border-box;" aria-label="UTR or reference">
             </div>
           </div>
-          <div class="rc-field">
-            <label for="fund-utr">UTR / Reference</label>
-            <input type="text" id="fund-utr" placeholder="Transaction UTR / reference number" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:8px;min-height:44px;" aria-label="UTR or reference">
+          <div class="rc-field" id="fund-credit-note" style="display:none;">
+            <p style="font-size:12.5px;color:var(--color-text-muted,#94A3B8);margin:0;background:var(--color-bg-muted,#f1f5f9);padding:10px 12px;border-radius:8px;">Credit request — you are not paying now. Once your Distributor / Admin approves it, the amount is added to your wallet as credit.</p>
           </div>
           <div class="rc-field">
             <label for="fund-note">Note (optional)</label>
-            <textarea id="fund-note" rows="2" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:8px;resize:vertical;" aria-label="Optional note"></textarea>
+            <textarea id="fund-note" rows="2" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:8px;resize:vertical;font:inherit;box-sizing:border-box;" aria-label="Optional note"></textarea>
           </div>
           <button class="btn primary block" id="fund-submit-btn" onclick="submitFundRequest()" style="min-height:44px;">Submit Fund Request</button>
         </div>
@@ -3624,9 +3700,10 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
         <div id="wallet-bank-empty" style="display:none;margin-bottom:14px;"></div>
 
         <div class="wallet-section-head">
-          <h3>Fund Requests</h3>
+          <h3 onclick="toggleFundRequests()" style="cursor:pointer;user-select:none;">Fund Requests <i class="ti ti-chevron-down" id="fund-req-chevron" style="font-size:14px;vertical-align:-1px;"></i></h3>
           <button type="button" class="btn sm wallet-export-disabled" disabled title="Available Soon" aria-label="Export fund requests unavailable">Export · Available Soon</button>
         </div>
+        <div id="fund-requests-body" style="display:none;">
         <div class="status-tabs" id="fund-status-tabs" style="margin-bottom:12px;" role="tablist" aria-label="Fund request status"></div>
         <div class="card wallet-fundhist-card">
           <div class="wallet-table-wrap" style="overflow-x:auto;">
@@ -3651,6 +3728,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
               <button class="btn sm" id="fund-hist-next-btn" onclick="fundHistNextPage()" style="min-height:40px;">Next</button>
             </div>
           </div>
+        </div>
         </div>
 
         <div class="wallet-section-head">
@@ -3839,6 +3917,62 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
               </div>
             </div>
             <div class="settings-note" id="settings-profile-note">Profile editing is unavailable — no profile update API is exposed.</div>
+          </div>
+
+          <!-- KYC (owner, 24 Oct 2026): the KYC form lives here; for now only the shop location. -->
+          <div class="card settings-card kyc-card" id="settings-kyc-card">
+            <div class="title">KYC</div>
+            <div class="kyc-row">
+              <div class="kyc-icon" aria-hidden="true"><i class="ti ti-map-pin"></i></div>
+              <div class="kyc-body">
+                <div class="kyc-label">Shop location</div>
+                <div class="kyc-status" id="kyc-loc-status">Checking…</div>
+                <div class="field-error" id="kyc-loc-error"></div>
+              </div>
+              <button type="button" class="btn sm" id="kyc-loc-btn" onclick="setShopLocation()" disabled>Set shop location</button>
+            </div>
+            <div class="hint kyc-hint">Stand inside your shop and tap the button. Only the shop's location is saved, once. Your location is never tracked.</div>
+
+            <!-- KYC documents + details (GET/POST /api/profile/kyc*) -->
+            <div class="kyc-docs" id="kyc-docs">
+              <div class="kyc-docs-head">
+                <div class="kyc-label">Documents</div>
+                <span class="kyc-badge" id="kyc-state-badge">…</span>
+              </div>
+              <div class="kyc-reject" id="kyc-reject" hidden></div>
+              <div id="kyc-doc-rows"></div>
+              <div id="kyc-form">
+                <div class="settings-field"><label for="kyc-f-name">Name (as on PAN)</label><input id="kyc-f-name" autocomplete="name"></div>
+                <div class="settings-field-row">
+                  <div class="settings-field"><label for="kyc-f-pan">PAN number</label><input id="kyc-f-pan" maxlength="10" autocapitalize="characters" placeholder="ABCDE1234F"></div>
+                  <div class="settings-field"><label for="kyc-f-dob">Date of birth</label><input id="kyc-f-dob" type="date"></div>
+                </div>
+                <div class="settings-field-row">
+                  <div class="settings-field"><label for="kyc-f-a4">Aadhaar – last 4 digits only</label><input id="kyc-f-a4" inputmode="numeric" maxlength="4" placeholder="1234"></div>
+                  <div class="settings-field"><label for="kyc-f-shop">Shop name</label><input id="kyc-f-shop"></div>
+                </div>
+                <div class="settings-field"><label for="kyc-f-addr">Shop address</label><input id="kyc-f-addr"></div>
+                <div class="settings-field-row">
+                  <div class="settings-field"><label for="kyc-f-city">City / village</label><input id="kyc-f-city"></div>
+                  <div class="settings-field"><label for="kyc-f-pin">Pincode</label><input id="kyc-f-pin" inputmode="numeric" maxlength="6"></div>
+                </div>
+                <div class="settings-field"><label for="kyc-f-ptype">Address proof type</label>
+                  <select id="kyc-f-ptype">
+                    <option value="">Select</option>
+                    <option value="electricity_bill">Electricity bill</option>
+                    <option value="rent_agreement">Rent agreement</option>
+                    <option value="shop_act">Shop Act / Gumasta licence</option>
+                    <option value="udyam">Udyam certificate</option>
+                    <option value="gst">GST certificate</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <label class="kyc-declare"><input type="checkbox" id="kyc-f-declare"> I confirm these documents are mine and the details are correct.</label>
+                <div class="field-error" id="kyc-form-error"></div>
+                <button type="button" class="btn primary block" id="kyc-submit-btn" onclick="submitKyc()">Submit KYC</button>
+                <div class="hint kyc-hint">Aadhaar tip: upload the "masked Aadhaar" (first 8 digits hidden) from the UIDAI website if you have it.</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -4140,6 +4274,216 @@ async function apiPostFundRequest(payload) {
   });
   const data = await res.json();
   return { httpStatus: res.status, body: data };
+}
+async function apiGetFundRecipients() {
+  const res = await fetch(API_BASE + "/api/fund-request/recipients", { headers: authHeaders() });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+/* ============ NOTIFICATIONS (in-app bell) ============ */
+async function apiGetNotifications(limit) {
+  const res = await fetch(API_BASE + "/api/notifications?limit=" + (limit || 30), { headers: authHeaders() });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+async function apiGetNotifUnread() {
+  const res = await fetch(API_BASE + "/api/notifications/unread-count", { headers: authHeaders() });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+async function apiMarkNotifRead(payload) {
+  const res = await fetch(API_BASE + "/api/notifications/read", {
+    method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() }, body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+function notifIconInfo(n) {
+  var cat = n.category || "ops";
+  var icons = { money: "ti-wallet", recharge: "ti-bolt", earning: "ti-coin", ops: "ti-bell" };
+  var cls = cat;
+  var icon = icons[cat] || "ti-bell";
+  if (n.type === "recharge_failed") { cls = "recharge fail"; icon = "ti-alert-triangle"; }
+  else if (n.type === "low_balance") { icon = "ti-alert-circle"; }
+  else if (n.type === "refund") { icon = "ti-arrow-back-up"; }
+  else if (n.type === "commission") { icon = "ti-percentage"; }
+  else if (n.type === "security") { icon = "ti-shield-lock"; }
+  else if (n.type === "announcement") { icon = "ti-speakerphone"; }
+  return { cls: cls, icon: icon };
+}
+function notifRelTime(iso) {
+  if (!iso) return "";
+  var t = new Date(iso); if (isNaN(t)) return "";
+  var s = Math.floor((Date.now() - t.getTime()) / 1000);
+  if (s < 60) return "just now";
+  if (s < 3600) return Math.floor(s / 60) + " min ago";
+  if (s < 86400) return Math.floor(s / 3600) + " hr ago";
+  var d = Math.floor(s / 86400);
+  if (d < 7) return d + " day" + (d === 1 ? "" : "s") + " ago";
+  return t.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
+}
+function updateBellBadge(n) {
+  var badge = document.getElementById("qp-bell-badge");
+  if (!badge) return;
+  var num = Number(n) || 0;
+  if (num > 0) { badge.textContent = num > 99 ? "99+" : String(num); badge.hidden = false; }
+  else { badge.hidden = true; }
+}
+async function refreshNotifUnread() {
+  if (!state.token || !canCallApi()) return;
+  try {
+    const { httpStatus, body } = await apiGetNotifUnread();
+    if (httpStatus === 401) return;
+    if (body && body.status === "success") updateBellBadge(body.unread);
+  } catch (e) {}
+}
+function openNotifications() {
+  var sheet = document.getElementById("notif-sheet");
+  var bd = document.getElementById("notif-backdrop");
+  if (bd) bd.hidden = false;
+  if (sheet) sheet.classList.add("show");
+  try { document.body.style.overflow = "hidden"; } catch (e) {}
+  updatePushPrompt();
+  loadNotifications();
+}
+function closeNotifications() {
+  var sheet = document.getElementById("notif-sheet");
+  var bd = document.getElementById("notif-backdrop");
+  if (sheet) sheet.classList.remove("show");
+  if (bd) bd.hidden = true;
+  try { document.body.style.overflow = ""; } catch (e) {}
+  refreshNotifUnread();
+}
+async function loadNotifications() {
+  var list = document.getElementById("notif-list");
+  if (!list) return;
+  list.innerHTML = '<div class="notif-empty">Loading…</div>';
+  try {
+    const { httpStatus, body } = await apiGetNotifications(30);
+    if (httpStatus === 401) return handleAuthFailure();
+    if (!body || body.status !== "success") { list.innerHTML = '<div class="notif-empty">Could not load notifications.</div>'; return; }
+    updateBellBadge(body.unread);
+    var items = body.notifications || [];
+    if (!items.length) { list.innerHTML = '<div class="notif-empty">🔔<br>No notifications yet.</div>'; return; }
+    list.innerHTML = items.map(function (n) {
+      var ii = notifIconInfo(n);
+      return '<div class="notif-item' + (n.is_read ? "" : " unread") + '" onclick="onNotifClick(' + n.id + ',\'' + (n.link || "") + '\')">'
+        + '<div class="notif-ic ' + ii.cls + '"><i class="ti ' + ii.icon + '"></i></div>'
+        + '<div class="notif-body"><div class="notif-title">' + escapeHtml(n.title || "") + '</div>'
+        + (n.body ? '<div class="notif-text">' + escapeHtml(n.body) + '</div>' : "")
+        + '<div class="notif-time">' + notifRelTime(n.created) + '</div></div>'
+        + (n.is_read ? "" : '<span class="notif-dot"></span>')
+        + '</div>';
+    }).join("");
+  } catch (e) {
+    list.innerHTML = '<div class="notif-empty">Could not load notifications.</div>';
+  }
+}
+async function onNotifClick(id, link) {
+  try { await apiMarkNotifRead({ id: id }); } catch (e) {}
+  var row = document.querySelector('.notif-item[onclick*="(' + id + ',"]');
+  if (row) { row.classList.remove("unread"); var d = row.querySelector(".notif-dot"); if (d) d.remove(); }
+  refreshNotifUnread();
+  if (link) {
+    var screens = ["dashboard", "recharge", "transactions", "ledger", "wallet", "reports", "commission", "support"];
+    if (screens.indexOf(link) >= 0) { closeNotifications(); goTo(link); }
+  }
+}
+async function markAllNotifRead() {
+  try {
+    const { body } = await apiMarkNotifRead({ all: true });
+    if (body && body.status === "success") updateBellBadge(body.unread);
+  } catch (e) {}
+  document.querySelectorAll("#notif-list .notif-item.unread").forEach(function (el) {
+    el.classList.remove("unread"); var d = el.querySelector(".notif-dot"); if (d) d.remove();
+  });
+}
+/* ===== WEB PUSH (phone-screen alerts) ===== */
+function pushSupported() {
+  return ("serviceWorker" in navigator) && ("PushManager" in window) && ("Notification" in window);
+}
+function urlB64ToUint8Array(base64String) {
+  var padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  var base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  var raw = atob(base64);
+  var out = new Uint8Array(raw.length);
+  for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+}
+async function apiGetVapidKey() {
+  const res = await fetch(API_BASE + "/api/notifications/vapid-key", { headers: authHeaders() });
+  return (await res.json());
+}
+async function apiPostSubscribe(sub) {
+  const res = await fetch(API_BASE + "/api/notifications/subscribe", {
+    method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() }, body: JSON.stringify(sub),
+  });
+  return { httpStatus: res.status, body: await res.json() };
+}
+function updatePushPrompt() {
+  var btn = document.getElementById("notif-enable-push");
+  if (!btn) return;
+  var show = pushSupported() && Notification.permission === "default";
+  btn.style.display = show ? "" : "none";
+}
+async function subscribePush(reg) {
+  try {
+    var vk = await apiGetVapidKey();
+    if (!vk || vk.status !== "success" || !vk.public_key) return false;
+    var existing = await reg.pushManager.getSubscription();
+    var sub = existing || await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlB64ToUint8Array(vk.public_key),
+    });
+    var j = sub.toJSON();
+    await apiPostSubscribe({ endpoint: j.endpoint, keys: j.keys });
+    return true;
+  } catch (e) { return false; }
+}
+// Called on boot: if the retailer already granted permission, keep the
+// subscription fresh silently. Never prompts.
+async function setupPush() {
+  if (!pushSupported() || !state.token) return;
+  updatePushPrompt();
+  if (Notification.permission !== "granted") return;
+  try {
+    var reg = await navigator.serviceWorker.ready;
+    await subscribePush(reg);
+  } catch (e) {}
+}
+// Called when the retailer taps "Turn on phone alerts".
+async function enablePush() {
+  if (!pushSupported()) { showToast("Alerts are not supported on this browser."); return; }
+  var btn = document.getElementById("notif-enable-push");
+  if (btn) { btn.disabled = true; }
+  try {
+    var perm = await Notification.requestPermission();
+    if (perm !== "granted") {
+      showToast(perm === "denied" ? "Alerts are blocked. Enable them in browser settings." : "Alerts not enabled.");
+      updatePushPrompt();
+      return;
+    }
+    var reg = await navigator.serviceWorker.ready;
+    var ok = await subscribePush(reg);
+    showToast(ok ? "Phone alerts turned on." : "Could not turn on alerts. Please try again.");
+    updatePushPrompt();
+  } catch (e) {
+    showToast("Could not turn on alerts.");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+// Navigate when a push notification is clicked (SW posts the target screen).
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.addEventListener("message", function (ev) {
+    try {
+      if (ev.data && ev.data.qpNavigate) {
+        var scr = String(ev.data.qpNavigate);
+        var screens = ["dashboard","recharge","transactions","ledger","wallet","reports","commission","support"];
+        if (screens.indexOf(scr) >= 0 && state.token) goTo(scr);
+      }
+    } catch (e) {}
+  });
 }
 async function apiPostUpiInitiate(payload) {
   const res = await fetch(API_BASE + "/api/upi/initiate", {
@@ -6063,6 +6407,14 @@ function applyRcServiceChrome() {
   const mobileInput = document.getElementById("rc-mobile");
   const formTitle = document.getElementById("rc-form-title");
   if (formTitle) formTitle.textContent = st === "dth" ? "DTH Recharge" : "Mobile Recharge";
+  const amtAction = document.getElementById("rc-amount-action");
+  if (amtAction) amtAction.textContent = st === "dth" ? "DTH Info" : "Browse Plans";
+  const opCheck = document.getElementById("rc-opcheck-btn");
+  if (opCheck) opCheck.hidden = st === "dth";
+  const plansTitle = document.getElementById("rc-plans-title");
+  if (plansTitle) plansTitle.textContent = st === "dth" ? "Customer Details" : "Plans & Offers";
+  const plansSub = document.getElementById("rc-plans-sub");
+  if (plansSub) plansSub.textContent = st === "dth" ? "Name, balance and next recharge date for this account." : "Choose a plan, or enter the amount manually.";
 
   if (label) label.textContent = st === "dth" ? "Customer / Account Number" : "Mobile Number";
   if (hint) {
@@ -6529,6 +6881,12 @@ function renderPlansPanel() {
   if (!panel) return;
   const svc = state.rc.serviceType || "mobile";
   const placeholder = (html) => { panel.className = "plans-placeholder"; panel.innerHTML = html; };
+  if (svc === "dth") {
+    const info = currentDthInfo();
+    if (info && info !== "loading" && info.ok) { panel.className = "plans-browser"; panel.innerHTML = dthInfoHtml(info.body); return; }
+    placeholder('<i class="ti ti-user-search"></i><strong>DTH customer details</strong>Enter the account number, then tap DTH Info.');
+    return;
+  }
   if (svc !== "mobile") {
     placeholder('<i class="ti ti-clipboard-list"></i><strong>Plans not available for DTH yet</strong>Enter the amount manually.');
     return;
@@ -6588,6 +6946,7 @@ function renderPlansSheet() {
 }
 
 function openPlansBrowser() {
+  if ((state.rc.serviceType || "mobile") === "dth") { openDthInfo(); return; }
   if ((state.rc.serviceType || "mobile") !== "mobile") { focusPlansPanel(); return; }
   if (!state.rc.operator) { showToast("Select an operator first."); openOperatorSheet(); return; }
   if (window.matchMedia("(min-width:1024px)").matches) { focusPlansPanel(); return; }
@@ -6603,6 +6962,172 @@ function closePlansSheet() {
   if (!el || el.hasAttribute("hidden")) return;
   el.classList.remove("show");
   setTimeout(() => el.setAttribute("hidden", ""), prefersReducedMotion() ? 0 : 180);
+}
+
+/* ===== DTH Info: customer details from Plan Connect (GET /api/dth-info) =====
+   In place of Browse Plans on the DTH screen: name, balance, next recharge date;
+   asks the server once per operator + number (server reuses it for 10 min). */
+state.dthInfo = {};   // "OP|number" -> "loading" | {ok, body|message}
+function dthInfoKey() { return (state.rc.operator || "") + "|" + (state.rc.mobile || ""); }
+function currentDthInfo() { return state.dthInfo[dthInfoKey()]; }
+
+function dthInfoHtml(b) {
+  const rows = [];
+  const row = (k, v, extra) => rows.push('<div class="dth-info-row"><span class="k">' + escapeHtml(k) + '</span><span class="v">' + v + (extra || "") + "</span></div>");
+  if (b.balance) {
+    const bal = Number(b.balance);
+    row("Current balance", '<span class="' + (isFinite(bal) && bal < 50 ? "low" : "") + '">₹' + escapeHtml(b.balance) + "</span>");
+  }
+  if (b.next_recharge_date) row("Next recharge date", escapeHtml(b.next_recharge_date), b.next_recharge_date_passed ? '<span class="dth-info-tag">Date passed</span>' : "");
+  let html = '<div class="dth-info-name"><i class="ti ti-user-circle" aria-hidden="true"></i>' + escapeHtml(b.name || "Customer") + "</div>";
+  if (rows.length) html += '<div class="dth-info-rows">' + rows.join("") + "</div>";
+  if (!rows.length) html += '<div class="plans-placeholder">Only the name is available for this customer.</div>';
+  let when = "";
+  try { when = new Date(b.checked_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }); } catch (e) { /* no time */ }
+  html += '<div class="dth-info-foot">Account ' + escapeHtml(b.vc_no || "") + (when ? " · checked " + escapeHtml(when) : "") + "</div>";
+  html += '<div class="dth-info-refresh"><button type="button" class="btn block dth-refresh-btn" onclick="dthHeavyRefresh(this)">'
+    + '<i class="ti ti-refresh" aria-hidden="true"></i> Heavy Refresh</button>'
+    + '<div class="hint">Use only when the customer\'s channels are not showing after recharge.</div></div>';
+  return html;
+}
+
+function dthInfoSheetEl() {
+  let el = document.getElementById("dth-info-sheet");
+  if (el) return el;
+  el = document.createElement("div");
+  el.id = "dth-info-sheet";
+  el.className = "op-sheet-backdrop";
+  el.setAttribute("hidden", "");
+  el.innerHTML = '<div class="op-sheet plans-sheet" role="dialog" aria-modal="true" aria-labelledby="dth-info-title">'
+    + '<div class="op-sheet-grip" aria-hidden="true"></div>'
+    + '<div class="op-sheet-head"><h3 id="dth-info-title">DTH Info</h3>'
+    + '<button type="button" class="op-sheet-close" onclick="closeDthInfo()" aria-label="Close"><i class="ti ti-x"></i></button></div>'
+    + '<div class="plans-sheet-body" id="dth-info-body"></div></div>';
+  el.addEventListener("click", (e) => { if (e.target === el) closeDthInfo(); });
+  el.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDthInfo(); });
+  document.body.appendChild(el);
+  return el;
+}
+
+function renderDthInfoSheet() {
+  const el = document.getElementById("dth-info-sheet");
+  if (!el || el.hasAttribute("hidden")) return;
+  const body = document.getElementById("dth-info-body");
+  document.getElementById("dth-info-title").textContent = (operatorDisplayName() || "DTH") + " · Customer details";
+  const v = currentDthInfo();
+  if (!v || v === "loading") {
+    body.innerHTML = '<div class="skel skel-line" style="height:28px;width:60%;border-radius:8px;margin:6px 0 14px;"></div>'
+      + Array(4).fill('<div class="skel skel-line" style="height:40px;border-radius:10px;margin-bottom:8px;"></div>').join("");
+  } else if (!v.ok) {
+    body.innerHTML = '<div class="plans-placeholder"><i class="ti ti-user-question"></i><strong>Details not available</strong>'
+      + escapeHtml(v.message || "Try again later.") + "</div>";
+  } else {
+    body.innerHTML = dthInfoHtml(v.body);
+  }
+}
+
+async function loadDthInfo() {
+  const key = dthInfoKey();
+  state.dthInfo[key] = "loading";
+  let out;
+  try {
+    const url = new URL(API_BASE + "/api/dth-info");
+    url.searchParams.set("operator_code", state.rc.operator);
+    url.searchParams.set("vc_no", state.rc.mobile);
+    const res = await fetch(url.toString(), { headers: authHeaders() });
+    let body = null;
+    try { body = await res.json(); } catch (e) { body = null; }
+    out = res.status === 200 && body && body.status === "success"
+      ? { ok: true, body: body }
+      : { ok: false, message: (body && body.message) || "Customer details are not available right now." };
+  } catch (e) {
+    out = { ok: false, message: "No internet / server not reachable. Try again." };
+  }
+  state.dthInfo[key] = out;
+  renderDthInfoSheet();
+  renderPlansPanel();
+}
+
+function openDthInfo() {
+  if (!state.rc.operator) { showToast("Select the DTH operator first."); openOperatorSheet(); return; }
+  if (!state.rc.mobile) {
+    showFieldError("rc-mobile-error", "Enter customer / account number");
+    const input = document.getElementById("rc-mobile");
+    if (input) input.focus();
+    return;
+  }
+  const el = dthInfoSheetEl();
+  el.removeAttribute("hidden");
+  requestAnimationFrame(() => el.classList.add("show"));
+  const prev = currentDthInfo();
+  if (prev === undefined || (prev !== "loading" && !prev.ok)) loadDthInfo();  // a failed lookup is asked again
+  renderDthInfoSheet();
+}
+
+function closeDthInfo() {
+  const el = document.getElementById("dth-info-sheet");
+  if (!el || el.hasAttribute("hidden")) return;
+  el.classList.remove("show");
+  setTimeout(() => el.setAttribute("hidden", ""), prefersReducedMotion() ? 0 : 180);
+}
+
+/* Heavy Refresh (POST /api/dth-heavy-refresh): re-sends channels to the
+   customer's box. Paid hit, so it asks first; the server sends it at most
+   once per number in 10 minutes. */
+async function dthHeavyRefresh(btn) {
+  if (!state.rc.operator || !state.rc.mobile) return;
+  if (!window.confirm("Send Heavy Refresh to account " + state.rc.mobile + "?\nUse only when channels are not showing.")) return;
+  const label = btn ? btn.innerHTML : "";
+  if (btn) { btn.disabled = true; btn.textContent = "Sending…"; }
+  try {
+    const url = new URL(API_BASE + "/api/dth-heavy-refresh");
+    url.searchParams.set("operator_code", state.rc.operator);
+    url.searchParams.set("vc_no", state.rc.mobile);
+    const res = await fetch(url.toString(), { method: "POST", headers: authHeaders() });
+    let body = null;
+    try { body = await res.json(); } catch (e) { body = null; }
+    const ok = res.status === 200 && body && body.status === "success";
+    showToast((body && body.message) || "Heavy Refresh failed. Try again later.", ok ? "success" : "error", 5000);
+  } catch (e) {
+    showToast("No internet / server not reachable. Try again.", "error");
+  }
+  if (btn) { btn.disabled = false; btn.innerHTML = label; }
+}
+
+/* Check Operator (GET /api/operator-check): only when the retailer taps it -
+   each check is a paid Plan Connect hit. */
+async function checkOperator() {
+  if ((state.rc.serviceType || "mobile") !== "mobile") return;
+  const mobile = state.rc.mobile || "";
+  if (!/^[6-9][0-9]{9}$/.test(mobile)) {
+    showFieldError("rc-mobile-error", "Enter a 10-digit mobile number first");
+    const input = document.getElementById("rc-mobile");
+    if (input) input.focus();
+    return;
+  }
+  const btn = document.getElementById("rc-opcheck-btn");
+  if (btn) { btn.disabled = true; btn.textContent = "Checking…"; }
+  try {
+    const url = new URL(API_BASE + "/api/operator-check");
+    url.searchParams.set("mobile_no", mobile);
+    const res = await fetch(url.toString(), { headers: authHeaders() });
+    let body = null;
+    try { body = await res.json(); } catch (e) { body = null; }
+    if (state.rc.mobile !== mobile) return;  // number changed while checking
+    if (res.status === 200 && body && body.status === "success") {
+      const known = body.operator_code && (state.operators || []).some((o) => (o.code || o.operator_code) === body.operator_code);
+      if (known) selectOperator(body.operator_code, true);
+      const name = known ? operatorDisplayName() : (body.plan_connect_operator || "Unknown");
+      showToast("Operator: " + name + (body.circle_name ? " · " + body.circle_name : "")
+        + (known ? "" : " · select it below"), known ? "success" : "info", 5000);
+    } else {
+      showToast((body && body.message) || "Could not check the operator. Select it below.", "info", 5000);
+    }
+  } catch (e) {
+    showToast("No internet / server not reachable. Select the operator below.", "error");
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "Check Operator"; }
+  }
 }
 
 /* Quick amounts: the operator's most recharged amounts (last 30 days, from
@@ -6625,11 +7150,15 @@ async function loadPopularAmounts(code) {
 
 function renderQuickAmountPills() {
   const code = state.rc.operator;
-  if (code && (state.rc.serviceType || "mobile") === "mobile") loadPopularAmounts(code);
+  if (code) loadPopularAmounts(code);  // mobile and DTH: the operator's own most recharged amounts
   const popular = code ? state.popularAmounts[code] : null;
   const hint = document.getElementById("rc-quick-hint");
   if (hint) hint.textContent = popular ? "Most recharged " + (operatorDisplayName() || "") + " amounts" : "Or pick a quick amount below";
-  const amounts = (popular || [10, 49, 99, 149, 199, 249, 299, 349, 399, 499]).slice(0, 10);
+  // until known: DTH = amounts common to all DTH operators (production, Oct 2026), mobile = the old list
+  const fallback = (state.rc.serviceType || "mobile") === "dth"
+    ? [200, 250, 290, 300, 350, 400, 500]
+    : [10, 49, 99, 149, 199, 249, 299, 349, 399, 499];
+  const amounts = (popular || fallback).slice(0, 10);
   const op = state.rc.operatorObj;
   const visible = amounts.filter((a) => {
     if (op && op.min_amount && a < op.min_amount) return false;
@@ -6796,7 +7325,7 @@ function renderInsufficientWalletModal() {
     + modalRow("Required Amount", formatMoney(state.rc.amount))
     + "</div>"
     + '<div class="modal-actions">'
-    + '<button type="button" class="btn primary" onclick="closeRcModal();openFundRequest();">Add Money</button>'
+    + '<button type="button" class="btn primary" onclick="closeRcModal();openUpiSheet();">Add Money</button>'
     + '<button type="button" class="btn" onclick="closeRcModal()">Cancel</button></div>';
   openRcModalBackdrop();
 }
@@ -7385,7 +7914,7 @@ function openTxDrawer(id) {
   } else if (cls === "success") {
     html += drawerRow("Commission", "—");
   }
-  if (r.transaction_id) html += drawerRow("Operator Reference", r.transaction_id);
+  if (r.operator_reference) html += drawerRow("Operator Reference", r.operator_reference);
 
   if (cls === "success" && r.amount != null && r.amount !== "") {
     html += '<div class="drawer-row"><span class="k">Wallet Debit</span><span class="v" style="color:var(--color-text-debit, var(--danger));">−' + formatMoney(r.amount) + '</span></div>';
@@ -8736,6 +9265,12 @@ function renderWalletSummary() {
     setText("w-commission", formatMoney(state.wallets.commission));
     setText("w-dmr", formatMoney(state.wallets.dmr));
     setText("w-balance", formatMoney(bal));
+    // DMR card: show only when the retailer actually has a DMR balance.
+    const dmrVal = Number(state.wallets.dmr) || 0;
+    const dmrCard = document.getElementById("wallet-card-dmr");
+    const balGrid = document.getElementById("wallet-bal-grid");
+    if (dmrCard) dmrCard.style.display = dmrVal > 0 ? "" : "none";
+    if (balGrid) balGrid.classList.toggle("dmr-hidden", !(dmrVal > 0));
     const d = state.wallet.lastUpdated;
     setText("w-last-updated", "Last updated " + d.toLocaleString("en-IN", {
       day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"
@@ -8746,6 +9281,96 @@ function renderWalletSummary() {
     setText("w-dmr", "—");
     setText("w-balance", "—");
     setText("w-last-updated", "Last updated —");
+  }
+}
+
+/* =========================================================================
+   COMMISSION -> MAIN TRANSFER
+   Moves retailer's own commission balance into the main wallet.
+   POST /api/commission/transfer {amount, reference}; the reference is
+   generated once per dialog-open so a double-tap/refresh retry is
+   deduplicated server-side instead of moving money twice.
+   ========================================================================= */
+let commTransferSubmitting = false;
+
+async function apiPostCommissionTransfer(payload) {
+  const res = await fetch(API_BASE + "/api/commission/transfer", {
+    method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() }, body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  return { httpStatus: res.status, body: data };
+}
+
+function openCommTransfer() {
+  const avail = Number(state.wallets && state.wallets.commission) || 0;
+  if (avail <= 0) {
+    showToast("No commission balance to move.");
+    return;
+  }
+  // One idempotency reference per dialog open - a retried POST with the
+  // same reference is a server-side no-op, not a second transfer.
+  state.commTransferRef = "comm-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+  const box = document.getElementById("rc-modal-box");
+  box.innerHTML =
+    '<h3 class="rc-confirm-title" id="rc-modal-title">Move commission to Main wallet</h3>'
+    + '<div class="modal-row"><span class="k">Available commission</span><span class="v">' + formatMoney(avail) + '</span></div>'
+    + '<div class="rc-field" style="margin:14px 0 4px;text-align:left;">'
+    + '<label for="comm-transfer-amount" style="font-size:12.5px;font-weight:600;color:var(--text-secondary);">Amount to move</label>'
+    + '<div class="amt-input-wrap" style="display:flex;align-items:center;gap:8px;">'
+    + '<span class="rupee">&#8377;</span>'
+    + '<input type="number" id="comm-transfer-amount" min="1" step="0.01" inputmode="decimal" value="' + avail.toFixed(2) + '" style="flex:1;height:44px;" aria-label="Amount to move">'
+    + '<button type="button" class="btn sm" onclick="commTransferSetMax()">Max</button>'
+    + '</div></div>'
+    + '<div class="modal-actions">'
+    + '<button type="button" class="btn" onclick="closeRcModal()">Cancel</button>'
+    + '<button type="button" class="btn primary" id="comm-transfer-submit" onclick="submitCommTransfer()">Move to Main</button>'
+    + '</div>';
+  openRcModalBackdrop();
+  setTimeout(function () { const i = document.getElementById("comm-transfer-amount"); if (i) i.focus(); }, 60);
+}
+
+function commTransferSetMax() {
+  const avail = Number(state.wallets && state.wallets.commission) || 0;
+  const i = document.getElementById("comm-transfer-amount");
+  if (i) i.value = avail.toFixed(2);
+}
+
+async function submitCommTransfer() {
+  if (commTransferSubmitting) return;
+  const avail = Number(state.wallets && state.wallets.commission) || 0;
+  const input = document.getElementById("comm-transfer-amount");
+  const amount = input ? Number(input.value) : 0;
+  if (!amount || amount <= 0) { showToast("Enter an amount above zero."); return; }
+  if (amount > avail + 0.001) { showToast("Amount is more than your commission balance."); return; }
+
+  commTransferSubmitting = true;
+  const btn = document.getElementById("comm-transfer-submit");
+  if (btn) { btn.disabled = true; btn.textContent = "Moving..."; }
+  try {
+    const { httpStatus, body } = await apiPostCommissionTransfer({
+      amount: Math.round(amount * 100) / 100,
+      reference: state.commTransferRef,
+    });
+    if (httpStatus === 401) { handleAuthFailure(); return; }
+    if (body && body.status === "success") {
+      const moved = body.transferred != null ? body.transferred : amount;
+      const box = document.getElementById("rc-modal-box");
+      box.innerHTML =
+        '<div class="result-icon success"><i class="ti ti-check"></i></div>'
+        + '<div class="result-title" id="rc-modal-title">' + formatMoney(moved) + ' moved to Main wallet</div>'
+        + '<div class="modal-row"><span class="k">Main balance</span><span class="v">' + formatMoney(body.main_balance_after) + '</span></div>'
+        + '<div class="modal-row"><span class="k">Commission left</span><span class="v">' + formatMoney(body.balance_after) + '</span></div>'
+        + '<div class="modal-actions"><button type="button" class="btn primary block" onclick="closeRcModal()">Done</button></div>';
+      try { await refreshWalletBalance(); renderWalletSummary(); } catch (e) {}
+    } else {
+      showToast((body && body.message) || "Transfer failed. Please try again.");
+      if (btn) { btn.disabled = false; btn.textContent = "Move to Main"; }
+    }
+  } catch (e) {
+    showToast("Could not reach the server. Check Transactions before retrying.");
+    if (btn) { btn.disabled = false; btn.textContent = "Move to Main"; }
+  } finally {
+    commTransferSubmitting = false;
   }
 }
 
@@ -9026,45 +9651,102 @@ function openFundRequest() {
   setTimeout(function () {
     document.getElementById("upi-form-card").classList.remove("show");
     document.getElementById("fund-form-card").classList.add("show");
+    setFundType("paid");
+    loadFundRecipients();
     document.getElementById("fund-form-card").scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, 50);
 }
+// Fund Requests history is collapsed by default; tap the heading to expand.
+function toggleFundRequests() {
+  const body = document.getElementById("fund-requests-body");
+  const chev = document.getElementById("fund-req-chevron");
+  if (!body) return;
+  const opening = (body.style.display === "none" || !body.style.display);
+  body.style.display = opening ? "" : "none";
+  if (chev) chev.style.transform = opening ? "rotate(180deg)" : "";
+}
+
+// Home-screen "Add Money": open the UPI top-up as a bottom-sheet over the
+// current screen (no navigation to the wallet tab).
+function goToUpiTopup() { openUpiSheet(); }
+function openUpiSheet() {
+  const card = document.getElementById("upi-form-card");
+  const backdrop = document.getElementById("upi-sheet-backdrop");
+  dismissUpiBanner();
+  resetUpiForm();
+  if (backdrop) backdrop.hidden = false;
+  if (card) card.classList.add("show");
+  try { document.body.style.overflow = "hidden"; } catch (e) {}
+  apiGetUpiConfig().then(applyPgChips).catch(function () {});
+}
+function hideUpiSheet() {
+  const card = document.getElementById("upi-form-card");
+  const backdrop = document.getElementById("upi-sheet-backdrop");
+  if (card) card.classList.remove("show");
+  if (backdrop) backdrop.hidden = true;
+  try { document.body.style.overflow = ""; } catch (e) {}
+}
+// Tap on ✕ or the dim backdrop: cancel any in-flight polling and close.
+function closeUpiSheet() { cancelUpiPay(); }
 
 async function submitFundRequest() {
   const amount = Number(document.getElementById("fund-amount").value);
-  const mode = document.querySelector('input[name="pay-mode"]:checked').value;
-  const utr = document.getElementById("fund-utr").value.trim();
   const note = document.getElementById("fund-note").value.trim();
+  const isCredit = state.fundReq && state.fundReq.type === "credit";
+  const recipientId = state.fundReq && state.fundReq.recipientId;
 
   if (!amount || amount <= 0) return showToast("Please enter a valid amount.");
-  if (!utr) return showToast("Please enter the UTR / reference number.");
+  if (!recipientId) return showToast("Please choose who to send this request to.");
 
+  let mode = "Cash", utr = "";
+  if (!isCredit) {
+    const modeEl = document.querySelector('input[name="pay-mode"]:checked');
+    mode = modeEl ? modeEl.value : "Cash";
+    utr = document.getElementById("fund-utr").value.trim();
+    if (!utr) return showToast("Please enter the UTR / reference number.");
+  }
+
+  const defaultLabel = isCredit ? "Send Credit Request" : "Submit Fund Request";
   const btn = document.getElementById("fund-submit-btn");
   btn.disabled = true; btn.textContent = "Submitting...";
   try {
-    // quickpay.fund.request has no dedicated payment-mode/UTR fields -
-    // both are folded into the free-text "notes" channel the backend
-    // already persists (via audit log), rather than inventing new
-    // backend fields for this UI.
-    const notes = "Payment Mode: " + mode + " | UTR: " + utr + (note ? " | Note: " + note : "");
-    const reqBody = { amount: amount, wallet_type: "main", notes: notes };
+    // Model payment_mode is cash/credit/bank. Cash->cash, the online rails
+    // (IMPS/NEFT/UPI)->bank, udhaar->credit. The finer mode + UTR still go
+    // into the free-text notes (persisted via the audit log).
+    let payment_mode, notes;
+    if (isCredit) {
+      payment_mode = "credit";
+      notes = "Credit / Udhaar request" + (note ? " | Note: " + note : "");
+    } else {
+      payment_mode = (mode === "Cash") ? "cash" : "bank";
+      notes = "Payment Mode: " + mode + " | UTR: " + utr + (note ? " | Note: " + note : "");
+    }
+    const reqBody = {
+      amount: amount,
+      wallet_type: "main",
+      requested_to_id: recipientId,
+      payment_mode: payment_mode,
+      notes: notes,
+    };
     const { httpStatus, body } = await apiPostFundRequest(reqBody);
     if (httpStatus === 401) return handleAuthFailure();
     if (body && body.status === "success") {
-      showToast("Fund request submitted successfully.");
-      document.getElementById("fund-amount").value = ""; document.getElementById("fund-utr").value = ""; document.getElementById("fund-note").value = "";
+      showToast(isCredit ? "Credit request sent." : "Fund request submitted successfully.");
+      document.getElementById("fund-amount").value = "";
+      const utrEl = document.getElementById("fund-utr"); if (utrEl) utrEl.value = "";
+      document.getElementById("fund-note").value = "";
       document.getElementById("fund-form-card").classList.remove("show");
       state.fundHist.status = "all";
       state.fundHist.page = 1;
       loadFundRequestHistory();
       loadWalletPendingAmount();
     } else {
-      showToast("Could not submit fund request. Please try again.");
+      showToast((body && body.message) ? body.message : "Could not submit request. Please try again.");
     }
   } catch (e) {
     showToast("Unable to connect. Please try again.");
   } finally {
-    btn.disabled = false; btn.textContent = "Submit Fund Request";
+    btn.disabled = false; btn.textContent = defaultLabel;
   }
 }
 
@@ -9083,6 +9765,8 @@ function clearUpiSession() {
     sessionStorage.removeItem("upi_amount");
     sessionStorage.removeItem("upi_order_id");
     sessionStorage.removeItem("upi_payment_url");
+    sessionStorage.removeItem("upi_baseline");
+    sessionStorage.removeItem("upi_pg");
   } catch (e) {}
 }
 function saveUpiSession() {
@@ -9091,18 +9775,70 @@ function saveUpiSession() {
     if (state.upi.amount != null) sessionStorage.setItem("upi_amount", String(state.upi.amount));
     if (state.upi.orderId) sessionStorage.setItem("upi_order_id", String(state.upi.orderId));
     if (state.upi.paymentUrl) sessionStorage.setItem("upi_payment_url", String(state.upi.paymentUrl));
+    if (state.upi.baseline != null) sessionStorage.setItem("upi_baseline", String(state.upi.baseline));
+    if (state.upi.pg) sessionStorage.setItem("upi_pg", String(state.upi.pg));
   } catch (e) {}
 }
 function toggleUpiForm() {
-  const card = document.getElementById("upi-form-card");
-  const opening = !card.classList.contains("show");
-  card.classList.toggle("show");
-  document.getElementById("fund-form-card").classList.remove("show");
-  if (opening) resetUpiForm();
+  // Kept for any legacy caller: always open the bottom-sheet.
+  openUpiSheet();
 }
 function toggleFundForm() {
-  document.getElementById("fund-form-card").classList.toggle("show");
+  const card = document.getElementById("fund-form-card");
+  const opening = !card.classList.contains("show");
+  card.classList.toggle("show");
   document.getElementById("upi-form-card").classList.remove("show");
+  if (opening) {
+    setFundType("paid");
+    loadFundRecipients();
+    card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+}
+// Fund-request state: who to ask + paid-vs-credit(udhaar).
+state.fundReq = state.fundReq || { type: "paid", recipientId: null, recipients: [] };
+function setFundType(t) {
+  state.fundReq.type = (t === "credit") ? "credit" : "paid";
+  document.querySelectorAll("#fund-type-chips .upi-chip").forEach(function (chip) {
+    chip.classList.toggle("active", chip.getAttribute("data-ftype") === state.fundReq.type);
+  });
+  const paid = document.getElementById("fund-paid-fields");
+  const creditNote = document.getElementById("fund-credit-note");
+  const isCredit = state.fundReq.type === "credit";
+  if (paid) paid.style.display = isCredit ? "none" : "";
+  if (creditNote) creditNote.style.display = isCredit ? "" : "none";
+  const btn = document.getElementById("fund-submit-btn");
+  if (btn) btn.textContent = isCredit ? "Send Credit Request" : "Submit Fund Request";
+}
+function setFundRecipient(id) {
+  state.fundReq.recipientId = id;
+  document.querySelectorAll("#fund-recipient-chips .upi-chip").forEach(function (chip) {
+    chip.classList.toggle("active", String(chip.getAttribute("data-rid")) === String(id));
+  });
+}
+async function loadFundRecipients() {
+  const box = document.getElementById("fund-recipient-chips");
+  if (!box) return;
+  try {
+    const { httpStatus, body } = await apiGetFundRecipients();
+    if (httpStatus === 401) return handleAuthFailure();
+    const list = (body && body.status === "success" && Array.isArray(body.recipients)) ? body.recipients : [];
+    state.fundReq.recipients = list;
+    if (!list.length) {
+      box.innerHTML = '<span class="upi-chip" style="opacity:.6;">No recipient available</span>';
+      state.fundReq.recipientId = null;
+      return;
+    }
+    box.innerHTML = list.map(function (r) {
+      const tag = r.type === "distributor" ? "Distributor" : "Admin";
+      return '<button type="button" class="upi-chip" data-rid="' + r.id + '" onclick="setFundRecipient(' + r.id + ')">'
+        + escapeHtml(r.name) + ' <span style="opacity:.6;">· ' + tag + '</span></button>';
+    }).join("");
+    // Default to the distributor (direct upline) if present, else first.
+    const def = list.find(function (r) { return r.type === "distributor"; }) || list[0];
+    setFundRecipient(def.id);
+  } catch (e) {
+    box.innerHTML = '<span class="upi-chip" style="opacity:.6;">Could not load recipients</span>';
+  }
 }
 function setUpiAmount(n) {
   const el = document.getElementById("upi-amount");
@@ -9123,7 +9859,13 @@ function hideUpiSteps() {
 }
 function resetUpiForm() {
   if (state.upi.pollTimer) { clearInterval(state.upi.pollTimer); state.upi.pollTimer = null; }
-  state.upi = { collectId: null, orderId: null, amount: 0, paymentUrl: null, pollTimer: null, polls: 0 };
+  if (state.upi.autoCloseTimer) { clearTimeout(state.upi.autoCloseTimer); state.upi.autoCloseTimer = null; }
+  state.upi = { pg: "icici", collectId: null, orderId: null, amount: 0, baseline: 0, paymentUrl: null, pollTimer: null, polls: 0, autoCloseTimer: null, bannerMode: false, bannerTimer: null, iciciDirect: false, iciciIntent: null };
+  try {
+    document.querySelectorAll("#upi-pg-chips .upi-chip").forEach(function (chip) {
+      chip.classList.toggle("active", chip.getAttribute("data-pg") === "icici");
+    });
+  } catch (e) {}
   hideUpiSteps();
   document.getElementById("upi-step-amount").style.display = "";
   document.getElementById("upi-step-result").innerHTML = "";
@@ -9131,6 +9873,7 @@ function resetUpiForm() {
   document.getElementById("upi-proceed-btn").disabled = false;
   document.getElementById("upi-proceed-btn").textContent = "Proceed to Pay";
   document.querySelectorAll("#upi-quick-chips .upi-chip").forEach(function (chip) { chip.classList.remove("active"); });
+  applyPgChips();
 }
 function showUpiResult(html) {
   if (state.upi.pollTimer) { clearInterval(state.upi.pollTimer); state.upi.pollTimer = null; }
@@ -9152,19 +9895,282 @@ function showUpiRedirectStep() {
   document.getElementById("upi-step-redirect").style.display = "";
   document.getElementById("upi-redir-amount").textContent = formatMoney(state.upi.amount);
   document.getElementById("upi-redir-ref").textContent = state.upi.orderId ? ("Ref: " + state.upi.orderId) : "";
-  const openBtn = document.getElementById("upi-open-pay-btn");
-  if (openBtn) openBtn.disabled = false;
+  renderUpiAppChooser(state.upi.pg);
 }
 function cancelUpiPay() {
   if (state.upi.pollTimer) { clearInterval(state.upi.pollTimer); state.upi.pollTimer = null; }
+  if (state.upi.autoCloseTimer) { clearTimeout(state.upi.autoCloseTimer); state.upi.autoCloseTimer = null; }
   clearUpiSession();
   resetUpiForm();
-  document.getElementById("upi-form-card").classList.remove("show");
+  hideUpiSheet();
+  dismissUpiBanner();
+}
+// ICICI UPI collection via native intent: build the upi:// deep link so the
+// phone shows the GPay/PhonePe app chooser (no QR scan). Money lands in the
+// shared merchant (qkpay@icici) tagged with this retailer's account, and the
+// backend bridge credits the Main wallet. Status = wallet balance increase.
+var UPI_MERCHANT_VPA = "qkpay@icici";
+var UPI_MERCHANT_NAME = "Prasad Cellular";
+var UPI_MERCHANT_MCC = "5411";
+var UPI_ACCOUNT_PREFIX = "MNO";
+function buildUpiIntentUrl(mobile, amount) {
+  var tr = UPI_ACCOUNT_PREFIX + mobile;
+  return "upi://pay?pa=" + encodeURIComponent(UPI_MERCHANT_VPA)
+    + "&pn=" + encodeURIComponent(UPI_MERCHANT_NAME)
+    + "&tr=" + encodeURIComponent(tr)
+    + "&am=" + encodeURIComponent(String(amount))
+    + "&cu=INR&mc=" + UPI_MERCHANT_MCC;
+}
+// HDFC (V AND D FINTECH): each retailer has its own VPA = vanddfintech.<mobile
+// padded to 18 digits>@hdfcbank. The VPA itself identifies the retailer (no tr).
+var HDFC_MERCHANT_NAME = "V AND D FINTECH SERVISES SATARA";
+var HDFC_MERCHANT_MCC = "4814";
+// HDFC common UPI params. Retailer is identified by the VPA sub-address
+// (…<mobile>@hdfcbank); tr/tid/tn are a unique, well-formed transaction so UPI
+// apps don't flag it under their risk policy.
+function buildHdfcUpiParams(mobile, amount) {
+  var padded = ("00000000000000000000" + mobile).slice(-18);
+  var pa = "vanddfintech." + padded + "@hdfcbank";
+  var txnId = "QP" + Date.now();
+  return "pa=" + encodeURIComponent(pa)
+    + "&pn=" + encodeURIComponent(HDFC_MERCHANT_NAME)
+    + "&tr=" + encodeURIComponent("STQ" + mobile)
+    + "&tid=" + encodeURIComponent(txnId)
+    + "&tn=" + encodeURIComponent("QuickPay wallet top-up")
+    + "&am=" + encodeURIComponent(String(amount))
+    + "&cu=INR&mc=" + HDFC_MERCHANT_MCC;
+}
+// Per-app deep link. Paytm needs the native money-transfer link (proven to pass
+// its risk policy); the others use their own schemes / the generic upi: intent.
+function buildHdfcAppLink(app, mobile, amount) {
+  var p = buildHdfcUpiParams(mobile, amount);
+  if (app === "paytm") return "paytmmp://cash_wallet?" + p + "&featuretype=money_transfer";
+  // GPay / PhonePe reject their own deep-link scheme for this merchant sub-VPA,
+  // but accept it when scanned from a QR (an ACTION_VIEW on the upi: URI). An
+  // Android intent: URL targeting the app's package fires that same ACTION_VIEW.
+  var pq = p + "&mode=1&qrMedium=06";
+  if (app === "gpay") return "intent://pay?" + pq + "#Intent;scheme=upi;action=android.intent.action.VIEW;package=com.google.android.apps.nbu.paisa.user;end";
+  if (app === "phonepe") return "intent://pay?" + pq + "#Intent;scheme=upi;action=android.intent.action.VIEW;package=com.phonepe.app;end";
+  return "upi://pay?" + pq; // other / OS app chooser
+}
+function payHdfcWith(app) {
+  var mob = String(state.upi.mob || state.mobile || "").replace(/\D/g, "");
+  if (mob.length !== 10 || !state.upi.amount) { showToast("Please start again."); return; }
+  state.upi.paymentUrl = buildHdfcAppLink(app, mob, state.upi.amount);
+  saveUpiSession();
+  launchUpiAndWatch();
+}
+// GPay / PhonePe reject the HDFC sub-VPA via a direct intent, but they DO
+// accept it when the same string is scanned as a QR. So show the QR in-app.
+function showHdfcQr() {
+  var mob = String(state.upi.mob || state.mobile || "").replace(/\D/g, "");
+  if (mob.length !== 10 || !state.upi.amount) { showToast("Please start again."); return; }
+  var url = "upi://pay?" + buildHdfcUpiParams(mob, state.upi.amount) + "&mode=1&qrMedium=06";
+  var box = document.getElementById("hdfc-qr");
+  if (!box || typeof QRCode === "undefined") { showToast("Could not show QR. Please use Paytm."); return; }
+  box.innerHTML = "";
+  try {
+    // correctLevel L maximises data capacity — the UPI string (~190 chars)
+    // overflows at the default High level.
+    new QRCode(box, { text: url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.L });
+  } catch (e) { showToast("Could not show QR. Please use Paytm."); return; }
+  var wrap = document.getElementById("hdfc-qr-box");
+  if (wrap) wrap.style.display = "";
+  // Detect the credit (via the bridge) while they scan & pay. QR stays visible
+  // in the sheet (no banner) since the user needs it open to scan.
+  state.upi.paymentUrl = url;
+  state.upi.bannerMode = false;
+  saveUpiSession();
+  startUpiPolling();
+}
+// ICICI per-app deep link: target a specific UPI app by package so the user
+// always gets to choose (even if the phone has a "default UPI app = always").
+function buildIciciAppLink(app, mobile, amount) {
+  var q;
+  if (state.upi.iciciDirect && state.upi.iciciIntent) {
+    // Direct Eazypay: use the server-issued refId intent's query as-is.
+    q = state.upi.iciciIntent.split("?")[1] || "";
+  } else {
+    // Legacy MNO intent (fallback).
+    q = "pa=" + encodeURIComponent(UPI_MERCHANT_VPA)
+      + "&pn=" + encodeURIComponent(UPI_MERCHANT_NAME)
+      + "&tr=" + encodeURIComponent(UPI_ACCOUNT_PREFIX + mobile)
+      + "&am=" + encodeURIComponent(String(amount))
+      + "&cu=INR&mc=" + UPI_MERCHANT_MCC;
+  }
+  if (app === "all") return "upi://pay?" + q;
+  var pkg = app === "phonepe" ? "com.phonepe.app"
+    : app === "gpay" ? "com.google.android.apps.nbu.paisa.user"
+    : app === "paytm" ? "net.one97.paytm" : "";
+  if (!pkg) return "upi://pay?" + q;
+  return "intent://pay?" + q + "#Intent;scheme=upi;action=android.intent.action.VIEW;package=" + pkg + ";end";
+}
+function payWithApp(app) {
+  var mob = String(state.upi.mob || state.mobile || "").replace(/\D/g, "");
+  if (mob.length !== 10 || !state.upi.amount) { showToast("Please start again."); return; }
+  state.upi.paymentUrl = buildIciciAppLink(app, mob, state.upi.amount);
+  saveUpiSession();
+  launchUpiAndWatch();
+}
+// Buttons shown after "Proceed to Pay": per-app for ICICI, Paytm + QR for HDFC.
+function appBtn(label, color, onclick) {
+  return '<button type="button" class="upi-app-btn" onclick="' + onclick + '">'
+    + '<span class="upi-app-ic" style="background:' + color + '22;color:' + color + ';">' + label.charAt(0) + '</span>'
+    + '<span class="upi-app-lbl">' + label + '</span><span class="upi-app-go">›</span></button>';
+}
+function renderUpiAppChooser(pg) {
+  var box = document.getElementById("upi-app-chooser");
+  if (!box) return;
+  var qrBox = document.getElementById("hdfc-qr-box");
+  if (qrBox) qrBox.style.display = "none";
+  var html = "";
+  if (pg === "hdfc") {
+    html += appBtn("Paytm", "#00BAF2", "payHdfcWith('paytm')");
+    html += '<button type="button" class="upi-app-btn" onclick="showHdfcQr()"><span class="upi-app-ic">▦</span><span class="upi-app-lbl">GPay / PhonePe — Scan QR</span><span class="upi-app-go">›</span></button>';
+  } else if (pg === "apistation") {
+    html += '<button type="button" class="btn primary block" style="min-height:44px;" onclick="openUpiPaymentPage()">Continue to Payment →</button>';
+  } else {
+    html += appBtn("PhonePe", "#5F259F", "payWithApp('phonepe')");
+    html += appBtn("Google Pay", "#1A73E8", "payWithApp('gpay')");
+    html += appBtn("Paytm", "#00BAF2", "payWithApp('paytm')");
+    html += '<button type="button" class="upi-app-btn" onclick="payWithApp(\'all\')"><span class="upi-app-ic">⋯</span><span class="upi-app-lbl">All UPI Apps</span><span class="upi-app-go">›</span></button>';
+  }
+  box.innerHTML = html;
+  box.style.display = "";
+}
+// Launch the chosen UPI app and watch for the credit via a slim non-blocking
+// banner (no confusing modal left on the dashboard).
+function launchUpiAndWatch() {
+  if (!state.upi.paymentUrl) { showToast("Payment link missing. Please try again."); return; }
+  saveUpiSession();
+  var url = state.upi.paymentUrl;
+  state.upi.bannerMode = true;
+  hideUpiSheet();
+  showUpiBanner();
+  startUpiPolling();
+  if (isMobileUpiClient()) { try { window.location.href = url; } catch (e) {} }
+}
+function showUpiBanner() {
+  var b = document.getElementById("upi-banner");
+  var t = document.getElementById("upi-banner-text");
+  if (!b) return;
+  b.classList.remove("success");
+  if (t) t.textContent = "Confirming your ₹" + Number(state.upi.amount || 0).toLocaleString("en-IN") + " payment…";
+  b.hidden = false;
+}
+function updateUpiBannerSuccess(amount) {
+  var b = document.getElementById("upi-banner");
+  var t = document.getElementById("upi-banner-text");
+  if (!b) return;
+  b.classList.add("success");
+  if (t) t.textContent = "✓ ₹" + Number(amount || 0).toLocaleString("en-IN") + " added to your wallet";
+  b.hidden = false;
+  if (state.upi.bannerTimer) clearTimeout(state.upi.bannerTimer);
+  state.upi.bannerTimer = setTimeout(dismissUpiBanner, 4000);
+}
+function updateUpiBannerPending() {
+  var t = document.getElementById("upi-banner-text");
+  if (t) t.textContent = "Taking a little longer… balance updates automatically";
+  if (state.upi.bannerTimer) clearTimeout(state.upi.bannerTimer);
+  state.upi.bannerTimer = setTimeout(dismissUpiBanner, 6000);
+}
+function dismissUpiBanner() {
+  var b = document.getElementById("upi-banner");
+  if (b) b.hidden = true;
+  if (state.upi.bannerTimer) { clearTimeout(state.upi.bannerTimer); state.upi.bannerTimer = null; }
+  if (state.upi.pollTimer) { clearInterval(state.upi.pollTimer); state.upi.pollTimer = null; }
+  state.upi.bannerMode = false;
+}
+function setUpiPg(pg) {
+  state.upi.pg = pg;
+  document.querySelectorAll("#upi-pg-chips .upi-chip").forEach(function (chip) {
+    chip.classList.toggle("active", chip.getAttribute("data-pg") === pg);
+  });
+}
+// Which payment gateways the admin has turned ON (Settings -> Payment Gateway).
+// Default: ICICI + HDFC on, API Station off, until the backend says otherwise.
+async function apiGetUpiConfig() {
+  try {
+    const res = await fetch(API_BASE + "/api/upi/config", { headers: authHeaders() });
+    const body = await res.json();
+    if (body && body.status === "success" && body.gateways) {
+      state.pgConfig = body.gateways;
+    }
+  } catch (e) {}
+  return state.pgConfig;
+}
+// Show only the enabled PG chips; if the selected one is now off, switch to the
+// first enabled gateway.
+function applyPgChips() {
+  const cfg = state.pgConfig || { icici: true, hdfc: true, apistation: false };
+  const order = ["icici", "hdfc", "apistation"];
+  let firstEnabled = null;
+  order.forEach(function (pg) {
+    const chip = document.querySelector('#upi-pg-chips .upi-chip[data-pg="' + pg + '"]');
+    if (!chip) return;
+    const on = !!cfg[pg];
+    chip.style.display = on ? "" : "none";
+    if (on && !firstEnabled) firstEnabled = pg;
+  });
+  if (firstEnabled && !cfg[state.upi.pg]) setUpiPg(firstEnabled);
+}
+async function apiPostIciciInitiate(amount) {
+  const res = await fetch(API_BASE + "/api/upi/icici/initiate", {
+    method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ amount: amount }),
+  });
+  let data = null; try { data = await res.json(); } catch (e) {}
+  return { httpStatus: res.status, body: data };
 }
 async function proceedUpiPay() {
   const amount = parseFloat(document.getElementById("upi-amount").value);
-  if (!amount || amount < 100) { showToast("Minimum UPI top-up is ₹100"); return; }
+  if (!amount || amount < 10) { showToast("Minimum UPI top-up is ₹10"); return; }
   if (amount > 50000) { showToast("Maximum UPI top-up is ₹50,000"); return; }
+  const pg = state.upi.pg || "icici";
+  if (pg === "apistation") { return proceedUpiPayApiStation(amount); }
+  // Bank intents (icici / hdfc): native UPI app chooser.
+  const mob = String(state.mobile || "").replace(/\D/g, "");
+  if (mob.length !== 10) { showToast("Your mobile number is missing. Please log in again."); return; }
+  // Capture the current Main balance so we can detect the credit after payment.
+  let baseline = Number((state.wallets && state.wallets.main) || 0);
+  try {
+    const { httpStatus, body } = await apiGetWalletBalance();
+    if (httpStatus === 401) return handleAuthFailure();
+    if (body && body.status === "success") baseline = Number(body.main_balance) || baseline;
+  } catch (e) {}
+  state.upi.pg = pg;
+  state.upi.collectId = null;
+  state.upi.mob = mob;
+  state.upi.orderId = (pg === "hdfc" ? "STQ" : UPI_ACCOUNT_PREFIX) + mob;
+  state.upi.amount = amount;
+  state.upi.baseline = baseline;
+  state.upi.polls = 0;
+  state.upi.paymentUrl = null;
+  state.upi.bannerMode = false;
+  state.upi.iciciDirect = false;
+  state.upi.iciciIntent = null;
+  // ICICI: prefer the direct Eazypay flow (per-payment refId, no mobile, no
+  // double-credit). On any failure, fall back to the legacy MNO intent.
+  if (pg === "icici") {
+    const btn = document.getElementById("upi-proceed-btn");
+    if (btn) { btn.disabled = true; btn.textContent = "Starting…"; }
+    try {
+      const { httpStatus, body } = await apiPostIciciInitiate(amount);
+      if (httpStatus === 401) return handleAuthFailure();
+      if (body && body.status === "success" && body.intent) {
+        state.upi.iciciDirect = true;
+        state.upi.iciciIntent = body.intent;
+        if (body.merchant_tran_id) state.upi.orderId = body.merchant_tran_id;
+      }
+    } catch (e) {}
+    if (btn) { btn.disabled = false; btn.textContent = "Proceed to Pay"; }
+  }
+  saveUpiSession();
+  // Show the in-app UPI app chooser for both ICICI and HDFC — never auto-open,
+  // so the user always gets to pick the app (even with a phone default set).
+  showUpiRedirectStep();
+}
+async function proceedUpiPayApiStation(amount) {
   const btn = document.getElementById("upi-proceed-btn");
   btn.disabled = true; btn.textContent = "Creating payment…";
   try {
@@ -9175,14 +10181,15 @@ async function proceedUpiPay() {
       btn.disabled = false; btn.textContent = "Proceed to Pay ₹" + amount.toLocaleString("en-IN");
       return;
     }
+    state.upi.pg = "apistation";
     state.upi.collectId = body.collect_id;
     state.upi.orderId = body.order_id;
     state.upi.amount = body.amount || amount;
+    state.upi.baseline = null;
     state.upi.paymentUrl = body.payment_url;
     state.upi.polls = 0;
     saveUpiSession();
     showUpiRedirectStep();
-    // Mobile: auto-open same-tab after a short beat so instructions are readable.
     if (isMobileUpiClient()) {
       setTimeout(function () { openUpiPaymentPage(); }, 600);
     }
@@ -9198,13 +10205,18 @@ function openUpiPaymentPage() {
   }
   saveUpiSession();
   const url = state.upi.paymentUrl;
+  const isApiStation = state.upi.pg === "apistation";
   if (isMobileUpiClient()) {
-    // Mobile: same-tab redirect keeps context via sessionStorage on return.
-    window.location.href = url;
+    // Bank intent → UPI app chooser; API Station → hosted checkout. Either way
+    // same-tab navigation; the page/polling resumes on return.
+    showUpiWaiting("Waiting for payment…");
+    startUpiPolling();
+    try { window.location.href = url; } catch (e) {}
     return;
   }
-  // Desktop: open hosted checkout in a new tab; keep polling here.
-  window.open(url, "_blank");
+  // Desktop: bank UPI intents live on the phone (just poll). API Station has a
+  // hosted web page we can open in a new tab.
+  if (isApiStation) { try { window.open(url, "_blank"); } catch (e) {} }
   showUpiWaiting("Waiting for payment…");
   startUpiPolling();
 }
@@ -9221,6 +10233,7 @@ function startUpiPolling() {
 }
 function showUpiTimeout() {
   if (state.upi.pollTimer) { clearInterval(state.upi.pollTimer); state.upi.pollTimer = null; }
+  if (state.upi.bannerMode) { updateUpiBannerPending(); return; }
   showUpiResult(
     '<div style="font-size:28px;">⏳</div>'
     + '<div class="big">Payment not confirmed yet</div>'
@@ -9231,27 +10244,28 @@ function showUpiTimeout() {
 }
 function resumePendingUpiPayment(opts) {
   opts = opts || {};
-  let collectId = opts.collectId || null;
+  let amt = null, base = null, oid = null, pg = null, cid = null;
   try {
-    if (!collectId) collectId = sessionStorage.getItem("upi_collect_id");
+    amt = sessionStorage.getItem("upi_amount");
+    base = sessionStorage.getItem("upi_baseline");
+    oid = sessionStorage.getItem("upi_order_id");
+    pg = sessionStorage.getItem("upi_pg");
+    cid = sessionStorage.getItem("upi_collect_id");
   } catch (e) {}
-  if (!collectId) return false;
-  try { sessionStorage.removeItem("upi_collect_id"); } catch (e) {}
+  state.upi.amount = Number(amt) || 0;
+  if (!state.upi.amount) return false;
+  state.upi.pg = pg || "icici";
+  state.upi.baseline = base != null ? (Number(base) || 0) : Number((state.wallets && state.wallets.main) || 0);
+  state.upi.collectId = cid || null;
+  if (oid) state.upi.orderId = oid;
 
-  state.upi.collectId = Number(collectId) || collectId;
-  try {
-    const amt = sessionStorage.getItem("upi_amount");
-    const oid = sessionStorage.getItem("upi_order_id");
-    if (amt) state.upi.amount = Number(amt) || state.upi.amount;
-    if (oid) state.upi.orderId = oid;
-  } catch (e) {}
-
+  const _resumeBackdrop = document.getElementById("upi-sheet-backdrop");
+  if (_resumeBackdrop) _resumeBackdrop.hidden = false;
   document.getElementById("upi-form-card").classList.add("show");
-  document.getElementById("fund-form-card").classList.remove("show");
-  const title = opts.fromReturn
-    ? "Checking payment status…"
-    : "Checking payment status…";
-  showUpiWaiting(title);
+  try { document.body.style.overflow = "hidden"; } catch (e) {}
+  const _resumeFund = document.getElementById("fund-form-card");
+  if (_resumeFund) _resumeFund.classList.remove("show");
+  showUpiWaiting("Checking payment status…");
   if (opts.hint) showToast(opts.hint);
   startUpiPolling();
   return true;
@@ -9277,7 +10291,7 @@ function consumeUpiReturnUrl() {
   return upiStatus;
 }
 async function checkUpiStatus(manual) {
-  if (!state.upi.collectId) return;
+  if (!state.upi.amount) return;
   if (!manual) {
     state.upi.polls += 1;
     const hint = document.getElementById("upi-poll-hint");
@@ -9294,48 +10308,89 @@ async function checkUpiStatus(manual) {
   const checkBtn = document.getElementById("upi-check-btn") || document.getElementById("upi-manual-check-btn");
   if (manual && checkBtn) { checkBtn.disabled = true; checkBtn.textContent = "Checking…"; }
   try {
-    const { httpStatus, body } = await apiGetUpiStatus(state.upi.collectId);
+    if (state.upi.pg === "apistation" && state.upi.collectId) {
+      // API Station: ask the gateway for this collect's status.
+      const { httpStatus, body } = await apiGetUpiStatus(state.upi.collectId);
+      if (httpStatus === 401) return handleAuthFailure();
+      if (isRateLimited(httpStatus, body)) {
+        handleRateLimit(body);
+        if (manual) showToast("Too many requests. Please wait a moment.");
+        return;
+      }
+      if (httpStatus === 403) {
+        clearUpiSession();
+        showUpiResult('<div class="big">❌ Access denied</div><div class="sub">You cannot check this payment.</div><button class="btn primary block" onclick="cancelUpiPay()">Done</button>');
+        return;
+      }
+      if (!body) { if (manual) showToast("Could not check status."); return; }
+      const st = (body.status || "").toLowerCase();
+      if (st === "paid" || body.wallet_credited) {
+        clearUpiSession();
+        const bal = (body.new_balance !== undefined && body.new_balance !== null)
+          ? formatMoney(body.new_balance) : formatMoney(state.wallets.main);
+        showUpiResult(
+          '<div style="font-size:28px;">✅</div>'
+          + '<div class="big">₹' + Number(body.amount || state.upi.amount).toLocaleString("en-IN") + " added to your Main Wallet!</div>"
+          + '<div class="sub">New Balance: ' + bal + "</div>"
+          + '<div class="sub" style="font-size:12px;opacity:.7;">Closing automatically…</div>'
+          + '<button class="btn primary block" onclick="finishUpiSuccess()">Done</button>'
+        );
+        scheduleUpiAutoClose();
+        try { await refreshWalletBalance(); document.getElementById("w-main").textContent = formatMoney(state.wallets.main); } catch (e) {}
+        return;
+      }
+      if (st === "failed" || st === "expired") {
+        clearUpiSession();
+        showUpiResult(
+          '<div style="font-size:28px;">❌</div>'
+          + '<div class="big">Payment ' + st + ". No amount deducted.</div>"
+          + '<div class="sub">You can try again with a new payment.</div>'
+          + '<button class="btn primary block" onclick="resetUpiForm()">Try Again</button>'
+        );
+        return;
+      }
+      if (manual) { showToast("Payment not confirmed yet."); showUpiWaiting("Waiting for payment…"); }
+      return;
+    }
+    // Bank intent (icici / hdfc): the backend bridge credits the Main wallet
+    // ~1 min after a successful UPI payment, so we detect the credit as an
+    // increase in the Main balance over the pre-payment baseline.
+    const { httpStatus, body } = await apiGetWalletBalance();
     if (httpStatus === 401) return handleAuthFailure();
     if (isRateLimited(httpStatus, body)) {
       handleRateLimit(body);
       if (manual) showToast("Too many requests. Please wait a moment.");
       return;
     }
-    if (httpStatus === 403) {
-      clearUpiSession();
-      showUpiResult('<div class="big">❌ Access denied</div><div class="sub">You cannot check this payment.</div><button class="btn primary block" onclick="cancelUpiPay()">Done</button>');
-      return;
-    }
-    if (!body) {
+    if (!body || body.status !== "success") {
       if (manual) showToast("Could not check status.");
       return;
     }
-    const st = (body.status || "").toLowerCase();
-    if (st === "paid" || body.wallet_credited) {
+    const newMain = Number(body.main_balance) || 0;
+    const baseline = Number(state.upi.baseline) || 0;
+    if (newMain > baseline + 0.009) {
+      const creditedAmt = state.upi.amount;
       clearUpiSession();
-      const bal = (body.new_balance !== undefined && body.new_balance !== null)
-        ? formatMoney(body.new_balance) : formatMoney(state.wallets.main);
-      showUpiResult(
-        '<div style="font-size:28px;">✅</div>'
-        + '<div class="big">₹' + Number(body.amount || state.upi.amount).toLocaleString("en-IN") + " added to your Main Wallet!</div>"
-        + '<div class="sub">New Balance: ' + bal + "</div>"
-        + '<button class="btn primary block" onclick="finishUpiSuccess()">Done</button>'
-      );
-      try { await refreshWalletBalance(); document.getElementById("w-main").textContent = formatMoney(state.wallets.main); } catch (e) {}
-      return;
-    }
-    if (st === "failed" || st === "expired") {
-      clearUpiSession();
-      showUpiResult(
-        '<div style="font-size:28px;">❌</div>'
-        + '<div class="big">Payment ' + st + ". No amount deducted.</div>"
-        + '<div class="sub">You can try again with a new payment.</div>'
-        + '<button class="btn primary block" onclick="resetUpiForm()">Try Again</button>'
-      );
+      state.wallets = { main: body.main_balance, commission: body.commission_balance, dmr: body.dmr_balance, total: body.total_balance };
+      if (state.upi.pollTimer) { clearInterval(state.upi.pollTimer); state.upi.pollTimer = null; }
+      if (state.upi.bannerMode) {
+        // App-launch flow: confirm via the slim banner, not a modal.
+        updateUpiBannerSuccess(creditedAmt);
+      } else {
+        showUpiResult(
+          '<div style="font-size:28px;">✅</div>'
+          + '<div class="big">₹' + Number(creditedAmt).toLocaleString("en-IN") + " added to your Main Wallet!</div>"
+          + '<div class="sub">New Balance: ' + formatMoney(newMain) + "</div>"
+          + '<div class="sub" style="font-size:12px;opacity:.7;">Closing automatically…</div>'
+          + '<button class="btn primary block" onclick="finishUpiSuccess()">Done</button>'
+        );
+        scheduleUpiAutoClose();
+      }
+      try { renderIdentityAndBalance(); document.getElementById("w-main").textContent = formatMoney(newMain); } catch (e) {}
       return;
     }
     if (manual) {
-      showToast("Payment not confirmed yet.");
+      showToast("Payment not confirmed yet. Credit can take up to a minute after you pay.");
       showUpiWaiting("Waiting for payment…");
     }
   } catch (e) {
@@ -9348,33 +10403,47 @@ async function checkUpiStatus(manual) {
   }
 }
 async function finishUpiSuccess() {
+  if (state.upi.autoCloseTimer) { clearTimeout(state.upi.autoCloseTimer); state.upi.autoCloseTimer = null; }
   clearUpiSession();
   resetUpiForm();
-  document.getElementById("upi-form-card").classList.remove("show");
+  hideUpiSheet();
   try {
     await refreshWalletBalance();
     document.getElementById("w-main").textContent = formatMoney(state.wallets.main);
   } catch (e) {}
 }
+// After a confirmed top-up, auto-close the UPI window so the retailer returns
+// to the wallet with the fresh balance without tapping "Done".
+function scheduleUpiAutoClose() {
+  if (state.upi.autoCloseTimer) { clearTimeout(state.upi.autoCloseTimer); }
+  state.upi.autoCloseTimer = setTimeout(function () {
+    try { finishUpiSuccess(); } catch (e) {}
+  }, 3000);
+}
 
 function routeAfterAuth() {
-  let pendingCollect = null;
-  try { pendingCollect = sessionStorage.getItem("upi_collect_id"); } catch (e) {}
+  let pendingUpi = null;
+  try { pendingUpi = sessionStorage.getItem("upi_amount"); } catch (e) {}
   const upiReturnStatus = readUpiReturnParams();
   if (upiReturnStatus || (window.location.search || "").includes("upi_")) {
     try { window.history.replaceState({}, "", "/"); } catch (e) {}
   }
-  if (pendingCollect) {
+  if (pendingUpi) {
     goTo("wallet");
-    resumePendingUpiPayment({
-      collectId: pendingCollect,
-      fromReturn: true,
-      hint: upiReturnStatus === "failure"
-        ? "Payment page reported failure — verifying with server…"
-        : null,
-    });
+    resumePendingUpiPayment({ fromReturn: true });
     return;
   }
+  // Opened from a push notification click (fresh window): ?screen=<name>
+  try {
+    var sp = new URLSearchParams(window.location.search || "");
+    var scr = sp.get("screen");
+    var screens = ["dashboard","recharge","transactions","ledger","wallet","reports","commission","support"];
+    if (scr && screens.indexOf(scr) >= 0) {
+      try { window.history.replaceState({}, "", "/"); } catch (e) {}
+      goTo(scr);
+      return;
+    }
+  } catch (e) {}
   goTo("dashboard");
 }
 
@@ -10050,8 +11119,200 @@ async function loadSettingsScreen(opts) {
   loadSettingsAppearance();
   setSettingsTab(opts.tab || state.settings.tab || "profile");
   renderSettingsProfile();
+  loadShopLocation();
+  loadKyc();
   await refreshSettingsProfileName();
   renderSettingsProfile();
+}
+
+
+/* ===== KYC documents + details (owner, 24 Oct 2026) =====
+   Not required for anything yet (QR works without it); admin reviews it.
+   Photos are shrunk on the phone (max 1600 px JPEG) before upload. */
+const KYC_DOCS = [
+  ["pan_image", "PAN card"], ["aadhaar_front", "Aadhaar – front"], ["aadhaar_back", "Aadhaar – back"],
+  ["shop_photo", "Shop photo (with board)"], ["address_proof", "Address proof"],
+];
+const KYC_FIELDS = { "kyc-f-name": "full_name", "kyc-f-dob": "dob", "kyc-f-a4": "aadhaar_last4", "kyc-f-shop": "shop_name",
+  "kyc-f-addr": "shop_address", "kyc-f-city": "city", "kyc-f-pin": "pincode", "kyc-f-ptype": "address_proof_type" };
+
+async function kycCall(path, body) {
+  const opts = body === undefined ? { headers: authHeaders() }
+    : { method: "POST", headers: Object.assign({ "Content-Type": "application/json" }, authHeaders()), body: JSON.stringify(body) };
+  const res = await fetch(API_BASE + "/api/profile/kyc" + path, opts);
+  const data = await res.json().catch(() => null);
+  if (res.status === 200 && data && data.status === "success") return data;
+  throw new Error((data && data.message) || "Could not save. Try again.");
+}
+
+async function loadKyc() {
+  try { state.kyc = await kycCall(""); renderKyc(); } catch (e) { /* card stays as is */ }
+}
+
+function renderKyc() {
+  const k = state.kyc;
+  if (!k) return;
+  const badge = document.getElementById("kyc-state-badge");
+  badge.textContent = k.state === "approved" ? "Approved ✓" : k.state_label;
+  badge.className = "kyc-badge " + k.state;
+  const rej = document.getElementById("kyc-reject");
+  rej.hidden = k.state !== "rejected";
+  rej.textContent = k.reject_reason ? "Please fix: " + k.reject_reason : "";
+  document.getElementById("kyc-doc-rows").innerHTML = KYC_DOCS.map(([doc, label]) => {
+    const has = k.documents[doc], redo = k.redo[doc];
+    const tag = redo ? '<span class="redo">Upload again</span>' : has ? '<span class="ok">✓ Uploaded</span>' : '<span class="no">Not uploaded</span>';
+    const accept = doc === "address_proof" ? "image/*,application/pdf" : "image/*";
+    const btn = k.editable ? '<label class="btn sm">' + (has ? "Change" : "Upload")
+      + '<input type="file" accept="' + accept + '" hidden onchange="uploadKycDoc(\'' + doc + '\', this)"></label>' : "";
+    return '<div class="kyc-doc"><span class="kyc-doc-name">' + escapeHtml(label) + "</span>" + tag + btn + "</div>";
+  }).join("");
+  const d = k.details;
+  Object.entries(KYC_FIELDS).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el && document.activeElement !== el) el.value = d[key] || "";
+    if (el) el.disabled = !k.editable;
+  });
+  const pan = document.getElementById("kyc-f-pan");
+  pan.value = "";
+  pan.placeholder = d.pan_masked || "ABCDE1234F";
+  pan.disabled = !k.editable;
+  document.getElementById("kyc-f-declare").disabled = !k.editable;
+  const btn = document.getElementById("kyc-submit-btn");
+  btn.hidden = !k.editable;
+  btn.textContent = k.state === "rejected" ? "Submit again" : "Submit KYC";
+  document.querySelector("#kyc-form .kyc-declare").hidden = !k.editable;
+}
+
+function kycShrink(file) {
+  return new Promise((resolve, reject) => {
+    if (file.type === "application/pdf") {
+      if (file.size > 6 * 1024 * 1024) return reject(new Error("PDF too large (max 6 MB)."));
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result).split(",")[1]);
+      r.onerror = () => reject(new Error("Could not read the file."));
+      return r.readAsDataURL(file);
+    }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const scale = Math.min(1, 1600 / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * scale);
+      c.height = Math.round(img.height * scale);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL("image/jpeg", 0.82).split(",")[1]);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("This is not a photo. Use JPG/PNG.")); };
+    img.src = url;
+  });
+}
+
+async function uploadKycDoc(doc, input) {
+  const file = input.files && input.files[0];
+  input.value = "";
+  if (!file) return;
+  hideFieldError("kyc-form-error");
+  showToast(state.kyc && state.kyc.ai_enabled ? "Uploading and reading the photo…" : "Uploading…", "info", 4000);
+  try {
+    const data = await kycShrink(file);
+    state.kyc = await kycCall("/document", { doc: doc, data: data });
+    renderKyc();
+    const filled = state.kyc.ai_filled || [];
+    showToast(filled.length ? "Filled from photo: " + filled.join(", ") + ". Please check." : "Uploaded.", "success", filled.length ? 6000 : 3000);
+  } catch (e) {
+    showFieldError("kyc-form-error", e.message);
+  }
+}
+
+async function submitKyc() {
+  hideFieldError("kyc-form-error");
+  const body = {};
+  Object.entries(KYC_FIELDS).forEach(([id, key]) => { body[key] = (document.getElementById(id).value || "").trim(); });
+  const pan = (document.getElementById("kyc-f-pan").value || "").trim().toUpperCase();
+  if (pan) body.pan = pan;
+  const btn = document.getElementById("kyc-submit-btn");
+  btn.disabled = true;
+  try {
+    state.kyc = await kycCall("/details", body);
+    renderKyc();
+    if (state.kyc.missing.length) throw new Error("Still needed: " + state.kyc.missing.join(", "));
+    if (!document.getElementById("kyc-f-declare").checked) throw new Error("Tick the confirmation box to submit.");
+    state.kyc = await kycCall("/submit", { declaration: true });
+    renderKyc();
+    showToast("KYC submitted. QuickPay will review it.", "success", 5000);
+  } catch (e) {
+    showFieldError("kyc-form-error", e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ===== KYC > Shop location (GET/POST /api/profile/shop-location) =====
+   Saved once from the phone GPS when the retailer taps the button; never
+   tracked. Shown on the admin Recharge Map. */
+function renderShopLocation(loc, busy) {
+  const st = document.getElementById("kyc-loc-status");
+  const btn = document.getElementById("kyc-loc-btn");
+  if (!st || !btn) return;
+  btn.disabled = !!busy;
+  if (busy) { btn.textContent = "Getting GPS…"; return; }
+  if (loc && loc.set) {
+    let when = "";
+    try { when = new Date(loc.set_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }); } catch (e) { /* no date */ }
+    st.textContent = "Saved" + (when ? " on " + when : "") + (loc.accuracy_m ? " · accuracy " + loc.accuracy_m + " m" : "")
+      + (loc.source === "admin" ? " · set by QuickPay" : "");
+    st.className = "kyc-status ok";
+    btn.textContent = "Update";
+  } else if (loc) {
+    st.textContent = "Not set";
+    st.className = "kyc-status";
+    btn.textContent = "Set shop location";
+  }
+}
+
+async function loadShopLocation() {
+  hideFieldError("kyc-loc-error");
+  try {
+    const res = await fetch(API_BASE + "/api/profile/shop-location", { headers: authHeaders() });
+    const body = await res.json();
+    if (res.status === 200 && body.status === "success") { state.shopLocation = body; renderShopLocation(body); return; }
+  } catch (e) { /* shown below */ }
+  renderShopLocation({ set: false });
+}
+
+function setShopLocation() {
+  hideFieldError("kyc-loc-error");
+  if (!navigator.geolocation) { showFieldError("kyc-loc-error", "This phone/browser cannot share location."); return; }
+  if (state.shopLocation && state.shopLocation.set
+      && !window.confirm("Replace the saved shop location with where you are now?")) return;
+  renderShopLocation(null, true);
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    try {
+      const res = await fetch(API_BASE + "/api/profile/shop-location", {
+        method: "POST",
+        headers: Object.assign({ "Content-Type": "application/json" }, authHeaders()),
+        body: JSON.stringify({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy || 0) }),
+      });
+      const body = await res.json().catch(() => null);
+      if (res.status === 200 && body && body.status === "success") {
+        state.shopLocation = body;
+        renderShopLocation(body);
+        showToast("Shop location saved.", "success");
+        return;
+      }
+      showFieldError("kyc-loc-error", (body && body.message) || "Could not save. Try again.");
+    } catch (e) {
+      showFieldError("kyc-loc-error", "No internet / server not reachable. Try again.");
+    }
+    renderShopLocation(state.shopLocation || { set: false });
+  }, (err) => {
+    const msg = err && err.code === 1
+      ? "Location permission is blocked. Allow location for this app in phone settings, then try again."
+      : "Could not get GPS. Turn on location and try again near the shop door.";
+    showFieldError("kyc-loc-error", msg);
+    renderShopLocation(state.shopLocation || { set: false });
+  }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
 }
 
 /* =========================================================================
@@ -10064,13 +11325,20 @@ async function loadSettingsScreen(opts) {
     if (!state.token) return;
     if (document.visibilityState && document.visibilityState !== "visible") return;
     refreshWalletBalance().catch(function () {});
-    // If user returned to the tab after paying (desktop new-tab flow), nudge status check.
-    if (state.upi.collectId && state.upi.pollTimer) checkUpiStatus(true).catch(function () {});
+    refreshNotifUnread();
+    // If user returned to the tab after paying, nudge a status check (collect
+    // flow or the bank banner flow).
+    if (state.upi.pollTimer && (state.upi.collectId || state.upi.bannerMode)) {
+      Promise.resolve(checkUpiStatus(false)).catch(function () {});
+    }
   }
   document.addEventListener("visibilitychange", onAppFocus);
   window.addEventListener("focus", onAppFocus);
 
   if (state.token) {
+    apiGetUpiConfig().catch(function () {});
+    refreshNotifUnread();
+    setupPush();
     loadServices().finally(routeAfterAuth);
   } else {
     goTo("login");
@@ -10159,5 +11427,74 @@ async function loadSettingsScreen(opts) {
   }
 })();
 </script>
+<!-- ===== UPI top-up bottom sheet (opens over any screen: home / wallet) ===== -->
+<div id="upi-sheet-backdrop" class="upi-sheet-backdrop" onclick="closeUpiSheet()" hidden></div>
+<div class="card upi-form upi-sheet" id="upi-form-card" role="dialog" aria-label="Add Money via UPI">
+  <div class="upi-sheet-handle" aria-hidden="true"></div>
+  <button type="button" class="upi-sheet-close" onclick="closeUpiSheet()" aria-label="Close">&times;</button>
+  <div id="upi-step-amount">
+    <h3 style="margin:0 0 16px;font-size:15px;">Add Money via UPI</h3>
+    <div class="rc-field">
+      <label for="upi-amount">Amount</label>
+      <div class="amt-input-wrap"><span class="rupee">₹</span><input type="number" id="upi-amount" placeholder="0" min="10" max="50000" style="height:44px;" aria-label="UPI amount"></div>
+    </div>
+    <div class="upi-quick" id="upi-quick-chips">
+      <button type="button" class="upi-chip" data-amt="500" onclick="setUpiAmount(500)">₹500</button>
+      <button type="button" class="upi-chip" data-amt="1000" onclick="setUpiAmount(1000)">₹1,000</button>
+      <button type="button" class="upi-chip" data-amt="2000" onclick="setUpiAmount(2000)">₹2,000</button>
+      <button type="button" class="upi-chip" data-amt="5000" onclick="setUpiAmount(5000)">₹5,000</button>
+    </div>
+    <p style="font-size:12px;color:var(--color-text-muted,#94A3B8);margin:0 0 12px;">Min ₹10 · Max ₹50,000</p>
+    <div class="rc-field">
+      <label>Payment Gateway</label>
+      <div class="upi-quick" id="upi-pg-chips">
+        <button type="button" class="upi-chip pg-chip pg-icici active" data-pg="icici" onclick="setUpiPg('icici')"><i class="ti ti-building-bank"></i> ICICI</button>
+        <button type="button" class="upi-chip pg-chip pg-hdfc" data-pg="hdfc" onclick="setUpiPg('hdfc')"><i class="ti ti-building-bank"></i> HDFC</button>
+        <button type="button" class="upi-chip pg-chip pg-apistation" data-pg="apistation" onclick="setUpiPg('apistation')">API Station</button>
+      </div>
+    </div>
+    <button class="btn primary block" id="upi-proceed-btn" onclick="proceedUpiPay()" style="min-height:44px;">Proceed to Pay</button>
+  </div>
+  <div id="upi-step-redirect" class="upi-redirect" style="display:none;">
+    <div class="big" style="font-weight:700;">Choose your UPI app</div>
+    <div class="upi-amt" id="upi-redir-amount">₹0</div>
+    <div class="upi-ref" id="upi-redir-ref"></div>
+    <div id="upi-app-chooser" class="upi-app-grid"></div>
+    <div id="hdfc-qr-box" style="display:none;text-align:center;margin-top:12px;">
+      <div id="hdfc-qr" style="display:inline-block;background:#fff;padding:10px;border-radius:8px;"></div>
+      <p style="font-size:12px;color:var(--color-text-muted,#94A3B8);margin:8px 0 0;">Scan this with GPay / PhonePe / Google Lens. Your balance updates automatically after you pay.</p>
+    </div>
+    <button class="btn block" style="margin-top:10px;min-height:44px;" onclick="cancelUpiPay()">Cancel</button>
+  </div>
+  <div id="upi-step-waiting" class="upi-waiting" style="display:none;">
+    <div style="font-size:28px;">⏳</div>
+    <div class="big" style="font-weight:700;margin-top:8px;" id="upi-wait-title">Waiting for payment…</div>
+    <div class="upi-amt" id="upi-wait-amount">₹0</div>
+    <div class="upi-ref" id="upi-wait-ref"></div>
+    <div class="upi-msg">Complete payment in your UPI app. We auto-check every 5 seconds (up to 3 minutes).</div>
+    <div class="upi-msg" id="upi-poll-hint" style="font-size:12.5px;color:var(--text-muted);"></div>
+    <button class="btn primary block" id="upi-check-btn" onclick="checkUpiStatus(true)" style="min-height:44px;">✓ I've Paid — Check Status</button>
+    <button class="btn block" style="margin-top:8px;min-height:44px;" onclick="cancelUpiPay()">✕ Cancel</button>
+  </div>
+  <div id="upi-step-result" class="upi-result" style="display:none;"></div>
+</div>
+<!-- ===== Notifications bottom sheet ===== -->
+<div id="notif-backdrop" class="upi-sheet-backdrop" onclick="closeNotifications()" hidden></div>
+<div id="notif-sheet" class="card upi-sheet notif-sheet" role="dialog" aria-label="Notifications">
+  <div class="upi-sheet-handle" aria-hidden="true"></div>
+  <button type="button" class="upi-sheet-close" onclick="closeNotifications()" aria-label="Close">&times;</button>
+  <div class="notif-head">
+    <h3>Notifications</h3>
+    <button type="button" class="btn sm" id="notif-markall" onclick="markAllNotifRead()">Mark all read</button>
+  </div>
+  <button type="button" class="btn primary block" id="notif-enable-push" onclick="enablePush()" style="display:none;margin-bottom:10px;min-height:44px;"><i class="ti ti-bell-ringing"></i> Turn on phone alerts</button>
+  <div id="notif-list" class="notif-list"></div>
+</div>
+<!-- Slim non-blocking banner shown while a UPI top-up is being confirmed -->
+<div id="upi-banner" class="upi-banner" hidden>
+  <span class="upi-banner-spin" id="upi-banner-spin"></span>
+  <span id="upi-banner-text">Confirming your payment…</span>
+  <button id="upi-banner-x" onclick="dismissUpiBanner()" aria-label="Dismiss">&times;</button>
+</div>
 </body>
 </html>

@@ -1,0 +1,11 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "fun.qpaytest.qpretailer.twa",
+    "sha256_cert_fingerprints": [
+      "ED:FB:34:BE:5E:35:AE:91:BE:34:5D:0B:B0:7A:C8:1C:03:48:E0:81:46:E5:CA:D0:0C:7A:0D:0D:0D:59:3E:60",
+      "2A:AF:17:A3:9B:D2:9C:11:AB:7F:12:31:00:7D:F4:23:23:E7:39:10:4D:44:B4:1C:D2:88:0F:B7:8E:69:3B:6D"
+    ]
+  }
+}]
