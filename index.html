@@ -2037,6 +2037,29 @@ body.is-channel .retailer-only{display:none !important;}
 .net-sheet-body{padding:4px 20px 22px;}
 .net-sheet-body .settings-field input{letter-spacing:.5px;}
 .net-pin input{font-size:22px;letter-spacing:10px;text-align:center;}
+.nh-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;}
+.nh-head h2{margin:0;font-size:20px;}
+.nh-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
+@media (min-width:1024px){.nh-kpis{grid-template-columns:repeat(6,minmax(0,1fr));}}
+.net-kpi small{display:block;font-size:11px;color:var(--text-secondary);margin-top:2px;font-weight:500;}
+.net-kpi small.up{color:#15803d;} .net-kpi small.down{color:#b91c1c;}
+.nh-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px;}
+@media (min-width:1024px){.nh-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+.nh-h{display:flex;justify-content:space-between;align-items:center;margin:0 0 6px;font-size:15px;}
+.nh-link{font-size:12px;font-weight:600;color:var(--color-text-brand);cursor:pointer;}
+.nr-filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:8px;}
+.nr-presets{display:flex;flex-wrap:wrap;gap:6px;}
+.nr-presets button{padding:7px 12px;border-radius:999px;border:1px solid var(--color-border-default,#e2e8f0);background:#fff;font-weight:600;font-size:13px;cursor:pointer;}
+.nr-presets button.active{background:var(--color-text-brand,#c2410c);color:#fff;border-color:transparent;}
+.nr-custom input,.nr-dt{padding:8px;border:1px solid var(--color-border-default);border-radius:8px;}
+.nr-custom[hidden],.nr-dt[hidden]{display:none !important;}
+.nr-label{font-weight:700;margin:4px 0 10px;}
+.nr-table{width:100%;border-collapse:collapse;font-size:13px;}
+.nr-table th{text-align:left;font-size:11px;color:var(--text-secondary);font-weight:600;padding:6px 4px;border-bottom:1px solid var(--color-border-default,#e2e8f0);white-space:nowrap;}
+.nr-table td{padding:8px 4px;border-bottom:1px solid #f1f5f9;vertical-align:top;}
+.nr-table td.r,.nr-table th.r{text-align:right;white-space:nowrap;}
+.nr-scroll{overflow-x:auto;}
+.nr-bar{height:6px;border-radius:3px;background:#fdba74;margin-top:4px;}
 .net-auto-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:13px;}
 .net-auto-bar.paused{background:#fff7ed;border-color:#fed7aa;}
 .net-auto-bar[hidden]{display:none !important;}
@@ -2842,25 +2865,27 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
         <div class="qp-mark">Q</div>
         <div class="sb-brand-text">
           <div class="qp-word">QuickPay</div>
-          <div class="qp-tag">Retailer Console</div>
+          <div class="qp-tag" id="qp-console-tag">Retailer Console</div>
         </div>
       </div>
       <nav class="sb-nav sidebar-nav">
         <div class="sb-section nav-section">
           <div class="sb-section-label nav-section-label">MAIN</div>
-          <div class="sb-item" data-nav="dashboard" onclick="goTo('dashboard')"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></div>
+          <div class="sb-item retailer-only" data-nav="dashboard" onclick="goTo('dashboard')"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></div>
+          <div class="sb-item channel-only" data-nav="nethome" onclick="goTo('nethome')"><i class="ti ti-layout-dashboard"></i><span>Home</span></div>
           <div class="sb-item channel-only" data-nav="network" onclick="goTo('network')"><i class="ti ti-users-group"></i><span>My Network</span></div>
-          <div class="sb-item" id="sb-recharge-toggle" onclick="toggleRechargeMenu()"><i class="ti ti-refresh"></i><span>Recharge</span><i class="ti ti-chevron-down chev"></i></div>
-          <div class="sb-sub" id="sb-recharge-sub">
+          <div class="sb-item retailer-only" id="sb-recharge-toggle" onclick="toggleRechargeMenu()"><i class="ti ti-refresh"></i><span>Recharge</span><i class="ti ti-chevron-down chev"></i></div>
+          <div class="sb-sub retailer-only" id="sb-recharge-sub">
             <!-- filled by renderServiceNav() from /api/services -->
           </div>
-          <div class="sb-item" data-nav="transactions" onclick="goTo('transactions')"><i class="ti ti-list-details"></i><span>Transactions</span></div>
+          <div class="sb-item retailer-only" data-nav="transactions" onclick="goTo('transactions')"><i class="ti ti-list-details"></i><span>Transactions</span></div>
           <div class="sb-item" data-nav="ledger" onclick="goTo('ledger')"><i class="ti ti-book"></i><span>Ledger</span></div>
           <div class="sb-item" data-nav="wallet" onclick="goTo('wallet')"><i class="ti ti-wallet"></i><span>Wallet</span></div>
         </div>
         <div class="sb-section nav-section">
           <div class="sb-section-label nav-section-label">BUSINESS</div>
-          <div class="sb-item" data-nav="reports" onclick="goTo('reports')"><i class="ti ti-chart-bar"></i><span>Reports</span></div>
+          <div class="sb-item retailer-only" data-nav="reports" onclick="goTo('reports')"><i class="ti ti-chart-bar"></i><span>Reports</span></div>
+          <div class="sb-item channel-only" data-nav="netreports" onclick="goTo('netreports')"><i class="ti ti-chart-bar"></i><span>Network Reports</span></div>
           <div class="sb-item" data-nav="commission" onclick="goTo('commission')"><i class="ti ti-percentage"></i><span>Commission</span></div>
         </div>
         <div class="sb-section nav-section">
@@ -2900,7 +2925,7 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
             <div class="profile-avatar" id="profile-avatar" aria-hidden="true">R</div>
             <span class="profile-meta">
               <span class="profile-name" id="profile-name-short">Retailer</span>
-              <span class="profile-role">Retailer</span>
+              <span class="profile-role" id="profile-role-label">Retailer</span>
             </span>
           </button>
           <div class="profile-menu" id="profile-menu">
@@ -3802,6 +3827,72 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
       </div>
 
 <!-- ============ SUPPORT V2 ============ -->
+      <!-- MD / DT: Home = network dashboard (GET /api/channel/dashboard) -->
+      <div class="screen hidden" id="screen-nethome">
+        <div class="nh-head">
+          <div><h2 id="nh-greet">Hello</h2><div class="sub" id="nh-date"></div></div>
+          <button type="button" class="dash-refresh-btn" onclick="loadNetHome()"><i class="ti ti-refresh" aria-hidden="true"></i> Refresh</button>
+        </div>
+        <div class="net-kpis nh-kpis" id="nh-kpis"></div>
+        <div class="dash-mid-row">
+          <div class="card dash-panel">
+            <div class="dash-panel-head">
+              <div><h3>Business Trend</h3><div class="panel-sub" id="nh-trend-sub">Network recharge volume</div></div>
+              <div class="trend-filters" role="tablist">
+                <button type="button" class="trend-filter nh-trend active" data-days="7" onclick="loadNetHome(7)">7D</button>
+                <button type="button" class="trend-filter nh-trend" data-days="30" onclick="loadNetHome(30)">30D</button>
+              </div>
+            </div>
+            <div id="nh-trend" class="trend-chart"></div>
+          </div>
+          <div class="card dash-panel">
+            <div class="dash-panel-head"><div><h3>Today's Transactions Status</h3><div class="panel-sub">All retailers in your network</div></div></div>
+            <div class="status-today">
+              <div class="status-total"><div class="n" id="nh-st-total">0</div><div class="t">Txns</div></div>
+              <div class="status-legend">
+                <div class="status-legend-row"><span class="left"><span class="status-dot success"></span>Success</span><span class="count" id="nh-st-success">0</span></div>
+                <div class="status-legend-row"><span class="left"><span class="status-dot pending"></span>Pending</span><span class="count" id="nh-st-pending">0</span></div>
+                <div class="status-legend-row"><span class="left"><span class="status-dot processing"></span>Processing</span><span class="count" id="nh-st-processing">0</span></div>
+                <div class="status-legend-row"><span class="left"><span class="status-dot failed"></span>Failed</span><span class="count" id="nh-st-failed">0</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="nh-grid">
+          <div class="card net-panel" id="nh-bydt-card" hidden><h3 class="nh-h">Distributors today</h3><div id="nh-bydt"></div></div>
+          <div class="card net-panel"><h3 class="nh-h">Top retailers today</h3><div id="nh-top"></div></div>
+          <div class="card net-panel"><h3 class="nh-h">Low balance <a class="nh-link" onclick="goTo('network')">Open network →</a></h3><div id="nh-low"></div></div>
+          <div class="card net-panel"><h3 class="nh-h">Recent transfers <a class="nh-link" onclick="state.net.tab='transfers';goTo('network')">All →</a></h3><div id="nh-recent"></div></div>
+        </div>
+      </div>
+
+      <!-- MD / DT: Network Reports (GET /api/channel/report, /report/pdf) -->
+      <div class="screen hidden" id="screen-netreports">
+        <div class="nr-filters">
+          <div class="nr-presets" id="nr-presets">
+            <button type="button" data-p="today" onclick="setNrPreset('today')">Today</button>
+            <button type="button" data-p="yesterday" onclick="setNrPreset('yesterday')">Yesterday</button>
+            <button type="button" data-p="7" onclick="setNrPreset('7')">7 days</button>
+            <button type="button" data-p="month" onclick="setNrPreset('month')">This month</button>
+            <button type="button" data-p="custom" onclick="setNrPreset('custom')">Custom</button>
+          </div>
+          <div class="nr-custom" id="nr-custom" hidden>
+            <input type="date" id="nr-from" onchange="loadNetReports()"> <span>to</span> <input type="date" id="nr-to" onchange="loadNetReports()">
+          </div>
+          <select id="nr-dt" class="nr-dt" onchange="loadNetReports()" hidden><option value="">All distributors</option></select>
+          <button type="button" class="btn sm" id="nr-pdf" onclick="downloadNetReportPdf()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> PDF</button>
+        </div>
+        <div class="nr-label" id="nr-label"></div>
+        <div class="net-kpis nh-kpis" id="nr-kpis"></div>
+        <div class="net-tabs" role="tablist">
+          <button type="button" class="net-tab active" data-nrtab="retailers" onclick="setNrTab('retailers')">Retailers</button>
+          <button type="button" class="net-tab" data-nrtab="days" onclick="setNrTab('days')">By day</button>
+          <button type="button" class="net-tab" data-nrtab="ops" onclick="setNrTab('ops')">Operators</button>
+          <button type="button" class="net-tab channel-md-only" data-nrtab="dts" onclick="setNrTab('dts')" hidden>Distributors</button>
+        </div>
+        <div class="card net-panel" id="nr-body"></div>
+      </div>
+
       <!-- MD / DT: My Network (GET/POST /api/channel/*) -->
       <div class="screen hidden" id="screen-network">
         <div class="net-kpis" id="net-kpis"></div>
@@ -4168,11 +4259,13 @@ html.qp-large-text .settings-field input{font-size:14.5px;}
 
 <!-- Bottom nav (mobile) -->
 <nav id="bottom-nav" aria-label="Primary">
-  <button type="button" class="bn-item" data-nav="dashboard" onclick="goTo('dashboard')" aria-label="Home"><i class="ti ti-layout-grid" aria-hidden="true"></i>Home</button>
-  <button type="button" class="bn-item" data-nav="recharge" onclick="goTo('recharge')" aria-label="Recharge"><i class="ti ti-bolt" aria-hidden="true"></i>Recharge</button>
-  <button type="button" class="bn-item" data-nav="transactions" onclick="goTo('transactions')" aria-label="Transactions"><i class="ti ti-list-details" aria-hidden="true"></i>Txns</button>
+  <button type="button" class="bn-item retailer-only" data-nav="dashboard" onclick="goTo('dashboard')" aria-label="Home"><i class="ti ti-layout-grid" aria-hidden="true"></i>Home</button>
+  <button type="button" class="bn-item channel-only" data-nav="nethome" onclick="goTo('nethome')" aria-label="Home"><i class="ti ti-layout-grid" aria-hidden="true"></i>Home</button>
+  <button type="button" class="bn-item retailer-only" data-nav="recharge" onclick="goTo('recharge')" aria-label="Recharge"><i class="ti ti-bolt" aria-hidden="true"></i>Recharge</button>
+  <button type="button" class="bn-item retailer-only" data-nav="transactions" onclick="goTo('transactions')" aria-label="Transactions"><i class="ti ti-list-details" aria-hidden="true"></i>Txns</button>
   <button type="button" class="bn-item retailer-only" data-nav="ledger" onclick="goTo('ledger')" aria-label="Ledger"><i class="ti ti-receipt" aria-hidden="true"></i>Ledger</button>
   <button type="button" class="bn-item channel-only" data-nav="network" onclick="goTo('network')" aria-label="My Network"><i class="ti ti-users-group" aria-hidden="true"></i>Network</button>
+  <button type="button" class="bn-item channel-only" data-nav="netreports" onclick="goTo('netreports')" aria-label="Reports"><i class="ti ti-chart-bar" aria-hidden="true"></i>Reports</button>
   <button type="button" class="bn-item" data-nav="wallet" onclick="goTo('wallet')" aria-label="Wallet"><i class="ti ti-wallet" aria-hidden="true"></i>Wallet</button>
 </nav>
 
@@ -5056,6 +5149,11 @@ function goTo(screen, opts) {
   }
   document.getElementById("screen-login-wrap").style.display = "none";
   document.getElementById("bottom-nav").style.display = "";
+  // MD / DT: no recharge screens (owner, 24 Oct 2026) - their Home and Reports are network views
+  if (isChannelRole()) {
+    const chMap = { dashboard: "nethome", recharge: "nethome", transactions: "nethome", reports: "netreports" };
+    if (chMap[screen]) screen = chMap[screen];
+  }
   document.getElementById("app-shell").classList.add("active");
 
   document.querySelectorAll(".screen").forEach((s) => s.classList.add("hidden"));
@@ -5071,6 +5169,7 @@ function goTo(screen, opts) {
     recharge: "Recharge",
     transactions: "Transactions", ledger: "Ledger", commission: "Commission Report",
     reports: "Reports", wallet: "Wallet", support: "Support", settings: "Settings", network: "My Network",
+    nethome: "Home", netreports: "Network Reports",
   };
   document.getElementById("page-title").textContent = titles[screen] || "QuickPay";
 
@@ -5100,6 +5199,8 @@ function goTo(screen, opts) {
     else if (screen === "support") loadSupportScreen();
     else if (screen === "settings") loadSettingsScreen(opts);
     else if (screen === "network") loadNetworkScreen();
+    else if (screen === "nethome") loadNetHome();
+    else if (screen === "netreports") loadNetReports(opts);
   } catch (e) {
     showToast("Something went wrong loading this screen. Please try again.");
   }
@@ -10496,10 +10597,11 @@ function routeAfterAuth() {
   try {
     var sp = new URLSearchParams(window.location.search || "");
     var scr = sp.get("screen");
-    var screens = ["dashboard","recharge","transactions","ledger","wallet","reports","commission","support"];
+    var screens = ["dashboard","recharge","transactions","ledger","wallet","reports","commission","support","network","nethome","netreports"];
     if (scr && screens.indexOf(scr) >= 0) {
+      var scrDate = sp.get("date");
       try { window.history.replaceState({}, "", "/"); } catch (e) {}
-      goTo(scr);
+      goTo(scr, scrDate ? { date: scrDate } : {});
       return;
     }
   } catch (e) {}
@@ -11190,7 +11292,14 @@ async function loadSettingsScreen(opts) {
    4-digit transaction PIN (not udhaar); reversal only through QuickPay admin. */
 const CHANNEL_ROLES = ["distributor", "sub_distributor", "md"];
 function isChannelRole() { return CHANNEL_ROLES.includes((state.role || "").toLowerCase()); }
-function applyChannelRole() { document.body.classList.toggle("is-channel", isChannelRole()); }
+function applyChannelRole() {
+  const ch = isChannelRole();
+  document.body.classList.toggle("is-channel", ch);
+  const label = (state.role || "").toLowerCase() === "md" ? "Master Distributor" : ch ? "Distributor" : "Retailer";
+  const tag = document.getElementById("qp-console-tag"), rl = document.getElementById("profile-role-label");
+  if (tag) tag.textContent = label + " Console";
+  if (rl) rl.textContent = label;
+}
 applyChannelRole();
 state.net = { summary: null, people: [], transfers: [], requests: [], tab: "people" };
 
@@ -11458,6 +11567,210 @@ function netReject(rid) {
       closeNetSheet(); renderNetKpis(); renderNetRequests(); showToast("Rejected.", "success");
     } catch (e) { showFieldError("net-rj-err", e.message); }
   };
+}
+
+/* ===== MD / DT Home + Network Reports (owner, 24 Oct 2026) ===== */
+state.nh = { days: 7, data: null };
+async function loadNetHome(days) {
+  if (!isChannelRole()) { goTo("dashboard"); return; }
+  if (days) state.nh.days = days;
+  document.querySelectorAll(".nh-trend").forEach((b) => b.classList.toggle("active", Number(b.getAttribute("data-days")) === state.nh.days));
+  const now = new Date(), hr = now.getHours();
+  document.getElementById("nh-date").textContent = now.toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "short", year: "numeric" });
+  try {
+    const d = await netCall("/dashboard?days=" + state.nh.days);
+    state.nh.data = d;
+    // the retailer dashboard normally fills these - keep the top bar / sidebar right for MD/DT
+    state.retailerName = d.name;
+    state.wallets = Object.assign({}, state.wallets, { main: d.balance, commission: d.commission_balance });
+    renderIdentityAndBalance();
+    const tb = document.getElementById("topbar-date-label");
+    if (tb) tb.textContent = "Today, " + now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+    document.getElementById("nh-greet").textContent = (hr < 12 ? "Good morning" : hr < 17 ? "Good afternoon" : "Good evening") + ", " + d.name;
+    renderNetHome(d);
+  } catch (e) {
+    document.getElementById("nh-kpis").innerHTML = '<div class="net-empty">' + escapeHtml(e.message) + "</div>";
+  }
+}
+
+function renderNetHome(d) {
+  const k = (label, val, sub, cls) => '<div class="net-kpi ' + (cls || "") + '"><span>' + label + "</span><b>" + val + "</b>" + (sub ? sub : "") + "</div>";
+  const y = d.yesterday_same_time.amount;
+  const diff = d.sale_today - y;
+  const vs = y || d.sale_today ? '<small class="' + (diff >= 0 ? "up" : "down") + '">' + (diff >= 0 ? "▲ " : "▼ ") + netMoney(Math.abs(diff)) + " vs yesterday</small>" : "<small>&nbsp;</small>";
+  document.getElementById("nh-kpis").innerHTML =
+    k("Network sale today", netMoney(d.sale_today), vs)
+    + k("Recharges today", d.recharges_today, "<small>" + d.active_today + " of " + d.retailers + " retailers active</small>")
+    + k("My commission today", netMoney(d.commission_today), "<small>Wallet " + netMoney(d.commission_balance) + "</small>")
+    + k("My balance", netMoney(d.balance), "<small>Given today " + netMoney(d.given_today) + "</small>")
+    + k("Low balance", d.low_balance_count, "<small>retailers below ₹500</small>", d.low_balance_count ? "warn" : "")
+    + k("Requests", d.pending_requests, "<small>" + (d.dts ? d.dts + " distributors · " : "") + d.retailers + " retailers</small>", d.pending_requests ? "warn" : "");
+  // trend (same look as the retailer dashboard)
+  const chart = document.getElementById("nh-trend");
+  let cols = d.trend;
+  if (cols.length > 10) {
+    const size = Math.ceil(cols.length / 7), out = [];
+    for (let i = 0; i < cols.length; i += size) {
+      const sl = cols.slice(i, i + size);
+      out.push({ date: sl[0].date, amount: sl.reduce((a, b) => a + b.amount, 0) });
+    }
+    cols = out;
+  }
+  const max = Math.max(1, ...cols.map((c) => c.amount));
+  const todayKey = d.trend[d.trend.length - 1].date;
+  if (!d.trend.some((c) => c.amount > 0)) {
+    chart.className = "trend-empty";
+    chart.innerHTML = '<div class="chart-empty-state"><p class="chart-empty-title">No network sale in this period yet</p><p class="chart-empty-sub">Your retailers\' daily business appears here.</p></div>';
+  } else {
+    chart.className = "trend-chart";
+    chart.innerHTML = cols.map((c) => {
+      const dt = new Date(c.date + "T00:00:00");
+      return '<div class="trend-col"><div class="trend-val">' + (c.amount ? formatCompactInr(c.amount) : "—") + '</div><div class="trend-bar-wrap"><div class="trend-bar'
+        + (c.date === todayKey ? " today" : "") + '" style="height:' + Math.max(4, Math.round(c.amount / max * 120)) + 'px"></div></div><div class="trend-day">'
+        + escapeHtml(cols.length > 7 || d.days === 30 ? dt.toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : dt.toLocaleDateString("en-IN", { weekday: "short" })) + "</div></div>";
+    }).join("");
+  }
+  const total = d.trend.reduce((a, b) => a + b.amount, 0);
+  document.getElementById("nh-trend-sub").textContent = (d.days === 30 ? "Last 30 days" : "Last 7 days") + " · " + netMoney(total);
+  const st = d.status_today;
+  setText("nh-st-total", st.success + st.pending + st.processing + st.failed);
+  ["success", "pending", "processing", "failed"].forEach((x) => setText("nh-st-" + x, st[x]));
+  const empty = (t) => '<div class="net-empty">' + t + "</div>";
+  document.getElementById("nh-top").innerHTML = d.top_today.length ? d.top_today.map((t, i) => '<div class="net-row"><div class="net-main"><div class="net-name">'
+    + (i + 1) + ". " + escapeHtml(t.name) + '</div><div class="net-sub">' + t.count + " recharges</div></div><div class=\"net-bal\">" + netMoney(t.amount) + "</div></div>").join("") : empty("No sale yet today.");
+  document.getElementById("nh-low").innerHTML = d.low_balance.length ? d.low_balance.map((r) => '<div class="net-row"><div class="net-main"><div class="net-name">'
+    + escapeHtml(r.name) + '</div><div class="net-sub">' + escapeHtml(r.mobile) + '</div></div><div class="net-bal low">' + netMoney(r.balance)
+    + '</div><button type="button" class="btn sm primary" onclick="nhSend(' + r.id + ')">Send</button></div>').join("") : empty("Every retailer has ₹500 or more.");
+  document.getElementById("nh-recent").innerHTML = d.recent_transfers.length ? d.recent_transfers.map((t) => {
+    let when = ""; try { when = new Date(t.at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }); } catch (e) {}
+    return '<div class="net-row"><div class="net-main"><div class="net-name">' + escapeHtml(t.to) + (t.source === "auto" ? '<span class="net-tag auto">AUTO</span>' : "")
+      + '</div><div class="net-sub">' + escapeHtml(when) + '</div></div><div class="net-bal">' + netMoney(t.amount) + "</div></div>";
+  }).join("") : empty("No transfers yet.");
+  const bydt = document.getElementById("nh-bydt-card");
+  bydt.hidden = !d.by_dt.length;
+  document.getElementById("nh-bydt").innerHTML = d.by_dt.map((x) => '<div class="net-row"><div class="net-main"><div class="net-name">' + escapeHtml(x.name)
+    + '</div><div class="net-sub">' + x.retailers + " retailers · " + x.count + " recharges · balance " + netMoney(x.balance) + '</div></div><div class="net-bal">' + netMoney(x.amount) + "</div></div>").join("");
+}
+
+async function nhSend(pid) {
+  // the send sheet needs the network list + summary (loaded with the Network screen)
+  if (!state.net.summary || !state.net.people.length) {
+    try {
+      const [sum, down] = await Promise.all([netCall("/summary"), netCall("/downline")]);
+      state.net.summary = sum; state.net.people = down.partners || [];
+    } catch (e) { showToast(e.message, "error"); return; }
+  }
+  openNetSend(pid);
+}
+
+state.nr = { preset: "today", tab: "retailers", data: null };
+function nrDates() {
+  const t = new Date(), iso = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const p = state.nr.preset;
+  if (p === "yesterday") { const y = new Date(t); y.setDate(t.getDate() - 1); return [iso(y), iso(y)]; }
+  if (p === "7") { const s = new Date(t); s.setDate(t.getDate() - 6); return [iso(s), iso(t)]; }
+  if (p === "month") return [iso(new Date(t.getFullYear(), t.getMonth(), 1)), iso(t)];
+  if (p === "custom") return [document.getElementById("nr-from").value || iso(t), document.getElementById("nr-to").value || iso(t)];
+  return [iso(t), iso(t)];
+}
+function setNrPreset(p) {
+  state.nr.preset = p;
+  document.querySelectorAll("#nr-presets button").forEach((b) => b.classList.toggle("active", b.getAttribute("data-p") === p));
+  document.getElementById("nr-custom").hidden = p !== "custom";
+  if (p === "custom" && !document.getElementById("nr-from").value) {
+    const [f, t] = nrDates(); document.getElementById("nr-from").value = f; document.getElementById("nr-to").value = t;
+  }
+  loadNetReports();
+}
+function nrQuery() {
+  const [f, t] = nrDates();
+  const dt = document.getElementById("nr-dt").value;
+  return "date_from=" + f + "&date_to=" + t + (dt ? "&dt_id=" + dt : "");
+}
+async function loadNetReports(opts) {
+  if (!isChannelRole()) { goTo("dashboard"); return; }
+  if (opts && opts.date) {
+    state.nr.preset = "custom";
+    document.getElementById("nr-from").value = opts.date; document.getElementById("nr-to").value = opts.date;
+  }
+  document.querySelectorAll("#nr-presets button").forEach((b) => b.classList.toggle("active", b.getAttribute("data-p") === state.nr.preset));
+  document.getElementById("nr-custom").hidden = state.nr.preset !== "custom";
+  document.getElementById("nr-body").innerHTML = '<div class="net-empty">Loading…</div>';
+  try {
+    const d = await netCall("/report?" + nrQuery());
+    state.nr.data = d;
+    const sel = document.getElementById("nr-dt");
+    if (d.role === "md" && d.dts.length && sel.options.length === 1) {
+      d.dts.forEach((x) => { const o = document.createElement("option"); o.value = x.id; o.textContent = x.name; sel.appendChild(o); });
+    }
+    sel.hidden = d.role !== "md" || !d.dts.length;
+    document.querySelector("[data-nrtab=dts]").hidden = d.role !== "md" || !d.by_dt.length;
+    renderNetReport();
+  } catch (e) {
+    document.getElementById("nr-body").innerHTML = '<div class="net-empty">' + escapeHtml(e.message) + "</div>";
+  }
+}
+function setNrTab(t) {
+  state.nr.tab = t;
+  document.querySelectorAll("[data-nrtab]").forEach((b) => b.classList.toggle("active", b.getAttribute("data-nrtab") === t));
+  renderNetReport();
+}
+function renderNetReport() {
+  const d = state.nr.data;
+  if (!d) return;
+  const t = d.totals;
+  setText("nr-label", d.label);
+  const k = (label, val, sub, cls) => '<div class="net-kpi ' + (cls || "") + '"><span>' + label + "</span><b>" + val + "</b>" + (sub || "") + "</div>";
+  document.getElementById("nr-kpis").innerHTML =
+    k("Network sale", netMoney(t.amount), "<small>" + t.recharges + " successful recharges</small>")
+    + k("Success rate", t.success_rate == null ? "—" : t.success_rate + "%", "<small>" + t.failed + " failed</small>", t.success_rate != null && t.success_rate < 90 ? "warn" : "")
+    + k("Active retailers", t.active_retailers + " / " + t.retailers, "<small>sold at least once</small>")
+    + k("My commission", netMoney(t.commission), "<small>earned in this period</small>")
+    + k("Balance given", netMoney(t.given_manual + t.given_auto), "<small>Auto Sale " + netMoney(t.given_auto) + "</small>")
+    + k("Avg per retailer", netMoney(t.active_retailers ? t.amount / t.active_retailers : 0), "<small>active retailers only</small>");
+  const body = document.getElementById("nr-body");
+  const tab = state.nr.tab;
+  const tbl = (head, rows) => '<div class="nr-scroll"><table class="nr-table"><thead><tr>' + head + "</tr></thead><tbody>" + (rows || '<tr><td colspan="9" class="net-empty">Nothing in this period.</td></tr>') + "</tbody></table></div>";
+  if (tab === "days") {
+    const max = Math.max(1, ...d.by_day.map((x) => x.amount));
+    body.innerHTML = tbl('<th>Date</th><th class="r">Recharges</th><th class="r">Sale</th>', d.by_day.map((x) => "<tr><td>"
+      + new Date(x.date + "T00:00:00").toLocaleDateString("en-IN", { weekday: "short", day: "2-digit", month: "short" }) + '<div class="nr-bar" style="width:' + Math.round(x.amount / max * 100) + '%"></div></td><td class="r">'
+      + x.count + '</td><td class="r">' + netMoney(x.amount) + "</td></tr>").join(""));
+  } else if (tab === "ops") {
+    const tot = d.by_operator.reduce((a, b) => a + b.amount, 0) || 1;
+    body.innerHTML = tbl('<th>Operator</th><th class="r">Recharges</th><th class="r">Sale</th><th class="r">Share</th>', d.by_operator.map((x) => "<tr><td>" + escapeHtml(x.operator)
+      + '</td><td class="r">' + x.count + '</td><td class="r">' + netMoney(x.amount) + '</td><td class="r">' + Math.round(x.amount / tot * 100) + "%</td></tr>").join(""));
+  } else if (tab === "dts") {
+    body.innerHTML = tbl('<th>Distributor</th><th class="r">Retailers</th><th class="r">Recharges</th><th class="r">Sale</th><th class="r">My commission</th>', d.by_dt.map((x) => "<tr><td>"
+      + escapeHtml(x.name) + '</td><td class="r">' + x.retailers + '</td><td class="r">' + x.recharges + '</td><td class="r">' + netMoney(x.amount) + '</td><td class="r">' + netMoney(x.commission) + "</td></tr>").join(""));
+  } else {
+    body.innerHTML = tbl('<th>Retailer</th><th class="r">Recharges</th><th class="r">Sale</th><th class="r">Failed</th><th class="r">Success</th><th class="r">My comm.</th><th class="r">Given</th><th class="r">Balance</th>',
+      d.by_retailer.map((x) => "<tr><td><b>" + escapeHtml(x.name) + "</b><div class=\"net-sub\">" + escapeHtml(x.mobile + (d.role === "md" && x.dt ? " · " + x.dt : "")) + '</div></td><td class="r">'
+        + x.recharges + '</td><td class="r">' + netMoney(x.amount) + '</td><td class="r">' + x.failed + '</td><td class="r">' + (x.success_rate == null ? "—" : x.success_rate + "%")
+        + '</td><td class="r">' + netMoney(x.commission) + '</td><td class="r">' + netMoney(x.given_manual + x.given_auto) + (x.given_auto ? '<div class="net-sub">auto ' + netMoney(x.given_auto) + "</div>" : "")
+        + '</td><td class="r' + (x.balance < 500 ? '" style="color:#b91c1c' : "") + '">' + netMoney(x.balance) + "</td></tr>").join(""));
+  }
+}
+async function downloadNetReportPdf() {
+  const btn = document.getElementById("nr-pdf");
+  btn.disabled = true;
+  try {
+    const res = await fetch(API_BASE + "/api/channel/report/pdf?" + nrQuery(), { headers: authHeaders() });
+    if (res.status !== 200) {
+      const j = await res.json().catch(() => null);
+      throw new Error((j && j.message) || "Could not make the PDF.");
+    }
+    const blob = await res.blob();
+    const name = "QuickPay-network-" + nrDates()[1] + ".pdf";
+    const file = new File([blob], name, { type: "application/pdf" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: "QuickPay network report" }).catch(() => {});
+    } else {
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    }
+  } catch (e) { showToast(e.message, "error"); }
+  finally { btn.disabled = false; }
 }
 
 /* ===== KYC documents + details (owner, 24 Oct 2026) =====
