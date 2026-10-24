@@ -26,3 +26,38 @@ self.addEventListener("fetch", (e) => {
     )
   );
 });
+
+/* ===== Web Push (Phase 3) ===== */
+self.addEventListener("push", (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; }
+  catch (e) { data = { title: "QuickPay", body: event.data ? event.data.text() : "" }; }
+  const title = data.title || "QuickPay";
+  const options = {
+    body: data.body || "",
+    icon: "icons/icon-192.png",
+    badge: "icons/icon-192.png",
+    data: { link: data.link || "", ntype: data.ntype || "" },
+    tag: data.ntype || undefined,
+    renotify: !!data.ntype,
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const link = (event.notification.data && event.notification.data.link) || "";
+  const target = link ? ("./?screen=" + encodeURIComponent(link)) : "./";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      for (const c of list) {
+        if ("focus" in c) {
+          c.focus();
+          if (link && c.postMessage) { try { c.postMessage({ qpNavigate: link }); } catch (e) {} }
+          return;
+        }
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(target);
+    })
+  );
+});
